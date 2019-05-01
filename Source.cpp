@@ -19,7 +19,7 @@ public:
 	bool loadTexture(char * src);
 
 };
-
+// lol epic
 bool init();
 
 bool loadMedia();
