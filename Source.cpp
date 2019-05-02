@@ -26,6 +26,8 @@ bool loadMedia();
 
 void close();
 
+void whatClicked(int x, int y, int mouse);
+
 int main(int argc, char * argv[])
 {
 	
@@ -54,11 +56,52 @@ int main(int argc, char * argv[])
 		}
 	}
 
-	//test push
+	//pre-game loop
+	bool isRunning = true;
+
+	while (isRunning) {
+		SDL_Event scanner;
+
+		
+		while (SDL_PollEvent(&scanner)) {
+			int x;
+			int y;
+
+			//mouse scanner
+			if (scanner.type == SDL_MOUSEBUTTONDOWN) {
+				x = scanner.motion.x;
+				y = scanner.motion.y;
+
+				switch (scanner.button.button) {
+					case SDL_BUTTON_LEFT:
+						std::cout << "Clicked Left!";
+						whatClicked(x, y, 1);
+						break;
+					case SDL_BUTTON_RIGHT:
+						std::cout << "Clicked Right!";
+						whatClicked(x, y, 2);
+						break;
+					case SDL_BUTTON_MIDDLE:
+						std::cout << "Clicked middle!";
+						whatClicked(x, y, 3);
+						break;
+				}
+			}
+		}
+
+	}
+
+	//close
 	SDL_DestroyWindow(window);
 	IMG_Quit();
 	SDL_Quit();
 
 	return 0;
+
+}
+
+void whatClicked(int x, int y, int mouse){
+	std::cout << "X position:" + x;
+	std::cout << "Y position:" + y;
 
 }

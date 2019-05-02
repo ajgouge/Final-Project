@@ -81,7 +81,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>C:\Users\ajgouge481\SDL\SDL2_image-2.0.4\lib\x86;C:\Users\ajgouge481\SDL\SDL2-2.0.9\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\IMMian616\SDL\SDL2_image-2.0.4\lib\x86;C:\Users\IMMian616\SDL\SDL2-2.0.9\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
