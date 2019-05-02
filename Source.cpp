@@ -54,6 +54,7 @@ int main(int argc, char * argv[])
 		}
 	}
 
+	//test push
 	SDL_DestroyWindow(window);
 	IMG_Quit();
 	SDL_Quit();
