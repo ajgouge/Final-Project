@@ -7,6 +7,8 @@
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
+Tile * * * map;
+
 class Tile {
 private:
 	SDL_Texture * display = NULL;
@@ -19,12 +21,16 @@ public:
 	bool loadTexture(char * src);
 
 };
-// lol epic
+
 bool init();
 
 bool loadMedia();
 
 void close();
+
+bool init() {
+
+}
 
 int main(int argc, char * argv[])
 {
