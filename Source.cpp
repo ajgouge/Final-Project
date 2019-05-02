@@ -22,14 +22,61 @@ public:
 
 };
 
-bool init();
+bool init(SDL_Window * window);
 
-bool loadMedia();
+bool loadTexture(SDL_Renderer * renderer, SDL_Texture* tex, std::string src);
 
 void close();
 
-bool init() {
+bool init(SDL_Window * window) {
+	SDL_DestroyWindow(window);
+	window = NULL;
 
+	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+		return false;
+	}
+	else {
+		window = SDL_CreateWindow("Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+		if (window == NULL) {
+			printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+			return false;
+		}
+		else {
+			int imgFlags = IMG_INIT_PNG;
+			if (!(IMG_Init(imgFlags) & imgFlags)) {
+				printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
+				return false;
+			}
+
+		}
+	}
+
+	return true;
+}
+
+bool loadTexture(SDL_Renderer * renderer, SDL_Texture * tex, std::string src) {
+	SDL_Surface * surface = IMG_Load(src.c_str());
+	if (surface == NULL) {
+		printf("Source image for texture @ %s failed to load! SDL_image Error: %s\n", src.c_str(), IMG_GetError());
+		return false;
+	}
+
+	tex = SDL_CreateTextureFromSurface(renderer, surface);
+	if (tex == NULL) {
+		printf("Texture @ %s failed to initialize! SDL_image Error: %s\n", src.c_str(), IMG_GetError());
+		return false;
+	}
+	SDL_FreeSurface(surface);
+
+	return true;
+}
+
+void close(SDL_Window * window) {
+	SDL_DestroyWindow(window);
+
+	IMG_Quit();
+	SDL_Quit();
 }
 
 int main(int argc, char * argv[])
@@ -37,32 +84,19 @@ int main(int argc, char * argv[])
 	
 	SDL_Window * window = NULL;
 	SDL_Surface * screenSurface = NULL;
+	SDL_Renderer * renderer = NULL;
 
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-	}
+
+	if (!init(window))
+		printf("Errors initializing\n");
 	else {
-		
-		window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-		if (window == NULL)
-			printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-		else {
-			
-			int imgFlags = IMG_INIT_PNG;
-			if (!(IMG_Init(imgFlags) & imgFlags))
-				printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
-			else {
-				printf("Everything initialized properly!");
-			}
 
-			SDL_Delay(2000);
 
-		}
+
 	}
 
-	SDL_DestroyWindow(window);
-	IMG_Quit();
-	SDL_Quit();
+
+	close(window);
 
 	return 0;
 
