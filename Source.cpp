@@ -59,33 +59,37 @@ int main(int argc, char * argv[])
 	//pre-game loop
 	bool isRunning = true;
 
+	int x = 0;
+	int y = 0;
+
 	while (isRunning) {
 		SDL_Event scanner;
 
 		
 		while (SDL_PollEvent(&scanner)) {
-			int x;
-			int y;
 
 			//mouse scanner
 			if (scanner.type == SDL_MOUSEBUTTONDOWN) {
-				x = scanner.motion.x;
-				y = scanner.motion.y;
+				x = scanner.button.x;
+				y = scanner.button.y;
 
 				switch (scanner.button.button) {
 					case SDL_BUTTON_LEFT:
-						std::cout << "Clicked Left!";
+						std::cout << "Clicked Left! ";
 						whatClicked(x, y, 1);
 						break;
 					case SDL_BUTTON_RIGHT:
-						std::cout << "Clicked Right!";
+						std::cout << "Clicked Right! ";
 						whatClicked(x, y, 2);
 						break;
 					case SDL_BUTTON_MIDDLE:
-						std::cout << "Clicked middle!";
+						std::cout << "Clicked middle! ";
 						whatClicked(x, y, 3);
 						break;
 				}
+			}
+			else if (scanner.type == SDL_KEYDOWN) {
+
 			}
 		}
 
@@ -101,7 +105,7 @@ int main(int argc, char * argv[])
 }
 
 void whatClicked(int x, int y, int mouse){
-	std::cout << "X position:" + x;
-	std::cout << "Y position:" + y;
+	std::cout << "X position: " << x;
+	std::cout << "Y position: " << y;
 
 }
