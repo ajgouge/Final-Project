@@ -1,0 +1,2 @@
+Due to varying workspace conditions, the .vcxproj file saves the include directories and library directories from the last workspace's
+file system. If you fetched this branch, be sure to change those directories to match your file system or you'll get errors!
