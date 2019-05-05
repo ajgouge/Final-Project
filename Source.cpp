@@ -90,6 +90,29 @@ int main(int argc, char * argv[])
 			}
 			else if (scanner.type == SDL_KEYDOWN) {
 
+				switch (scanner.key.keysym.sym) {
+				case SDLK_w:
+					std::cout << "W!";
+					break;
+				case SDLK_s:
+					std::cout << "S!";
+					break;
+				case SDLK_d:
+					std::cout << "D!";
+					break;
+				case SDLK_a:
+					std::cout << "A!";
+					break;
+				case SDLK_SPACE:
+					std::cout << "SPACE!";
+					break;
+				case SDLK_LSHIFT:
+					std::cout << "LEFT SHIFT!";
+					break;
+				case SDLK_LCTRL:
+					std::cout << "LEFT CTRL!";
+					break;
+				}
 			}
 		}
 
