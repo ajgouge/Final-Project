@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <iostream>
-#include <SDL.h>
-#include <SDL_image.h>
+#include "SDL.h"
+#include "SDL_image.h"
 #include <string>
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
+
+const int TILE_SIDE = 64;
 
 class Tile {
 private:
@@ -18,6 +20,7 @@ public:
 	Tile() : x(0), y(0) {}
 	Tile(int x, int y) : x(x), y(y) {}
 	~Tile();
+
 	bool setTexture(const char * src);
 	void render();
 	void setX(int ix);
@@ -31,7 +34,7 @@ public:
 
 SDL_Window * init(SDL_Window * window);
 
-bool loadTexture(SDL_Renderer * renderer, SDL_Texture* tex, std::string src);
+bool loadTexture(SDL_Renderer * renderer, SDL_Texture ** tex, const char * src);
 
 void close(SDL_Window * window);
 
@@ -40,11 +43,11 @@ Tile::~Tile() {
 }
 
 bool Tile::setTexture(const char* src) {
-	return loadTexture(renderer, display, src);
+	return loadTexture(renderer, &display, src);
 }
 
 void Tile::render() {
-	SDL_Rect dest = { x * 64, y * 64, 64, 64 };
+	SDL_Rect dest = { x * TILE_SIDE, y * TILE_SIDE, TILE_SIDE, TILE_SIDE };
 	SDL_RenderCopy(renderer, display, NULL, &dest);
 }
 
@@ -99,16 +102,16 @@ SDL_Window * init(SDL_Window * window) {
 	return window;
 }
 
-bool loadTexture(SDL_Renderer * renderer, SDL_Texture * tex, std::string src) {
-	SDL_Surface * surface = IMG_Load(src.c_str());
+bool loadTexture(SDL_Renderer * renderer, SDL_Texture ** tex, const char * src) {
+	SDL_Surface * surface = IMG_Load(src);
 	if (surface == NULL) {
-		printf("Source image for texture @ %s failed to load! SDL_image Error: %s\n", src.c_str(), IMG_GetError());
+		printf("Source image for texture @ %s failed to load! SDL_image Error: %s\n", src, IMG_GetError());
 		return false;
 	}
 
-	tex = SDL_CreateTextureFromSurface(renderer, surface);
+	*tex = SDL_CreateTextureFromSurface(renderer, surface);
 	if (tex == NULL) {
-		printf("Texture @ %s failed to initialize! SDL_image Error: %s\n", src.c_str(), IMG_GetError());
+		printf("Texture @ %s failed to initialize! SDL_image Error: %s\n", src, IMG_GetError());
 		return false;
 	}
 	SDL_FreeSurface(surface);
@@ -147,11 +150,14 @@ int main(int argc, char * argv[])
 		testImg1.setY(2);
 
 		screenSurface = SDL_GetWindowSurface(window);
+		printf("Got the window surface\n");
 		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-		SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		if (renderer == NULL) {
 			printf("Renderer could not be initialized! SDL_Error: %s\n", SDL_GetError());
 		}
+		SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		printf("Renderer initialized\n");
+
 		testImg1.setRenderer(renderer);
 		testImg1.setTexture("assets/Mech.png");
 		
