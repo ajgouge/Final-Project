@@ -4,9 +4,14 @@
 #include "SDL_image.h"
 #include <string>
 
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
+ 
 
+const int SCREEN_WIDTH = 1280;
+const int SCREEN_HEIGHT = 960;
+const int MAP_X = 0;
+const int MAP_Y = SCREEN_HEIGHT / 10;
+const int MAP_W = SCREEN_WIDTH;
+const int MAP_H = SCREEN_HEIGHT * 7 / 10;
 const int TILE_SIDE = 64;
 
 class Tile {
@@ -47,7 +52,9 @@ bool Tile::setTexture(const char* src) {
 }
 
 void Tile::render() {
-	SDL_Rect dest = { x * TILE_SIDE, y * TILE_SIDE, TILE_SIDE, TILE_SIDE };
+	if (x * TILE_SIDE + MAP_X > MAP_W || y * TILE_SIDE + MAP_Y > MAP_H)
+		return;
+	SDL_Rect dest = { x * TILE_SIDE + MAP_X, y * TILE_SIDE + MAP_Y, TILE_SIDE, TILE_SIDE };
 	SDL_RenderCopy(renderer, display, NULL, &dest);
 }
 
@@ -145,9 +152,13 @@ int main(int argc, char * argv[])
 		printf("Everything initialized!\n");
 
 		Tile testImg1;
+		Tile testBk1;
 
 		testImg1.setX(2);
 		testImg1.setY(2);
+
+		testBk1.setX(0);
+		testBk1.setY(0);
 
 		screenSurface = SDL_GetWindowSurface(window);
 		printf("Got the window surface\n");
@@ -160,12 +171,21 @@ int main(int argc, char * argv[])
 
 		testImg1.setRenderer(renderer);
 		testImg1.setTexture("assets/Mech.png");
+
+		testBk1.setRenderer(renderer);
+		testBk1.setTexture("assets/testbk.png");
 		
 		SDL_RenderClear(renderer);
+		for (int i = 0; i < MAP_W / TILE_SIDE + 1; ++i)
+			for (int j = 0; j < MAP_H / TILE_SIDE + 1; ++j) {
+				testBk1.setX(i);
+				testBk1.setY(j);
+				testBk1.render();
+			}
 		testImg1.render();
 		SDL_RenderPresent(renderer);
 
-		SDL_Delay(2000);
+		SDL_Delay(10000);
 
 	}
 	close(window);
