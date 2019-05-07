@@ -10,6 +10,17 @@ const int SCREEN_HEIGHT = 1080;
 const int TILE_SIDE = 64;
 
 void whatClicked(int x, int y, int mouse);
+void keyStatesUp(SDL_Keycode input);
+void keyStatesDown(SDL_Keycode input);
+
+//game loop variables
+bool w;
+bool s;
+bool a;
+bool d;
+bool shift;
+bool ctrl;
+bool space;
 
 class Tile{
 private:
@@ -203,34 +214,19 @@ int main(int argc, char* argv[])
 					}
 				}
 				else if (scanner.type == SDL_KEYDOWN) {
+					keyStatesDown(scanner.key.keysym.sym);
+				}
+				else if (scanner.type == SDL_KEYUP) {
+					keyStatesUp(scanner.key.keysym.sym);
+				}
 
-					switch (scanner.key.keysym.sym) {
-					case SDLK_w:
-						std::cout << "W!";
-						break;
-					case SDLK_s:
-						std::cout << "S!";
-						break;
-					case SDLK_d:
-						std::cout << "D!";
-						break;
-					case SDLK_a:
-						std::cout << "A!";
-						break;
-					case SDLK_SPACE:
-						std::cout << "SPACE!";
-						break;
-					case SDLK_LSHIFT:
-						std::cout << "LEFT SHIFT!";
-						break;
-					case SDLK_LCTRL:
-						std::cout << "LEFT CTRL!";
-						break;
-					case SDLK_ESCAPE:
-						close(window);
-						return 0;
-						break;
-					}
+				//game changing stuff
+				if (w == true) {
+					std::cout << "Moving up!";
+				}
+
+				if (a == true) {
+					std::cout << "Moving left!";
 				}
 			}
 
@@ -249,4 +245,78 @@ void whatClicked(int x, int y, int mouse){
 	std::cout << "X position: " << x;
 	std::cout << "Y position: " << y;
 
+}
+
+void keyStatesDown(SDL_Keycode input){
+	switch (input) {
+	case SDLK_w:
+		//std::cout << "W!";
+		w = true;
+		break;
+	case SDLK_s:
+		//std::cout << "S!";
+		s = true;
+		break;
+	case SDLK_d:
+		//std::cout << "D!";
+		d = true;
+		break;
+	case SDLK_a:
+		//std::cout << "A!";
+		a = true;
+		break;
+	case SDLK_SPACE:
+		//std::cout << "SPACE!";
+		space = true;
+		break;
+	case SDLK_LSHIFT:
+		//std::cout << "LEFT SHIFT!";
+		shift = true;
+		break;
+	case SDLK_LCTRL:
+		//std::cout << "LEFT CTRL!";
+		ctrl = true;
+		break;
+	case SDLK_ESCAPE:
+		//close(window);
+		//return 0;
+		break;
+	}
+}
+
+void keyStatesUp(SDL_Keycode input) {
+	switch (input) {
+	case SDLK_w:
+		//std::cout << "W!";
+		w = false;
+		break;
+	case SDLK_s:
+		//std::cout << "S!";
+		s = false;
+		break;
+	case SDLK_d:
+		//std::cout << "D!";
+		d = false;
+		break;
+	case SDLK_a:
+		//std::cout << "A!";
+		a = false;
+		break;
+	case SDLK_SPACE:
+		//std::cout << "SPACE!";
+		space = false;
+		break;
+	case SDLK_LSHIFT:
+		//std::cout << "LEFT SHIFT!";
+		shift = false;
+		break;
+	case SDLK_LCTRL:
+		//std::cout << "LEFT CTRL!";
+		ctrl = false;
+		break;
+	case SDLK_ESCAPE:
+		//close(window);
+		//return 0;
+		break;
+	}
 }
