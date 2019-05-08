@@ -24,6 +24,7 @@ bool d;
 bool shift;
 bool ctrl;
 bool space;
+bool isRunning = true;
 
 class Tile{
 private:
@@ -197,7 +198,6 @@ int main(int argc, char* argv[])
 		//SDL_Delay(10000);
 
 		//pre-game loop
-		bool isRunning = true;
 
 		int x = 0;
 		int y = 0;
@@ -244,7 +244,8 @@ int main(int argc, char* argv[])
 					std::cout << "Moving left!";
 				}
 			}
-
+			if (isRunning == false)
+				break;
 		}
 
 		//close
@@ -293,8 +294,7 @@ void keyStatesDown(SDL_Keycode input){
 		ctrl = true;
 		break;
 	case SDLK_ESCAPE:
-		//close(window);
-		//return 0;
+		isRunning = false;
 		break;
 	}
 }
@@ -328,10 +328,6 @@ void keyStatesUp(SDL_Keycode input) {
 	case SDLK_LCTRL:
 		//std::cout << "LEFT CTRL!";
 		ctrl = false;
-		break;
-	case SDLK_ESCAPE:
-		//close(window);
-		//return 0;
 		break;
 	}
 }
