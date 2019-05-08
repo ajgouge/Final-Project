@@ -166,7 +166,7 @@ int main(int argc, char * argv[])
 		if (renderer == NULL) {
 			printf("Renderer could not be initialized! SDL_Error: %s\n", SDL_GetError());
 		}
-		SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		SDL_SetRenderDrawColor(renderer, 0x0, 0x0, 0x0, 0xFF);
 		printf("Renderer initialized\n");
 
 		testImg1.setRenderer(renderer);
