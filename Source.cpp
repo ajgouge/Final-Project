@@ -6,7 +6,10 @@
 
 const int SCREEN_WIDTH = 1920;
 const int SCREEN_HEIGHT = 1080;
-
+const int MAP_X = 0;
+const int MAP_Y = SCREEN_HEIGHT / 10;
+const int MAP_W = SCREEN_WIDTH;
+const int MAP_H = SCREEN_HEIGHT * 7 / 10;
 const int TILE_SIDE = 64;
 
 void whatClicked(int x, int y, int mouse);
@@ -24,7 +27,7 @@ bool space;
 
 class Tile{
 private:
-	SDL_Renderer * renderer = NULL;
+	SDL_Renderer* renderer = NULL;
 	SDL_Texture* display = NULL;
 	int x;
 	int y;
@@ -60,7 +63,9 @@ bool Tile::setTexture(const char* src) {
 }
 
 void Tile::render() {
-	SDL_Rect dest = { x * TILE_SIDE, y * TILE_SIDE, TILE_SIDE, TILE_SIDE };
+	if (x * TILE_SIDE + MAP_X > MAP_W || y * TILE_SIDE + MAP_Y > MAP_H)
+		return;
+	SDL_Rect dest = { x * TILE_SIDE + MAP_X, y * TILE_SIDE + MAP_Y, TILE_SIDE, TILE_SIDE };
 	SDL_RenderCopy(renderer, display, NULL, &dest);
 }
 
@@ -72,7 +77,7 @@ void Tile::setY(int iy) {
 	y = iy;
 }
 
-void Tile::setRenderer(SDL_Renderer* irenderer) {
+void Tile::setRenderer(SDL_Renderer * irenderer) {
 	renderer = irenderer;
 }
 
@@ -88,7 +93,7 @@ SDL_Texture* Tile::getDisplay() {
 	return display;
 }
 
-SDL_Window* init(SDL_Window* window) {
+SDL_Window* init(SDL_Window * window) {
 	SDL_DestroyWindow(window);
 	window = NULL;
 
@@ -115,7 +120,7 @@ SDL_Window* init(SDL_Window* window) {
 	return window;
 }
 
-bool loadTexture(SDL_Renderer* renderer, SDL_Texture** tex, const char* src) {
+bool loadTexture(SDL_Renderer * renderer, SDL_Texture * *tex, const char* src) {
 	SDL_Surface* surface = IMG_Load(src);
 	if (surface == NULL) {
 		printf("Source image for texture @ %s failed to load! SDL_image Error: %s\n", src, IMG_GetError());
@@ -132,7 +137,7 @@ bool loadTexture(SDL_Renderer* renderer, SDL_Texture** tex, const char* src) {
 	return true;
 }
 
-void close(SDL_Window* window) {
+void close(SDL_Window * window) {
 	SDL_DestroyWindow(window);
 
 	IMG_Quit();
@@ -153,15 +158,16 @@ int main(int argc, char* argv[])
 		printf("Errors initializing\n");
 	else {
 
-		if (window == NULL)
-			printf("Ya done goofed\n");
-
 		printf("Everything initialized!\n");
 
 		Tile testImg1;
+		Tile testBk1;
 
 		testImg1.setX(2);
 		testImg1.setY(2);
+
+		testBk1.setX(0);
+		testBk1.setY(0);
 
 		screenSurface = SDL_GetWindowSurface(window);
 		printf("Got the window surface\n");
@@ -169,17 +175,26 @@ int main(int argc, char* argv[])
 		if (renderer == NULL) {
 			printf("Renderer could not be initialized! SDL_Error: %s\n", SDL_GetError());
 		}
-		SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		SDL_SetRenderDrawColor(renderer, 0x0, 0x0, 0x0, 0xFF);
 		printf("Renderer initialized\n");
 
 		testImg1.setRenderer(renderer);
 		testImg1.setTexture("assets/Mech.png");
 
+		testBk1.setRenderer(renderer);
+		testBk1.setTexture("assets/testbk.png");
+
 		SDL_RenderClear(renderer);
+		for (int i = 0; i < MAP_W / TILE_SIDE + 1; ++i)
+			for (int j = 0; j < MAP_H / TILE_SIDE + 1; ++j) {
+				testBk1.setX(i);
+				testBk1.setY(j);
+				testBk1.render();
+			}
 		testImg1.render();
 		SDL_RenderPresent(renderer);
 
-		SDL_Delay(2000);
+		//SDL_Delay(10000);
 
 		//pre-game loop
 		bool isRunning = true;
