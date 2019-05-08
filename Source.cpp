@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <string>
+#include "TileClasses.cpp"
 
 const int SCREEN_WIDTH = 1920;
 const int SCREEN_HEIGHT = 1080;
@@ -47,6 +48,12 @@ public:
 	void setRenderer(SDL_Renderer* irenderer);
 	SDL_Texture* getDisplay();
 
+};
+
+class Terrain {
+private:
+	int def;
+	int * mov;
 };
 
 SDL_Window* init(SDL_Window* window);
