@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <string>
+#include <vector>
 
 const int SCREEN_WIDTH = 1920;
 const int SCREEN_HEIGHT = 1080;
@@ -15,6 +16,7 @@ const int TILE_SIDE = 64;
 void whatClicked(int x, int y, int mouse);
 void keyStatesUp(SDL_Keycode input);
 void keyStatesDown(SDL_Keycode input);
+void reRender(/*std::vector< std::vector<int> > mapLayout,*/ int x, int y, Tile one/*, Tile two, Tile three, Tile four, Tile five*/, SDL_Window* window);
 
 //game loop variables
 bool w;
@@ -24,6 +26,7 @@ bool d;
 bool shift;
 bool ctrl;
 bool space;
+bool isRunning = true;
 
 class Tile{
 private:
@@ -162,12 +165,16 @@ int main(int argc, char* argv[])
 
 		Tile testImg1;
 		Tile testBk1;
+		Tile testCursor;
 
 		testImg1.setX(2);
 		testImg1.setY(2);
 
 		testBk1.setX(0);
 		testBk1.setY(0);
+
+		//testCursor.setX(2);
+		//testCursor.setY(2);
 
 		screenSurface = SDL_GetWindowSurface(window);
 		printf("Got the window surface\n");
@@ -184,6 +191,11 @@ int main(int argc, char* argv[])
 		testBk1.setRenderer(renderer);
 		testBk1.setTexture("assets/testbk.png");
 
+		//testCursor.setRenderer(renderer);
+		testCursor.setTexture("assets/red_cursor.png");
+
+		//std::vector< std::vector<int> > tileType;
+
 		SDL_RenderClear(renderer);
 		for (int i = 0; i < MAP_W / TILE_SIDE + 1; ++i)
 			for (int j = 0; j < MAP_H / TILE_SIDE + 1; ++j) {
@@ -192,12 +204,12 @@ int main(int argc, char* argv[])
 				testBk1.render();
 			}
 		testImg1.render();
+		//testCursor.render();
 		SDL_RenderPresent(renderer);
 
 		//SDL_Delay(10000);
 
 		//pre-game loop
-		bool isRunning = true;
 
 		int x = 0;
 		int y = 0;
@@ -233,18 +245,23 @@ int main(int argc, char* argv[])
 				}
 				else if (scanner.type == SDL_KEYUP) {
 					keyStatesUp(scanner.key.keysym.sym);
+
 				}
 
 				//game changing stuff
 				if (w == true) {
 					std::cout << "Moving up!";
+					//testCursor.setY(testCursor.getY() - 1);
+					reRender(5, 5, testCursor, window);
 				}
 
 				if (a == true) {
 					std::cout << "Moving left!";
+					testCursor.setX(testCursor.getX() - 1);
 				}
 			}
-
+			if (isRunning == false)
+				break;
 		}
 
 		//close
@@ -293,8 +310,7 @@ void keyStatesDown(SDL_Keycode input){
 		ctrl = true;
 		break;
 	case SDLK_ESCAPE:
-		//close(window);
-		//return 0;
+		isRunning = false;
 		break;
 	}
 }
@@ -329,9 +345,32 @@ void keyStatesUp(SDL_Keycode input) {
 		//std::cout << "LEFT CTRL!";
 		ctrl = false;
 		break;
-	case SDLK_ESCAPE:
-		//close(window);
-		//return 0;
-		break;
 	}
+}
+
+void reRender(/*std::vector< std::vector<int> > mapLayout,*/ int x, int y, Tile one/*, Tile two, Tile three, Tile four, Tile five*/, SDL_Window* window) {
+	// Renderer
+	SDL_Surface* screenSurface = NULL;
+	SDL_Renderer* renderer = NULL;
+
+	screenSurface = SDL_GetWindowSurface(window);
+	printf("Got the window surface\n");
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	if (renderer == NULL) {
+		printf("Renderer could not be initialized! SDL_Error: %s\n", SDL_GetError());
+	}
+	SDL_SetRenderDrawColor(renderer, 0x0, 0x0, 0x0, 0xFF);
+
+	//set Coord
+	one.setX(x);
+	one.setY(y);
+
+	//layerer
+	one.setRenderer(renderer);
+	//one.setTexture("assets/testbk.png");
+	one.render;
+
+	//Render Tile**
+	SDL_RenderPresent(renderer);
+
 }
