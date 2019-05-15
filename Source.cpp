@@ -3,7 +3,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <string>
-#include <vector>
+#include "TileClasses.cpp"
 
 const int SCREEN_WIDTH = 1920;
 const int SCREEN_HEIGHT = 1080;
@@ -13,10 +13,22 @@ const int MAP_W = SCREEN_WIDTH;
 const int MAP_H = SCREEN_HEIGHT * 7 / 10;
 const int TILE_SIDE = 64;
 
+enum TYPE {
+	FOOT,
+	BOOTS,
+	TREADS,
+	TIRES,
+	AIR,
+	SEA,
+	LANDER,
+	PIPE,
+	NUM_TYPES,
+	ERROR = -1
+};
+
 void whatClicked(int x, int y, int mouse);
 void keyStatesUp(SDL_Keycode input);
 void keyStatesDown(SDL_Keycode input);
-void reRender(/*std::vector< std::vector<int> > mapLayout,*/ int x, int y, Tile one/*, Tile two, Tile three, Tile four, Tile five*/, SDL_Window* window);
 
 //game loop variables
 bool w;
@@ -48,6 +60,69 @@ public:
 	int getY();
 	void setRenderer(SDL_Renderer* irenderer);
 	SDL_Texture* getDisplay();
+
+};
+
+class Terrain {
+private:
+	int def;
+	int * mov;
+	bool canCapture;
+	Tile * display;
+
+public:
+	Terrain() : def(0), mov(NULL), canCapture(false), display(NULL) {}
+	Terrain(int d, int* m, bool c, Tile * di) : def(d), mov(m), canCapture(c), display(di) {}
+	~Terrain();
+
+	bool setDisplay(const char* src);
+	void setDisplay(Tile* src);
+	Tile* getDisplay();
+	void setDef(int d);
+	void setMov(int* m);
+	void setCanCapture(bool c);
+	int getDef();
+	int* getMov();
+	bool getCanCapture();
+
+};
+
+class Unit {
+private:
+	int mov;
+	int ammo;
+	int fuel;
+	int vision;
+	int range;
+	TYPE movType;
+	int cost;
+	TYPE* attack;
+	Tile* display;
+
+public:
+	Unit() : mov(0), ammo(0), fuel(0), vision(0), range(0), movType(ERROR), cost(0), attack(NULL), display(NULL) {}
+	Unit(int m, int a, int f, int v, int r, TYPE mt, int c, TYPE * atk, Tile * d) : mov(m), ammo(a), fuel(f), vision(v), range(r), movType(mt), cost(c), attack(atk), display(d) {}
+	~Unit();
+
+	bool setDisplay(const char* src);
+	void setDisplay(Tile* src);
+	Tile* getDisplay();
+	void setMov(int m);
+	void setAmmo(int a);
+	void setFuel(int f);
+	void setVision(int v);
+	void setRange(int r);
+	void setMovType(TYPE t);
+	void setCost(int c);
+	void setAttack(TYPE* a);
+	int getMov();
+	int getAmmo();
+	int getFuel();
+	int getVision();
+	int getRange();
+	TYPE getMovType();
+	int getCost();
+	TYPE* getAttack();
 
 };
 
@@ -95,6 +170,46 @@ int Tile::getY() {
 SDL_Texture* Tile::getDisplay() {
 	return display;
 }
+
+Terrain::~Terrain() {}
+
+bool Terrain::setDisplay(const char* src) {
+	return display->setTexture(src);
+}
+
+void Terrain::setDisplay(Tile* src) {
+	display = src;
+}
+
+Tile* Terrain::getDisplay() {
+	return display;
+}
+
+void Terrain::setDef(int d) {
+	def = d;
+}
+
+void Terrain::setMov(int* m) {
+	mov = m;
+}
+
+void Terrain::setCanCapture(bool c) {
+	canCapture = c;
+}
+
+int Terrain::getDef() {
+	return def;
+}
+
+int* Terrain::getMov() {
+	return mov;
+}
+
+bool Terrain::getCanCapture() {
+	return canCapture;
+}
+
+
 
 SDL_Window* init(SDL_Window * window) {
 	SDL_DestroyWindow(window);
@@ -165,16 +280,12 @@ int main(int argc, char* argv[])
 
 		Tile testImg1;
 		Tile testBk1;
-		Tile testCursor;
 
 		testImg1.setX(2);
 		testImg1.setY(2);
 
 		testBk1.setX(0);
 		testBk1.setY(0);
-
-		//testCursor.setX(2);
-		//testCursor.setY(2);
 
 		screenSurface = SDL_GetWindowSurface(window);
 		printf("Got the window surface\n");
@@ -191,11 +302,6 @@ int main(int argc, char* argv[])
 		testBk1.setRenderer(renderer);
 		testBk1.setTexture("assets/testbk.png");
 
-		//testCursor.setRenderer(renderer);
-		testCursor.setTexture("assets/red_cursor.png");
-
-		//std::vector< std::vector<int> > tileType;
-
 		SDL_RenderClear(renderer);
 		for (int i = 0; i < MAP_W / TILE_SIDE + 1; ++i)
 			for (int j = 0; j < MAP_H / TILE_SIDE + 1; ++j) {
@@ -204,7 +310,6 @@ int main(int argc, char* argv[])
 				testBk1.render();
 			}
 		testImg1.render();
-		//testCursor.render();
 		SDL_RenderPresent(renderer);
 
 		//SDL_Delay(10000);
@@ -245,19 +350,15 @@ int main(int argc, char* argv[])
 				}
 				else if (scanner.type == SDL_KEYUP) {
 					keyStatesUp(scanner.key.keysym.sym);
-
 				}
 
 				//game changing stuff
 				if (w == true) {
 					std::cout << "Moving up!";
-					//testCursor.setY(testCursor.getY() - 1);
-					reRender(5, 5, testCursor, window);
 				}
 
 				if (a == true) {
 					std::cout << "Moving left!";
-					testCursor.setX(testCursor.getX() - 1);
 				}
 			}
 			if (isRunning == false)
@@ -346,31 +447,4 @@ void keyStatesUp(SDL_Keycode input) {
 		ctrl = false;
 		break;
 	}
-}
-
-void reRender(/*std::vector< std::vector<int> > mapLayout,*/ int x, int y, Tile one/*, Tile two, Tile three, Tile four, Tile five*/, SDL_Window* window) {
-	// Renderer
-	SDL_Surface* screenSurface = NULL;
-	SDL_Renderer* renderer = NULL;
-
-	screenSurface = SDL_GetWindowSurface(window);
-	printf("Got the window surface\n");
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	if (renderer == NULL) {
-		printf("Renderer could not be initialized! SDL_Error: %s\n", SDL_GetError());
-	}
-	SDL_SetRenderDrawColor(renderer, 0x0, 0x0, 0x0, 0xFF);
-
-	//set Coord
-	one.setX(x);
-	one.setY(y);
-
-	//layerer
-	one.setRenderer(renderer);
-	//one.setTexture("assets/testbk.png");
-	one.render;
-
-	//Render Tile**
-	SDL_RenderPresent(renderer);
-
 }
