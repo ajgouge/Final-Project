@@ -275,5 +275,8 @@
     <ClInclude Include="SDL\SDL2-2.0.9\include\SDL_vulkan.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MapClass.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

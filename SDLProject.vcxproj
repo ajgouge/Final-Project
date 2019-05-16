@@ -134,6 +134,7 @@
     <ClCompile Include="TileClasses.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MapClass.h" />
     <ClInclude Include="SDL\SDL2-2.0.9\include\begin_code.h" />
     <ClInclude Include="SDL\SDL2-2.0.9\include\close_code.h" />
     <ClInclude Include="SDL\SDL2-2.0.9\include\SDL.h" />
