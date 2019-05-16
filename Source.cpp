@@ -171,10 +171,12 @@ bool space;
 bool isRunning = true;
 //Global temp layer array
 Tile reRenderTemp[3]; //currently will render 3 layers of tiles at once
+//Tile reRenderOld[3];
 //fill in when map is created
 Terrain map[30][10];
 Unit spritesGround[30][10];
 //Unit spritesAir[30][10];
+SDL_Renderer* renderer = NULL;
 
 //init
 void whatClicked(int x, int y, int mouse);
@@ -250,7 +252,6 @@ int main(int argc, char* argv[])
 
 	SDL_Window* window = NULL;
 	SDL_Surface* screenSurface = NULL;
-	SDL_Renderer* renderer = NULL;
 
 	window = init(window);
 
@@ -354,11 +355,11 @@ int main(int argc, char* argv[])
 				if (w == true) {
 					std::cout << "Moving up!";
 					if (isInBounds(cursor.getX(), cursor.getY())) {
+						std::cout << "is in bounds!";
 						cursor.setY(cursor.getY() - 1);
+						std::cout << "Succesffully set Y - 1!";
 						reRender(cursor.getX(), cursor.getY());
-						for (int j = 0; j < sizeof(reRenderTemp); j++) {
-							reRenderTemp[j].render();
-						}
+						std::cout << "rerendered!!";
 						SDL_RenderPresent(renderer);
 					}
 				}
@@ -459,7 +460,7 @@ void keyStatesUp(SDL_Keycode input) {
 
 bool isInBounds(int x, int y) {
 	if (x >= 0 && x <= 30) {
-		if (y >= 0 && y >= 10) {
+		if (y >= 0 && y <= 10) {
 			return true;
 		}
 	}
@@ -599,32 +600,46 @@ void Unit::setType(int it) {
 	type = it;
 }
 
-void reRender(int x, int y) {
+void reRender(int x, int y/*, int xOld, int yOld*/) {
 	createMap();
+	std::cout << "Map Created!";
 	//map
 	Tile tempLayer1;
 	tempLayer1.setT(whatIsTerrain(map[x][y]));
+	const char* c1 = setAsset(whatIsTerrain(map[x][y]), true).c_str();
+	tempLayer1.setRenderer(renderer);
+	tempLayer1.setTexture(c1);
 	reRenderTemp[0] = tempLayer1;
+	tempLayer1.render();
 
 	//sprites layer 1 (troops)
 	Tile tempLayer2;
 	tempLayer1.setU(whatIsUnit(spritesGround[x][y]));
 	if (spritesGround[x][y].getType() != 0) {
+		const char* c2 = setAsset(whatIsUnit(spritesGround[x][y]), false).c_str();
+		tempLayer2.setRenderer(renderer);
+		tempLayer2.setTexture(c2);
 		reRenderTemp[1] = tempLayer2;
+		tempLayer2.render();
 	}
 
 	//sprites layer 2 (cursor)
 	Tile cursor;
-	reRenderTemp[2] = cursor;
-
-	//setTextures
-	const char* c1 = setAsset(whatIsTerrain(map[x][y]), true).c_str();
-	tempLayer1.setTexture(c1);
-
-	const char* c2 = setAsset(whatIsUnit(spritesGround[x][y]), false).c_str();
-	tempLayer2.setTexture(c2);
-
+	cursor.setRenderer(renderer);
 	cursor.setTexture("assets/red_cursor.png");
+	reRenderTemp[2] = cursor;
+	cursor.render();
+
+	//Rerender Old tile
+	/*
+	Tile tempOld1;
+	tempOld1.setT(whatIsTerrain(map[xOld][yOld]));
+	const char* c3 = setAsset(whatIsTerrain(map[xOld][yOld]), true).c_str();
+	tempOld1.setRenderer(renderer);
+	tempOld1.setTexture(c1);
+	reRenderOld[0];
+	tempOld1.render();
+	*/
 
 	return;
 }
