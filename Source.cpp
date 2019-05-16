@@ -45,14 +45,18 @@ Everyone:
 
 */
 
+// Sets the width and height of the screen in windowed mode
 const int SCREEN_WIDTH = 1920;
 const int SCREEN_HEIGHT = 1080;
+// Sets the boundaries of the map (playfield) on the screen
 const int MAP_X = 0;
 const int MAP_Y = SCREEN_HEIGHT / 10;
 const int MAP_W = SCREEN_WIDTH;
 const int MAP_H = SCREEN_HEIGHT * 7 / 10;
+// Defines the side length of one tile
 const int TILE_SIDE = 64;
 
+// Used for movement types
 enum TYPE {
 	FOOT,
 	BOOTS,
@@ -66,21 +70,24 @@ enum TYPE {
 	ERROR = -1
 };
 
+// Tile class stores data on position in map and keeps a texture rendered
 class Tile {
 private:
 	SDL_Renderer* renderer = NULL;
 	SDL_Texture* display = NULL;
 	int x;
 	int y;
-	int terrain;
-	int unit;
+	//int terrain;
+	//int unit;
 
 public:
 	Tile() : x(0), y(0) {}
 	Tile(int x, int y) : x(x), y(y) {}
 	~Tile();
 
+	// Only call after setting renderer
 	bool setTexture(const char* src);
+	// Only call after setting texture
 	void render();
 	void setX(int ix);
 	void setY(int iy);
@@ -88,15 +95,17 @@ public:
 	int getY();
 	void setRenderer(SDL_Renderer* irenderer);
 	SDL_Texture* getDisplay();
-	void setT(int it);
-	void setU(int iU);
-	int getT();
-	int getU();
+	//void setT(int it);
+	//void setU(int iU);
+	//int getT();
+	//int getU();
 };
 
+// Stores a tile on the map as well as other fields unique to terrain
 class Terrain {
 private:
 	int def;
+	// Pointer to multiple values of mov indexed by the enum TYPES
 	int* mov;
 	bool canCapture;
 	Tile* display;
@@ -106,7 +115,9 @@ public:
 	Terrain(int d, int* m, bool c, Tile* di) : def(d), mov(m), canCapture(c), display(di) {}
 	~Terrain();
 
+	// Try not to use this one
 	bool setDisplay(const char* src);
+	// Use this one instead
 	void setDisplay(Tile* src);
 	Tile* getDisplay();
 	void setDef(int d);
@@ -118,6 +129,7 @@ public:
 
 };
 
+// Stores a tile on the map as well as other fields unique to units
 class Unit {
 private:
 	int type;
@@ -128,6 +140,7 @@ private:
 	int range;
 	TYPE movType;
 	int cost;
+	// Pointer to ???
 	TYPE* attack;
 	Tile* display;
 
@@ -136,7 +149,9 @@ public:
 	Unit(int m, int a, int f, int v, int r, TYPE mt, int c, TYPE* atk, Tile* d) : mov(m), ammo(a), fuel(f), vision(v), range(r), movType(mt), cost(c), attack(atk), display(d) {}
 	//~Unit();
 
+	// Avoid using this one
 	bool setDisplay(const char* src);
+	// Use this one instead
 	void setDisplay(Tile* src);
 	Tile* getDisplay();
 	void setMov(int m);
@@ -160,7 +175,7 @@ public:
 
 };
 
-//game loop variables n stuff
+// w - space store key states, which are used to run events
 bool w;
 bool s;
 bool a;
@@ -168,28 +183,40 @@ bool d;
 bool shift;
 bool ctrl;
 bool space;
+// Flag for exiting the program
 bool isRunning = true;
 //Global temp layer array
 Tile reRenderTemp[3]; //currently will render 3 layers of tiles at once
 //fill in when map is created
+// map holds Terrain, spritesGround holds units
 Terrain map[30][10];
 Unit spritesGround[30][10];
 //Unit spritesAir[30][10];
 
 //init
+// Debug x and y coords
 void whatClicked(int x, int y, int mouse);
+// ...Up sets <input> key state to false, ...Down sets <input> key state to true
 void keyStatesUp(SDL_Keycode input);
 void keyStatesDown(SDL_Keycode input);
+// Checks x and y bounds
 bool isInBounds(int x, int y);
+// UNFINISHED -- returns integer code for specific terrain type
 int whatIsTerrain(Terrain input);
+// UNFINISHED -- returns integer code for specific unit type
 int whatIsUnit(Unit input);
+// UNFINISHED -- takes integer code and returns src string for that type's asset 
 std::string setAsset(int masterCode, bool isTerrain);
+
 void reRender(int x, int y);
 
+// Initializes SDL and a window passed in
 SDL_Window* init(SDL_Window* window);
 
+// Loads a texture to address at tex given a renderer and string
 bool loadTexture(SDL_Renderer* renderer, SDL_Texture** tex, const char* src);
 
+// Closes SDL and destroys window
 void close(SDL_Window* window);
 
 
@@ -260,10 +287,14 @@ int main(int argc, char* argv[])
 
 		printf("Everything initialized!\n");
 
+		// test army dude at 2,2
 		Tile testImg1;
+		// test bk tiled on the whole map
 		Tile land;
+		// cursor
 		Tile cursor;
 
+		// initialize map array to null values
 		for (int i = 0; i < 30; ++i)
 			for (int j = 0; j < 10; ++j) {
 				map[i][j].setDef(0);
@@ -272,6 +303,7 @@ int main(int argc, char* argv[])
 				map[i][j].setMov(NULL);
 			}
 
+		// Set starting positions
 		cursor.setX(2);
 		cursor.setY(2);
 
@@ -281,8 +313,10 @@ int main(int argc, char* argv[])
 		land.setX(0);
 		land.setY(0);
 
+		// Get the window surface
 		screenSurface = SDL_GetWindowSurface(window);
 		printf("Got the window surface\n");
+		// Initialize the renderer
 		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 		if (renderer == NULL) {
 			printf("Renderer could not be initialized! SDL_Error: %s\n", SDL_GetError());
@@ -290,6 +324,7 @@ int main(int argc, char* argv[])
 		SDL_SetRenderDrawColor(renderer, 0x0, 0x0, 0x0, 0xFF);
 		printf("Renderer initialized\n");
 
+		// Load assets
 		testImg1.setRenderer(renderer);
 		testImg1.setTexture("assets/Mech.png");
 
@@ -299,15 +334,19 @@ int main(int argc, char* argv[])
 		cursor.setRenderer(renderer);
 		cursor.setTexture("assets/red_cursor.png");
 
+		// Clear the screen
 		SDL_RenderClear(renderer);
+		// Tile the test land tile across the map
 		for (int i = 0; i < MAP_W / TILE_SIDE + 1; ++i)
 			for (int j = 0; j < MAP_H / TILE_SIDE + 1; ++j) {
 				land.setX(i);
 				land.setY(j);
 				land.render();
 			}
+		// Render the other two things
 		testImg1.render();
 		cursor.render();
+		// Swap the buffers and update the screen
 		SDL_RenderPresent(renderer);
 
 		//SDL_Delay(10000);
@@ -328,6 +367,7 @@ int main(int argc, char* argv[])
 					x = scanner.button.x;
 					y = scanner.button.y;
 
+					// Debug
 					switch (scanner.button.button) {
 					case SDL_BUTTON_LEFT:
 						std::cout << "Clicked Left! ";
@@ -351,9 +391,10 @@ int main(int argc, char* argv[])
 				}
 
 				//game changing stuff
+				// Attempt to move cursor up
 				if (w == true) {
 					std::cout << "Moving up!";
-					if (isInBounds(cursor.getX(), cursor.getY())) {
+					if (isInBounds(cursor.getX(), cursor.getY() - 1)) {
 						cursor.setY(cursor.getY() - 1);
 						reRender(cursor.getX(), cursor.getY());
 						for (int j = 0; j < sizeof(reRenderTemp); j++) {
@@ -533,7 +574,7 @@ int Tile::getY() {
 	return y;
 }
 
-void Tile::setT(int it) {
+/*void Tile::setT(int it) {
 	terrain = it;
 }
 
@@ -547,7 +588,7 @@ int Tile::getT() {
 
 int Tile::getU() {
 	return unit;
-}
+}*/
 
 SDL_Texture* Tile::getDisplay() {
 	return display;
@@ -603,12 +644,12 @@ void reRender(int x, int y) {
 	createMap();
 	//map
 	Tile tempLayer1;
-	tempLayer1.setT(whatIsTerrain(map[x][y]));
+	//tempLayer1.setT(whatIsTerrain(map[x][y]));
 	reRenderTemp[0] = tempLayer1;
 
 	//sprites layer 1 (troops)
 	Tile tempLayer2;
-	tempLayer1.setU(whatIsUnit(spritesGround[x][y]));
+	//tempLayer1.setU(whatIsUnit(spritesGround[x][y]));
 	if (spritesGround[x][y].getType() != 0) {
 		reRenderTemp[1] = tempLayer2;
 	}
