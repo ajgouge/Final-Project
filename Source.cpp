@@ -134,7 +134,7 @@ private:
 public:
 	Unit() : mov(0), ammo(0), fuel(0), vision(0), range(0), movType(ERROR), cost(0), attack(NULL), display(NULL) {}
 	Unit(int m, int a, int f, int v, int r, TYPE mt, int c, TYPE* atk, Tile* d) : mov(m), ammo(a), fuel(f), vision(v), range(r), movType(mt), cost(c), attack(atk), display(d) {}
-	~Unit();
+	//~Unit();
 
 	bool setDisplay(const char* src);
 	void setDisplay(Tile* src);
@@ -264,8 +264,16 @@ int main(int argc, char* argv[])
 		Tile land;
 		Tile cursor;
 
-		cursor.setX(0);
-		cursor.setY(0);
+		for (int i = 0; i < 30; ++i)
+			for (int j = 0; j < 10; ++j) {
+				map[i][j].setDef(0);
+				map[i][j].setCanCapture(false);
+				//map[i][j].setDisplay(NULL);
+				map[i][j].setMov(NULL);
+			}
+
+		cursor.setX(2);
+		cursor.setY(2);
 
 		testImg1.setX(2);
 		testImg1.setY(2);
