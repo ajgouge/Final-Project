@@ -171,12 +171,14 @@ bool space;
 bool isRunning = true;
 //Global temp layer array
 Tile reRenderTemp[3]; //currently will render 3 layers of tiles at once
-//Tile reRenderOld[3];
+Tile reRenderOld[3];
 //fill in when map is created
 Terrain map[30][10];
 Unit spritesGround[30][10];
 //Unit spritesAir[30][10];
 SDL_Renderer* renderer = NULL;
+int coords[4]; //temp coords array
+
 
 //init
 void whatClicked(int x, int y, int mouse);
@@ -185,8 +187,9 @@ void keyStatesDown(SDL_Keycode input);
 bool isInBounds(int x, int y);
 int whatIsTerrain(Terrain input);
 int whatIsUnit(Unit input);
-std::string setAsset(int masterCode, bool isTerrain);
-void reRender(int x, int y);
+const char* setAsset(int masterCode, bool isTerrain);
+void reRender(int input[]);
+void setCoord(int x, int y, char dir);
 
 SDL_Window* init(SDL_Window* window);
 
@@ -318,6 +321,9 @@ int main(int argc, char* argv[])
 		int x = 0;
 		int y = 0;
 
+		coords[0] = 2;
+		coords[1] = 2;
+
 		while (isRunning) {
 			SDL_Event scanner;
 
@@ -353,12 +359,11 @@ int main(int argc, char* argv[])
 
 				//game changing stuff
 				if (w == true) {
-					std::cout << "Moving up!";
-					if (isInBounds(cursor.getX(), cursor.getY())) {
-						std::cout << "is in bounds!";
+					if (isInBounds(coords[0], coords[1] - 1)) {
 						cursor.setY(cursor.getY() - 1);
 						std::cout << "Succesffully set Y - 1!";
-						reRender(cursor.getX(), cursor.getY());
+						setCoord(cursor.getX(), cursor.getY(), 'w');
+						reRender(coords);
 						std::cout << "rerendered!!";
 						SDL_RenderPresent(renderer);
 					}
@@ -366,6 +371,38 @@ int main(int argc, char* argv[])
 
 				if (a == true) {
 					std::cout << "Moving left!";
+					if (isInBounds(coords[0] - 1, coords[1])) {
+						cursor.setX(cursor.getX() - 1);
+						std::cout << "Succesffully set X - 1!";
+						setCoord(cursor.getX(), cursor.getY(), 'w');
+						reRender(coords);
+						std::cout << "rerendered!!";
+						SDL_RenderPresent(renderer);
+					}
+				}
+
+				if (s == true) {
+					std::cout << "Moving down!";
+					if (isInBounds(coords[0], coords[1] + 1)) {
+						cursor.setY(cursor.getY() + 1);
+						std::cout << "Succesffully set Y + 1!";
+						setCoord(cursor.getX(), cursor.getY(), 'w');
+						reRender(coords);
+						std::cout << "rerendered!!";
+						SDL_RenderPresent(renderer);
+					}
+				}
+
+				if (d == true) {
+					std::cout << "Moving right!";
+					if (isInBounds(coords[0] - 1, coords[1])) {
+						cursor.setX(cursor.getX() + 1);
+						std::cout << "Succesffully set X - 1!";
+						setCoord(cursor.getX(), cursor.getY(), 'w');
+						reRender(coords);
+						std::cout << "rerendered!!";
+						SDL_RenderPresent(renderer);
+					}
 				}
 			}
 			if (isRunning == false)
@@ -463,6 +500,7 @@ bool isInBounds(int x, int y) {
 		if (y >= 0 && y <= 10) {
 			return true;
 		}
+		return false;
 	}
 
 	return false;
@@ -478,7 +516,6 @@ bool isInBounds(int x, int y) {
 
 
 //init
-void reRender(int x, int y);
 void createMap();
 
 //Stock Map Data
@@ -600,13 +637,16 @@ void Unit::setType(int it) {
 	type = it;
 }
 
-void reRender(int x, int y/*, int xOld, int yOld*/) {
+void reRender(int input[]) {
 	createMap();
 	std::cout << "Map Created!";
 	//map
 	Tile tempLayer1;
-	tempLayer1.setT(whatIsTerrain(map[x][y]));
-	const char* c1 = setAsset(whatIsTerrain(map[x][y]), true).c_str();
+	tempLayer1.setX(input[0]);
+	tempLayer1.setY(input[1]);
+
+	tempLayer1.setT(whatIsTerrain(map[input[0]][input[1]]));
+	const char* c1 = setAsset(whatIsTerrain(map[input[0]][input[1]]), true);
 	tempLayer1.setRenderer(renderer);
 	tempLayer1.setTexture(c1);
 	reRenderTemp[0] = tempLayer1;
@@ -614,9 +654,12 @@ void reRender(int x, int y/*, int xOld, int yOld*/) {
 
 	//sprites layer 1 (troops)
 	Tile tempLayer2;
-	tempLayer1.setU(whatIsUnit(spritesGround[x][y]));
-	if (spritesGround[x][y].getType() != 0) {
-		const char* c2 = setAsset(whatIsUnit(spritesGround[x][y]), false).c_str();
+	tempLayer2.setX(input[0]);
+	tempLayer2.setY(input[1]);
+
+	tempLayer1.setU(whatIsUnit(spritesGround[input[0]][input[1]]));
+	if (spritesGround[input[0]][input[1]].getType() != 0) {
+		const char* c2 = setAsset(whatIsUnit(spritesGround[input[0]][input[1]]), false);
 		tempLayer2.setRenderer(renderer);
 		tempLayer2.setTexture(c2);
 		reRenderTemp[1] = tempLayer2;
@@ -625,21 +668,45 @@ void reRender(int x, int y/*, int xOld, int yOld*/) {
 
 	//sprites layer 2 (cursor)
 	Tile cursor;
+	cursor.setX(input[0]);
+	cursor.setY(input[1]);
+
 	cursor.setRenderer(renderer);
 	cursor.setTexture("assets/red_cursor.png");
 	reRenderTemp[2] = cursor;
 	cursor.render();
 
 	//Rerender Old tile
-	/*
+	
 	Tile tempOld1;
-	tempOld1.setT(whatIsTerrain(map[xOld][yOld]));
-	const char* c3 = setAsset(whatIsTerrain(map[xOld][yOld]), true).c_str();
+	tempOld1.setT(whatIsTerrain(map[input[2]][input[3]]));
+	const char* c3 = setAsset(whatIsTerrain(map[input[2]][input[3]]), true);
 	tempOld1.setRenderer(renderer);
 	tempOld1.setTexture(c1);
 	reRenderOld[0];
 	tempOld1.render();
-	*/
+	
+	Tile tempOld2;
+	tempOld2.setX(input[2]);
+	tempOld2.setY(input[3]);
+
+	tempLayer1.setU(whatIsUnit(spritesGround[input[2]][input[3]]));
+	if (spritesGround[input[2]][input[3]].getType() != 0) {
+		const char* c4 = setAsset(whatIsUnit(spritesGround[input[2]][input[3]]), false);
+		tempOld2.setRenderer(renderer);
+		tempOld2.setTexture(c4);
+		reRenderOld[1] = tempOld2;
+		tempOld2.render();
+	}
+
+	Tile cursorOld;
+	cursor.setX(input[2]);
+	cursor.setY(input[3]);
+
+	cursor.setRenderer(renderer);
+	cursor.setTexture("assets/null.png");
+	reRenderOld[2] = cursor;
+	cursor.render();
 
 	return;
 }
@@ -649,6 +716,7 @@ int whatIsTerrain(Terrain input) {
 	case 0:
 		return 0;
 	}
+	std::cout << "Returnign null!!!";
 	return NULL;
 }
 
@@ -664,8 +732,8 @@ int whatIsUnit(Unit input) {
 	return NULL;
 }
 
-std::string setAsset(int masterCode, bool isTerrain) {
-	std::string address;
+const char * setAsset(int masterCode, bool isTerrain) {
+	const char* address = NULL;
 	if (isTerrain) {
 		//terrain asset set
 		switch (masterCode) {
@@ -685,16 +753,47 @@ std::string setAsset(int masterCode, bool isTerrain) {
 	return address;
 }
 
-
+void setCoord(int x, int y, char dir) {
+	switch (dir) {
+	case 'w':
+		coords[0] = x;
+		coords[1] = y - 1;
+		coords[2] = x;
+		coords[3] = y;
+		break;
+	case 's':
+		coords[0] = x;
+		coords[1] = y + 1;
+		coords[2] = x;
+		coords[3] = y;
+		break;
+	case 'd':
+		coords[0] = x + 1;
+		coords[1] = y;
+		coords[2] = x;
+		coords[3] = y;
+		break;
+	case 'a':
+		coords[0] = x - 1;
+		coords[1] = y;
+		coords[2] = x;
+		coords[3] = y;
+		break;
+	return;
+	}
+}
 //temp debug
 
 void createMap() {
 
 	for (int i = 0; i < (sizeof map / sizeof map[0]); i++) {
 		for (int j = 0; j < (sizeof map[0] / sizeof(int)); j++) {
-			map[i][j].setCanCapture(true);
+			Terrain debugMap;
+			debugMap.setCanCapture(true);
+			debugMap.setDef(0);
+			map[i][j] = debugMap;
 			Unit debugMech;
-			debugMech.setType(1);
+			debugMech.setType(0);
 			spritesGround[i][j] = debugMech;
 		}
 
