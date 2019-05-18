@@ -359,50 +359,50 @@ int main(int argc, char* argv[])
 
 				//game changing stuff
 				if (w == true) {
-					if (isInBounds(coords[0], coords[1] - 1)) {
-						cursor.setY(cursor.getY() - 1);
-						std::cout << "Succesffully set Y - 1!";
-						setCoord(cursor.getX(), cursor.getY(), 'w');
-						reRender(coords);
-						std::cout << "rerendered!!";
-						SDL_RenderPresent(renderer);
-					}
+					if (coords[1] <= 0)
+						break;
+					cursor.setY(coords[1] - 1);
+					std::cout << "Succesffully set Y - 1!";
+					setCoord(coords[0], coords[1], 'w');
+					reRender(coords);
+					std::cout << "rerendered!!";
+					SDL_RenderPresent(renderer);
 				}
 
 				if (a == true) {
+					if (coords[0] <= 0)
+						break;
 					std::cout << "Moving left!";
-					if (isInBounds(coords[0] - 1, coords[1])) {
-						cursor.setX(cursor.getX() - 1);
+						cursor.setX(coords[0] - 1);
 						std::cout << "Succesffully set X - 1!";
-						setCoord(cursor.getX(), cursor.getY(), 'w');
+						setCoord(coords[0], coords[1], 'a');
 						reRender(coords);
 						std::cout << "rerendered!!";
 						SDL_RenderPresent(renderer);
-					}
 				}
 
 				if (s == true) {
+					if (coords[1] >= 10)
+						break;
 					std::cout << "Moving down!";
-					if (isInBounds(coords[0], coords[1] + 1)) {
-						cursor.setY(cursor.getY() + 1);
+						cursor.setY(coords[1] + 1);
 						std::cout << "Succesffully set Y + 1!";
-						setCoord(cursor.getX(), cursor.getY(), 'w');
+						setCoord(coords[0], coords[1], 's');
 						reRender(coords);
 						std::cout << "rerendered!!";
 						SDL_RenderPresent(renderer);
-					}
 				}
 
 				if (d == true) {
+					if (coords[0] >= 29)
+						break;
 					std::cout << "Moving right!";
-					if (isInBounds(coords[0] - 1, coords[1])) {
-						cursor.setX(cursor.getX() + 1);
+						cursor.setX(coords[0] + 1);
 						std::cout << "Succesffully set X - 1!";
-						setCoord(cursor.getX(), cursor.getY(), 'w');
+						setCoord(coords[0], coords[1], 'd');
 						reRender(coords);
 						std::cout << "rerendered!!";
 						SDL_RenderPresent(renderer);
-					}
 				}
 			}
 			if (isRunning == false)
@@ -679,10 +679,14 @@ void reRender(int input[]) {
 	//Rerender Old tile
 	
 	Tile tempOld1;
+	tempOld1.setX(input[2]);
+	tempOld1.setY(input[3]);
+
+
 	tempOld1.setT(whatIsTerrain(map[input[2]][input[3]]));
 	const char* c3 = setAsset(whatIsTerrain(map[input[2]][input[3]]), true);
 	tempOld1.setRenderer(renderer);
-	tempOld1.setTexture(c1);
+	tempOld1.setTexture(c3);
 	reRenderOld[0];
 	tempOld1.render();
 	
@@ -792,10 +796,15 @@ void createMap() {
 			debugMap.setCanCapture(true);
 			debugMap.setDef(0);
 			map[i][j] = debugMap;
-			Unit debugMech;
-			debugMech.setType(0);
-			spritesGround[i][j] = debugMech;
 		}
 
+	}
+
+	for (int k = 0; k < (sizeof spritesGround / sizeof spritesGround[0]); k++) {
+		for (int l = 0; l < (sizeof spritesGround[0] / sizeof(int)); l++) {
+			Unit debugMech;
+			debugMech.setType(0);
+			spritesGround[k][l] = debugMech;
+		}
 	}
 }
