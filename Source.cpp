@@ -4,7 +4,6 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include "TileClasses.cpp"
-//#include "MapClass.h"
 
 /*
 
@@ -184,7 +183,6 @@ int coords[4]; //temp coords array
 void whatClicked(int x, int y, int mouse);
 void keyStatesUp(SDL_Keycode input);
 void keyStatesDown(SDL_Keycode input);
-bool isInBounds(int x, int y);
 int whatIsTerrain(Terrain input);
 int whatIsUnit(Unit input);
 const char* setAsset(int masterCode, bool isTerrain);
@@ -350,13 +348,14 @@ int main(int argc, char* argv[])
 						break;
 					}
 				}
-				else if (scanner.type == SDL_KEYDOWN) {
+
+				 if (scanner.type == SDL_KEYDOWN) {
 					keyStatesDown(scanner.key.keysym.sym);
 				}
-				else if (scanner.type == SDL_KEYUP) {
+
+				 if (scanner.type == SDL_KEYUP) {
 					keyStatesUp(scanner.key.keysym.sym);
 				}
-
 				//game changing stuff
 				if (w == true) {
 					if (coords[1] <= 0)
@@ -367,6 +366,7 @@ int main(int argc, char* argv[])
 					reRender(coords);
 					std::cout << "rerendered!!";
 					SDL_RenderPresent(renderer);
+					w = false;
 				}
 
 				if (a == true) {
@@ -379,6 +379,7 @@ int main(int argc, char* argv[])
 						reRender(coords);
 						std::cout << "rerendered!!";
 						SDL_RenderPresent(renderer);
+						a = false;
 				}
 
 				if (s == true) {
@@ -391,6 +392,7 @@ int main(int argc, char* argv[])
 						reRender(coords);
 						std::cout << "rerendered!!";
 						SDL_RenderPresent(renderer);
+						s = false;
 				}
 
 				if (d == true) {
@@ -403,7 +405,9 @@ int main(int argc, char* argv[])
 						reRender(coords);
 						std::cout << "rerendered!!";
 						SDL_RenderPresent(renderer);
+						d = false;
 				}
+
 			}
 			if (isRunning == false)
 				break;
@@ -494,21 +498,6 @@ void keyStatesUp(SDL_Keycode input) {
 		break;
 	}
 }
-
-bool isInBounds(int x, int y) {
-	if (x >= 0 && x <= 30) {
-		if (y >= 0 && y <= 10) {
-			return true;
-		}
-		return false;
-	}
-
-	return false;
-}
-
-
-
-
 
 // Tile stuff (figure out how to movw to a different file and implement?
 
