@@ -169,7 +169,7 @@ bool ctrl;
 bool space;
 bool isRunning = true;
 //Global temp layer array
-Tile reRenderTemp[3]; //currently will render 3 layers of tiles at once
+Tile reRenderTemp[4]; //currently will render 4 layers of tiles at once
 Tile reRenderOld[3];
 //fill in when map is created
 Terrain map[30][10];
@@ -177,7 +177,7 @@ Unit spritesGround[30][10];
 //Unit spritesAir[30][10];
 SDL_Renderer* renderer = NULL;
 int coords[4]; //temp coords array
-
+bool isRedTurn;
 
 //init
 void whatClicked(int x, int y, int mouse);
@@ -186,8 +186,10 @@ void keyStatesDown(SDL_Keycode input);
 int whatIsTerrain(Terrain input);
 int whatIsUnit(Unit input);
 const char* setAsset(int masterCode, bool isTerrain);
-void reRender(int input[]);
+void reRender(int input[], char effect, char cursorType);
 void setCoord(int x, int y, char dir);
+void selectUnit(int x, int y);
+void createMap(); //debug
 
 SDL_Window* init(SDL_Window* window);
 
@@ -322,6 +324,10 @@ int main(int argc, char* argv[])
 		coords[0] = 2;
 		coords[1] = 2;
 
+		//debug
+		createMap();
+		std::cout << "Map Created!";
+
 		while (isRunning) {
 			SDL_Event scanner;
 
@@ -358,53 +364,42 @@ int main(int argc, char* argv[])
 				}
 				//game changing stuff
 				if (w == true) {
-					if (coords[1] <= 0)
+					if (coords[1] == 0)
 						break;
-					cursor.setY(coords[1] - 1);
-					std::cout << "Succesffully set Y - 1!";
 					setCoord(coords[0], coords[1], 'w');
-					reRender(coords);
-					std::cout << "rerendered!!";
+					reRender(coords, NULL, 'c');
 					SDL_RenderPresent(renderer);
+					std::cout << "X: " << coords[0] << " Y: " << coords[1];
 					w = false;
 				}
 
 				if (a == true) {
-					if (coords[0] <= 0)
+					if (coords[0] == 0)
 						break;
-					std::cout << "Moving left!";
-						cursor.setX(coords[0] - 1);
-						std::cout << "Succesffully set X - 1!";
 						setCoord(coords[0], coords[1], 'a');
-						reRender(coords);
-						std::cout << "rerendered!!";
+						reRender(coords, NULL, 'c');
 						SDL_RenderPresent(renderer);
+						std::cout << "X: " << coords[0] << " Y: " << coords[1];
 						a = false;
 				}
 
 				if (s == true) {
 					if (coords[1] >= 10)
 						break;
-					std::cout << "Moving down!";
-						cursor.setY(coords[1] + 1);
-						std::cout << "Succesffully set Y + 1!";
 						setCoord(coords[0], coords[1], 's');
-						reRender(coords);
-						std::cout << "rerendered!!";
+						reRender(coords, NULL, 'c');
 						SDL_RenderPresent(renderer);
+						std::cout << "X: " << coords[0] << " Y: " << coords[1];
 						s = false;
 				}
 
 				if (d == true) {
 					if (coords[0] >= 29)
 						break;
-					std::cout << "Moving right!";
-						cursor.setX(coords[0] + 1);
-						std::cout << "Succesffully set X - 1!";
 						setCoord(coords[0], coords[1], 'd');
-						reRender(coords);
-						std::cout << "rerendered!!";
+						reRender(coords, NULL, 'c');
 						SDL_RenderPresent(renderer);
+						std::cout << "X: " << coords[0] << " Y: " << coords[1];
 						d = false;
 				}
 
@@ -459,6 +454,10 @@ void keyStatesDown(SDL_Keycode input){
 	case SDLK_LCTRL:
 		//std::cout << "LEFT CTRL!";
 		ctrl = true;
+		break;
+	case SDLK_RSHIFT:
+		std::cout << "Finish Turn!";
+		isRedTurn = false;
 		break;
 	case SDLK_ESCAPE:
 		isRunning = false;
@@ -626,9 +625,10 @@ void Unit::setType(int it) {
 	type = it;
 }
 
-void reRender(int input[]) {
-	createMap();
-	std::cout << "Map Created!";
+void reRender(int input[], char effect, char cursorType) {
+	//debug
+	//std::cout << "input array stuff: " << input[0] << input[1] << input[2] << input[3];
+
 	//map
 	Tile tempLayer1;
 	tempLayer1.setX(input[0]);
@@ -655,18 +655,47 @@ void reRender(int input[]) {
 		tempLayer2.render();
 	}
 
-	//sprites layer 2 (cursor)
+	//sprites layer 2 (effects)
+	Tile tempLayer3;
+	tempLayer3.setX(input[0]);
+	tempLayer3.setY(input[1]);
+
+	tempLayer3.setRenderer(renderer);
+
+	switch (effect) {
+		case NULL:
+			tempLayer3.setTexture("assets/null.png");
+			break;
+	}
+
+	//sprites layer 3 (cursor)
 	Tile cursor;
 	cursor.setX(input[0]);
 	cursor.setY(input[1]);
 
 	cursor.setRenderer(renderer);
-	cursor.setTexture("assets/red_cursor.png");
+
+	switch (cursorType) {
+		case 'c': //cursor
+			cursor.setTexture("assets/red_cursor.png");
+			break;
+		case 's': //select Unit
+			cursor.setTexture("assets/red_select.png");
+			break;
+		case 't': //target enemy
+			cursor.setTexture("assets/target_red.png");
+			break;
+		case NULL: //no cursor
+			cursor.setTexture("assets/null.png");
+			break;
+	}
+
 	reRenderTemp[2] = cursor;
 	cursor.render();
-
-	//Rerender Old tile
 	
+	//Rerender Old tile
+	//if (input[2] != NULL && input[3] != NULL) {
+
 	Tile tempOld1;
 	tempOld1.setX(input[2]);
 	tempOld1.setY(input[3]);
@@ -678,7 +707,7 @@ void reRender(int input[]) {
 	tempOld1.setTexture(c3);
 	reRenderOld[0];
 	tempOld1.render();
-	
+
 	Tile tempOld2;
 	tempOld2.setX(input[2]);
 	tempOld2.setY(input[3]);
@@ -700,6 +729,7 @@ void reRender(int input[]) {
 	cursor.setTexture("assets/null.png");
 	reRenderOld[2] = cursor;
 	cursor.render();
+//}
 
 	return;
 }
@@ -775,6 +805,20 @@ void setCoord(int x, int y, char dir) {
 	return;
 	}
 }
+
+void selectUnit(int x, int y) {
+	int tempType = (spritesGround[x][y].getType());
+	if (tempType != 0) {
+		//select troop
+		int temp[2] = { x, y };
+		reRender(temp, NULL, 's');
+	}
+	return;
+}
+
+
+
+
 //temp debug
 
 void createMap() {
