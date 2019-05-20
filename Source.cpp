@@ -177,7 +177,7 @@ Unit spritesGround[30][10];
 //Unit spritesAir[30][10];
 SDL_Renderer* renderer = NULL;
 int coords[4]; //temp coords array
-bool isRedTurn;
+int turn = 1; // odd is red, even is blue
 
 //init
 void whatClicked(int x, int y, int mouse);
@@ -264,7 +264,6 @@ int main(int argc, char* argv[])
 
 		printf("Everything initialized!\n");
 
-		Tile testImg1;
 		Tile land;
 		Tile cursor;
 
@@ -276,11 +275,8 @@ int main(int argc, char* argv[])
 				map[i][j].setMov(NULL);
 			}
 
-		cursor.setX(2);
-		cursor.setY(2);
-
-		testImg1.setX(2);
-		testImg1.setY(2);
+		cursor.setX(15);
+		cursor.setY(5);
 
 		land.setX(0);
 		land.setY(0);
@@ -293,9 +289,6 @@ int main(int argc, char* argv[])
 		}
 		SDL_SetRenderDrawColor(renderer, 0x0, 0x0, 0x0, 0xFF);
 		printf("Renderer initialized\n");
-
-		testImg1.setRenderer(renderer);
-		testImg1.setTexture("assets/Mech.png");
 
 		land.setRenderer(renderer);
 		land.setTexture("assets/testbk.png");
@@ -310,22 +303,25 @@ int main(int argc, char* argv[])
 				land.setY(j);
 				land.render();
 			}
-		testImg1.render();
 		cursor.render();
 		SDL_RenderPresent(renderer);
-
-		//SDL_Delay(10000);
-
-		//pre-game loop
 
 		int x = 0;
 		int y = 0;
 
-		coords[0] = 2;
-		coords[1] = 2;
+		coords[0] = 15;
+		coords[1] = 5;
 
 		//debug
 		createMap();
+		for (int lolz = 0; lolz <= 29; lolz++) {
+			for (int yeetus = 0; yeetus <= 10; yeetus++) {
+				int tempInputter[4] = { lolz, yeetus, -1, -1 };
+				reRender(tempInputter, NULL, NULL);
+			}
+		}
+		SDL_RenderPresent(renderer);
+
 		std::cout << "Map Created!";
 
 		while (isRunning) {
@@ -403,6 +399,12 @@ int main(int argc, char* argv[])
 						d = false;
 				}
 
+				if (space == true) {
+					
+					
+					space = !space;
+				}
+
 			}
 			if (isRunning == false)
 				break;
@@ -455,9 +457,9 @@ void keyStatesDown(SDL_Keycode input){
 		//std::cout << "LEFT CTRL!";
 		ctrl = true;
 		break;
-	case SDLK_RSHIFT:
+	case SDLK_RETURN:
 		std::cout << "Finish Turn!";
-		isRedTurn = false;
+		turn++;
 		break;
 	case SDLK_ESCAPE:
 		isRunning = false;
@@ -483,10 +485,10 @@ void keyStatesUp(SDL_Keycode input) {
 		//std::cout << "A!";
 		a = false;
 		break;
-	case SDLK_SPACE:
-		//std::cout << "SPACE!";
-		space = false;
-		break;
+	//case SDLK_SPACE:
+	//	//std::cout << "SPACE!";
+	//	space = false;
+	//	break;
 	case SDLK_LSHIFT:
 		//std::cout << "LEFT SHIFT!";
 		shift = false;
@@ -500,11 +502,6 @@ void keyStatesUp(SDL_Keycode input) {
 
 // Tile stuff (figure out how to movw to a different file and implement?
 
-
-
-
-//init
-void createMap();
 
 //Stock Map Data
 
@@ -694,7 +691,7 @@ void reRender(int input[], char effect, char cursorType) {
 	cursor.render();
 	
 	//Rerender Old tile
-	//if (input[2] != NULL && input[3] != NULL) {
+	if (input[2] != -1 && input[3] != -1) {
 
 	Tile tempOld1;
 	tempOld1.setX(input[2]);
@@ -729,7 +726,7 @@ void reRender(int input[], char effect, char cursorType) {
 	cursor.setTexture("assets/null.png");
 	reRenderOld[2] = cursor;
 	cursor.render();
-//}
+}
 
 	return;
 }
@@ -836,8 +833,54 @@ void createMap() {
 	for (int k = 0; k < (sizeof spritesGround / sizeof spritesGround[0]); k++) {
 		for (int l = 0; l < (sizeof spritesGround[0] / sizeof(int)); l++) {
 			Unit debugMech;
-			debugMech.setType(0);
+			debugMech.setType(1);
 			spritesGround[k][l] = debugMech;
 		}
 	}
+}
+
+
+//Initialize Map and Units
+void initialize() {
+	Unit mech; 
+	mech.setType(0);
+	
+	spritesGround[0][0] = mech; spritesGround[0][1] = mech; spritesGround[0][2] = mech; spritesGround[0][3] = mech; spritesGround[0][4] = mech; spritesGround[0][5] = mech;
+	
+	
+	
+	 /*spritesGround = {  
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
+		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech}
+	};*/
+
+	//map = temp;
 }
