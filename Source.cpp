@@ -3,7 +3,7 @@
 #include <string>
 #include <SDL.h>
 #include <SDL_image.h>
-#include "TileClasses.cpp"
+//#include <algorithm.h>
 
 /*
 
@@ -185,10 +185,11 @@ void keyStatesUp(SDL_Keycode input);
 void keyStatesDown(SDL_Keycode input);
 int whatIsTerrain(Terrain input);
 int whatIsUnit(Unit input);
-const char* setAsset(int masterCode, bool isTerrain);
+const char* setAsset(int masterCode, bool isTerrain, bool animate);
 void reRender(int input[], char effect, char cursorType);
 void setCoord(int x, int y, char dir);
 void selectUnit(int x, int y);
+void animateRender();
 void createMap(); //debug
 
 SDL_Window* init(SDL_Window* window);
@@ -406,6 +407,8 @@ int main(int argc, char* argv[])
 				}
 
 			}
+			//animateRender();
+
 			if (isRunning == false)
 				break;
 		}	
@@ -632,7 +635,7 @@ void reRender(int input[], char effect, char cursorType) {
 	tempLayer1.setY(input[1]);
 
 	tempLayer1.setT(whatIsTerrain(map[input[0]][input[1]]));
-	const char* c1 = setAsset(whatIsTerrain(map[input[0]][input[1]]), true);
+	const char* c1 = setAsset(whatIsTerrain(map[input[0]][input[1]]), true, false);
 	tempLayer1.setRenderer(renderer);
 	tempLayer1.setTexture(c1);
 	reRenderTemp[0] = tempLayer1;
@@ -645,7 +648,7 @@ void reRender(int input[], char effect, char cursorType) {
 
 	tempLayer1.setU(whatIsUnit(spritesGround[input[0]][input[1]]));
 	if (spritesGround[input[0]][input[1]].getType() != 0) {
-		const char* c2 = setAsset(whatIsUnit(spritesGround[input[0]][input[1]]), false);
+		const char* c2 = setAsset(whatIsUnit(spritesGround[input[0]][input[1]]), false, false);
 		tempLayer2.setRenderer(renderer);
 		tempLayer2.setTexture(c2);
 		reRenderTemp[1] = tempLayer2;
@@ -699,7 +702,7 @@ void reRender(int input[], char effect, char cursorType) {
 
 
 	tempOld1.setT(whatIsTerrain(map[input[2]][input[3]]));
-	const char* c3 = setAsset(whatIsTerrain(map[input[2]][input[3]]), true);
+	const char* c3 = setAsset(whatIsTerrain(map[input[2]][input[3]]), true, false);
 	tempOld1.setRenderer(renderer);
 	tempOld1.setTexture(c3);
 	reRenderOld[0];
@@ -711,7 +714,7 @@ void reRender(int input[], char effect, char cursorType) {
 
 	tempLayer1.setU(whatIsUnit(spritesGround[input[2]][input[3]]));
 	if (spritesGround[input[2]][input[3]].getType() != 0) {
-		const char* c4 = setAsset(whatIsUnit(spritesGround[input[2]][input[3]]), false);
+		const char* c4 = setAsset(whatIsUnit(spritesGround[input[2]][input[3]]), false, false);
 		tempOld2.setRenderer(renderer);
 		tempOld2.setTexture(c4);
 		reRenderOld[1] = tempOld2;
@@ -752,7 +755,7 @@ int whatIsUnit(Unit input) {
 	return NULL;
 }
 
-const char * setAsset(int masterCode, bool isTerrain) {
+const char * setAsset(int masterCode, bool isTerrain, bool animate) {
 	const char* address = NULL;
 	if (isTerrain) {
 		//terrain asset set
@@ -763,11 +766,22 @@ const char * setAsset(int masterCode, bool isTerrain) {
 		}
 	}
 	else {
-		switch (masterCode) {
-		case 0:
-			return "assets/null.png";
-		case 1:
-			address = "assets/Mech.png";
+		if (animate == true) {
+			switch (masterCode) {
+			case NULL:
+				return "assets/null.png";
+			case 1:
+				address = "assets/apc/";
+			}
+		}
+		else if (animate == false){
+			switch (masterCode) {
+			case NULL:
+				return "assets/null.png";
+			case 1:
+				address = "assets/apc/1.png";
+			}
+		
 		}
 	}
 	return address;
@@ -813,7 +827,71 @@ void selectUnit(int x, int y) {
 	return;
 }
 
+void animateRender() {
+	Tile total[4][300]; //supports 300 x 4 frame animations at once, editable tho
 
+	int j = -1;
+	for (int k = 0; k < (sizeof spritesGround / sizeof spritesGround[0]); k++) {
+		for (int l = 0; l < (sizeof spritesGround[0] / sizeof(int)); l++) {
+			if (spritesGround[k][l].getType() != NULL) {
+				j++;
+				const char* dir;
+				dir = setAsset(spritesGround[k][l].getType(), false, true);
+				for (int i = 1; i <= 4; i++) {
+					Tile renderThis;
+					renderThis.setX(k);
+					renderThis.setY(l);
+					renderThis.setRenderer(renderer);
+
+					std::string tempAdd = std::to_string(i);
+					const char* addon = tempAdd.c_str();
+
+					const char* type = ".png";
+
+					std::string finalTotal(dir);
+					finalTotal.append(addon);
+					finalTotal.append(type);
+
+					const char* full = finalTotal.c_str();
+					renderThis.setTexture(full);
+
+					total[i][j] = renderThis;
+
+					std::cout << "j is: " << j;
+				}
+
+			}
+		}
+	}
+
+	//run through frames
+	for (int m = 0; m < 4; m++) {
+		for (int n = 0; n < 30; n++) {
+			//map
+			Tile tempLayer1;
+			tempLayer1.setX(total[m][n].getX());
+			tempLayer1.setY(total[m][n].getY());
+
+			tempLayer1.setT(whatIsTerrain(map[total[m][n].getX()][total[m][n].getY()]));
+			const char* c1 = setAsset(whatIsTerrain(map[total[m][n].getX()][total[m][n].getY()]), true, false);
+			tempLayer1.setRenderer(renderer);
+			tempLayer1.setTexture(c1);
+			reRenderTemp[0] = tempLayer1;
+			tempLayer1.render();
+
+			std::cout << "background setup and rendered layer level!";
+
+			Tile templayer2 = total[m][n];
+			templayer2.render();
+
+			std::cout << "animated tile render set!";
+		}
+		SDL_RenderPresent(renderer);
+		std::cout << "FINAL RENDER!!!";
+	}
+
+	return;
+}
 
 
 //temp debug
@@ -832,9 +910,9 @@ void createMap() {
 
 	for (int k = 0; k < (sizeof spritesGround / sizeof spritesGround[0]); k++) {
 		for (int l = 0; l < (sizeof spritesGround[0] / sizeof(int)); l++) {
-			Unit debugMech;
-			debugMech.setType(1);
-			spritesGround[k][l] = debugMech;
+			Unit debugAPC;
+			debugAPC.setType(1);
+			spritesGround[k][l] = debugAPC;
 		}
 	}
 }
