@@ -119,6 +119,8 @@ public:
 
 class Unit {
 private:
+	int x;
+	int y;
 	int type;
 	int mov;
 	int ammo;
@@ -131,10 +133,12 @@ private:
 	Tile* display;
 
 public:
-	Unit() : mov(0), ammo(0), fuel(0), vision(0), range(0), movType(ERROR), cost(0), attack(NULL), display(NULL) {}
+	Unit() : x(0), y(0), type(0), mov(0), ammo(0), fuel(0), vision(0), range(0), movType(ERROR), cost(0), attack(NULL), display(NULL) {}
 	Unit(int m, int a, int f, int v, int r, TYPE mt, int c, TYPE* atk, Tile* d) : mov(m), ammo(a), fuel(f), vision(v), range(r), movType(mt), cost(c), attack(atk), display(d) {}
 	//~Unit();
 
+	void setX(int i);
+	void setY(int i);
 	bool setDisplay(const char* src);
 	void setDisplay(Tile* src);
 	Tile* getDisplay();
@@ -146,6 +150,8 @@ public:
 	void setMovType(TYPE t);
 	void setCost(int c);
 	void setAttack(TYPE* a);
+	int getX();
+	int getY();
 	int getMov();
 	int getAmmo();
 	int getFuel();
@@ -159,6 +165,12 @@ public:
 
 };
 
+void Unit::setX(int i) {x = i;}
+void Unit::setY(int i) { y = i;}
+int Unit::getX() { return x; }
+int Unit::getY() { return y; }
+
+
 //game loop variables n stuff
 bool w;
 bool s;
@@ -168,12 +180,16 @@ bool shift;
 bool ctrl;
 bool space;
 bool isRunning = true;
+// Tracks whether a unit is selected or not (c for not, s for selecting)
+char moveMode = 'c';
+// Keeps a copy of the currently selected unit
+Unit selUnit;
 //Global temp layer array
 Tile reRenderTemp[4]; //currently will render 4 layers of tiles at once
 Tile reRenderOld[3];
 //fill in when map is created
-Terrain map[30][10];
-Unit spritesGround[30][10];
+Terrain map[32][12];
+Unit spritesGround[32][12];
 //Unit spritesAir[30][10];
 SDL_Renderer* renderer = NULL;
 int coords[4]; //temp coords array
@@ -268,8 +284,8 @@ int main(int argc, char* argv[])
 		Tile land;
 		Tile cursor;
 
-		for (int i = 0; i < 30; ++i)
-			for (int j = 0; j < 10; ++j) {
+		for (int i = 0; i < 32; ++i)
+			for (int j = 0; j < 12; ++j) {
 				map[i][j].setDef(0);
 				map[i][j].setCanCapture(false);
 				//map[i][j].setDisplay(NULL);
@@ -363,8 +379,11 @@ int main(int argc, char* argv[])
 				if (w == true) {
 					if (coords[1] == 0)
 						break;
+					if (moveMode == 's') {
+
+					}
 					setCoord(coords[0], coords[1], 'w');
-					reRender(coords, NULL, 'c');
+					reRender(coords, NULL, moveMode);
 					SDL_RenderPresent(renderer);
 					std::cout << "X: " << coords[0] << " Y: " << coords[1];
 					w = false;
@@ -373,36 +392,46 @@ int main(int argc, char* argv[])
 				if (a == true) {
 					if (coords[0] == 0)
 						break;
-						setCoord(coords[0], coords[1], 'a');
-						reRender(coords, NULL, 'c');
-						SDL_RenderPresent(renderer);
-						std::cout << "X: " << coords[0] << " Y: " << coords[1];
-						a = false;
+
+					setCoord(coords[0], coords[1], 'a');
+					reRender(coords, NULL, moveMode);
+					SDL_RenderPresent(renderer);
+					std::cout << "X: " << coords[0] << " Y: " << coords[1];
+					a = false;
 				}
 
 				if (s == true) {
 					if (coords[1] >= 10)
 						break;
-						setCoord(coords[0], coords[1], 's');
-						reRender(coords, NULL, 'c');
-						SDL_RenderPresent(renderer);
-						std::cout << "X: " << coords[0] << " Y: " << coords[1];
-						s = false;
+
+					setCoord(coords[0], coords[1], 's');
+					reRender(coords, NULL, moveMode);
+					SDL_RenderPresent(renderer);
+					std::cout << "X: " << coords[0] << " Y: " << coords[1];
+					s = false;
 				}
 
 				if (d == true) {
 					if (coords[0] >= 29)
 						break;
-						setCoord(coords[0], coords[1], 'd');
-						reRender(coords, NULL, 'c');
-						SDL_RenderPresent(renderer);
-						std::cout << "X: " << coords[0] << " Y: " << coords[1];
-						d = false;
+
+					setCoord(coords[0], coords[1], 'd');
+					reRender(coords, NULL, moveMode);
+					SDL_RenderPresent(renderer);
+					std::cout << "X: " << coords[0] << " Y: " << coords[1];
+					d = false;
 				}
 
 				if (space == true) {
-					
-					
+					// coords[0],coords[1] == coordinates of cursor currently
+					if (spritesGround[coords[0]][coords[1]].getType() != 0 && moveMode == 'c')
+					{
+						moveMode = 's';
+						selUnit = spritesGround[coords[0]][coords[1]];
+						reRender(coords, NULL, moveMode);
+						SDL_RenderPresent(renderer);
+					}
+
 					space = !space;
 				}
 
@@ -907,12 +936,20 @@ void createMap() {
 		}
 
 	}
-
+	
 	for (int k = 0; k < (sizeof spritesGround / sizeof spritesGround[0]); k++) {
 		for (int l = 0; l < (sizeof spritesGround[0] / sizeof(int)); l++) {
-			Unit debugAPC;
-			debugAPC.setType(1);
-			spritesGround[k][l] = debugAPC;
+			Unit APC;
+			APC.setType(1);
+			APC.setX(1);
+			APC.setY(1);
+			if (k == 1 && l == 1)
+				spritesGround[k][l] = APC;
+			else {
+				spritesGround[k][l].setType(0);
+				spritesGround[k][l].setY(k);
+				spritesGround[k][l].setX(l);
+			}
 		}
 	}
 }
