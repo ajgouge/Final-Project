@@ -162,6 +162,7 @@ public:
 	TYPE* getAttack();
 	int getType();
 	void setType(int it);
+	void renderRange();
 
 };
 
@@ -169,6 +170,12 @@ void Unit::setX(int i) {x = i;}
 void Unit::setY(int i) { y = i;}
 int Unit::getX() { return x; }
 int Unit::getY() { return y; }
+
+void Unit::renderRange() {
+
+
+
+}
 
 
 //game loop variables n stuff
@@ -188,8 +195,8 @@ Unit selUnit;
 Tile reRenderTemp[4]; //currently will render 4 layers of tiles at once
 Tile reRenderOld[3];
 //fill in when map is created
-Terrain map[32][12];
-Unit spritesGround[32][12];
+Terrain ** map; //32x12
+Unit  ** spritesGround; //32x12
 //Unit spritesAir[30][10];
 SDL_Renderer* renderer = NULL;
 int coords[4]; //temp coords array
@@ -239,6 +246,13 @@ SDL_Window* init(SDL_Window * window) {
 		}
 	}
 
+	map = new Terrain*[32];
+	for (int i = 0; i < 32; ++i)
+		map[i] = new Terrain[12];
+	spritesGround = new Unit * [32];
+	for (int i = 0; i < 32; ++i)
+		spritesGround[i] = new Unit[12];
+
 	return window;
 }
 
@@ -261,6 +275,13 @@ bool loadTexture(SDL_Renderer * renderer, SDL_Texture * *tex, const char* src) {
 
 void close(SDL_Window * window) {
 	SDL_DestroyWindow(window);
+
+	for (int i = 0; i < 32; ++i) {
+		delete [] map[i];
+		delete [] spritesGround[i];
+	}
+	delete [] map;
+	delete [] spritesGround;
 
 	IMG_Quit();
 	SDL_Quit();
@@ -429,6 +450,9 @@ int main(int argc, char* argv[])
 						moveMode = 's';
 						selUnit = spritesGround[coords[0]][coords[1]];
 						reRender(coords, NULL, moveMode);
+
+						selUnit.renderRange();
+
 						SDL_RenderPresent(renderer);
 					}
 
@@ -695,6 +719,7 @@ void reRender(int input[], char effect, char cursorType) {
 		case NULL:
 			tempLayer3.setTexture("assets/null.png");
 			break;
+
 	}
 
 	//sprites layer 3 (cursor)
