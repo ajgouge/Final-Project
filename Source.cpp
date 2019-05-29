@@ -172,9 +172,37 @@ int Unit::getX() { return x; }
 int Unit::getY() { return y; }
 
 void Unit::renderRange() {
-
-
-
+	
+	/*
+	
+		Notes on how to proceed:
+		
+		1. Indexing a Terrain's mov array with a Unit's movType member will return the number of mov points expended
+		by moving onto that tile. (CURRENTLY UNIMPLEMENTED, NEEDS TO BE INITIALIZED)
+		2. All units will (at most) be able to move to any tile in a diamond, centered at the unit's position and
+		with a range equal to the mov member of the Unit.
+		3. Any movement that a unit makes can be represented as a series of ups, downs, lefts, and rights. However,
+		any sequence that displays a left followed immediately by a right (and so on) is redundant and won't exist.
+			3.1 This means a Unit can move in 4 ways at first, and then 3 for each move after, totaling to 
+			4 * 3^(mov-1) total movement strings. Most of these strings map to the same tiles.
+			3.2 A brute force method to see what tiles can be moved to would be to go through each of these sequences
+			as far as allowed by point 1 and mark the final tile as 'reachable' by the current unit (add a data member
+			to the Terrain class as a boolean isReachable)
+		4. Once a unit is deselected, all of the Terrain tiles in that reachable diamond (or really on the whole map if that's
+		easier) need to have their isReachable members reset to false. These also need reRender()ing.
+		5. Rather than reRender() each tile upon finding it can be moved to with the effect layer (which, since many strings
+		will likely map to the same tile, create MANY redundant reRender() calls), cycle through the whole map once the range
+		is found and see if the tile can be moved to, reRender()ing on a success. This should save a lot of overhead.
+		
+		6. Once the movement range is set, the attack range will effectively be the move range + the attack range (just a
+		bigger diamond over the movement range diamond). 
+		
+		7. Also, simply rendering the movement range isn't useful. Once in movement mode 's', make sure that the cursor can't
+		move outside of that range. Also, if the deselect key is pressed, execute point 4 and change the cursor mode back to
+		move mode 'c' as well.
+		
+	*/
+	
 }
 
 
