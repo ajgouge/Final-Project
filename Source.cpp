@@ -99,10 +99,11 @@ private:
 	int* mov;
 	bool canCapture;
 	Tile* display;
+	bool isReachable;
 
 public:
-	Terrain() : def(0), mov(NULL), canCapture(false), display(NULL) {}
-	Terrain(int d, int* m, bool c, Tile* di) : def(d), mov(m), canCapture(c), display(di) {}
+	Terrain() : def(0), mov(NULL), canCapture(false), display(NULL), isReachable(false) {}
+	Terrain(int d, int* m, bool c, Tile* di) : def(d), mov(m), canCapture(c), display(di), isReachable(false) {}
 	~Terrain();
 
 	bool setDisplay(const char* src);
@@ -172,9 +173,15 @@ int Unit::getX() { return x; }
 int Unit::getY() { return y; }
 
 void Unit::renderRange() {
-	
+
+	for (int i = 0; i < 4; ++i) {
+		for (int steps = 1; steps <= mov; ++steps) {
+			int pointsLeft = mov;
+
+		}
+	}
+
 	/*
-	
 		Notes on how to proceed:
 		
 		1. Indexing a Terrain's mov array with a Unit's movType member will return the number of mov points expended
@@ -200,7 +207,6 @@ void Unit::renderRange() {
 		7. Also, simply rendering the movement range isn't useful. Once in movement mode 's', make sure that the cursor can't
 		move outside of that range. Also, if the deselect key is pressed, execute point 4 and change the cursor mode back to
 		move mode 'c' as well.
-		
 	*/
 	
 }
