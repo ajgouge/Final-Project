@@ -51,6 +51,30 @@ const int MAP_Y = SCREEN_HEIGHT / 10;
 const int MAP_W = SCREEN_WIDTH;
 const int MAP_H = SCREEN_HEIGHT * 7 / 10;
 const int TILE_SIDE = 64;
+//game loop variables n stuff
+bool w;
+bool s;
+bool a;
+bool d;
+bool shift;
+bool ctrl;
+bool space;
+bool isRunning = true;
+// Tracks whether a unit is selected or not (c for not, s for selecting)
+char moveMode = 'c';
+// Keeps a copy of the currently selected unit
+Unit selUnit;
+//Global temp layer array
+Tile reRenderTemp[4]; //currently will render 4 layers of tiles at once
+Tile reRenderOld[3];
+//fill in when map is created
+Terrain** map; //32x12
+Unit** spritesGround; //32x12
+Mover** movTemp; //32x12
+//Unit spritesAir[30][10];
+SDL_Renderer* renderer = NULL;
+int coords[4]; //temp coords array
+int turn = 1; // odd is red, even is blue
 
 enum TYPE {
 	FOOT,
@@ -112,11 +136,16 @@ public:
 	void setDef(int d);
 	void setMov(int* m);
 	void setCanCapture(bool c);
+	void setIsReachable(bool r);
 	int getDef();
 	int* getMov();
 	bool getCanCapture();
 
 };
+
+void Terrain::setIsReachable(bool r) {
+	isReachable = r;
+}
 
 class Unit {
 private:
@@ -167,6 +196,75 @@ public:
 
 };
 
+class Mover {
+public:
+	int x;
+	int y;
+	int mov;
+	int range;
+	bool hasMoved;
+	TYPE movType;
+	Mover() : x(-1), y(-1), mov(-1), range(-1), movType(ERROR), hasMoved(false) {}
+	Mover(int ix, int iy, int m, int r, TYPE t) : x(ix), y(iy), mov(m), range(r), movType(t), hasMoved(false) {}
+	~Mover();
+	void propagate();
+};
+
+Mover::~Mover() {
+
+}
+
+void Mover::propagate() {
+	if (hasMoved) return;
+	
+	for (int i = 0; i < 4; ++i) {
+		switch (i) {
+		case 0:
+			if (x >= 30)
+				break;
+			if (mov - map[x + 1][y].getMov()[movType] < 0)
+				break;
+			if (spritesGround[x + 1][y].getMovType() == ERROR)
+				break;
+			movTemp[x + 1][y] = Mover(x + 1, y, mov - map[x + 1][y].getMov()[movType], range, movType);
+			map[x + 1][y].setIsReachable(true);
+			break;
+		case 1:
+			if (x <= 0)
+				break;
+			if (mov - map[x - 1][y].getMov()[movType] < 0)
+				break;
+			if (spritesGround[x - 1][y].getMovType() == ERROR)
+				break;
+			movTemp[x - 1][y] = Mover(x - 1, y, mov - map[x - 1][y].getMov()[movType], range, movType);
+			map[x - 1][y].setIsReachable(true);
+			break;
+		case 2:
+			if (y >= 11)
+				break;
+			if (mov - map[x][y + 1].getMov()[movType] < 0)
+				break;
+			if (spritesGround[x][y + 1].getMovType() == ERROR)
+				break;
+			movTemp[x][y + 1] = Mover(x, y + 1, mov - map[x][y + 1].getMov()[movType], range, movType);
+			map[x][y + 1].setIsReachable(true);
+			break;
+		case 3:
+			if (y <= 0)
+				break;
+			if (mov - map[x][y - 1].getMov()[movType] < 0)
+				break;
+			if (spritesGround[x][y - 1].getMovType() == ERROR)
+				break;
+			movTemp[x][y - 1] = Mover(x, y - 1, mov - map[x][y - 1].getMov()[movType], range, movType);
+			map[x][y - 1].setIsReachable(true);
+			break;
+		}
+	}
+
+	hasMoved = true;
+}
+
 void Unit::setX(int i) {x = i;}
 void Unit::setY(int i) { y = i;}
 int Unit::getX() { return x; }
@@ -174,12 +272,67 @@ int Unit::getY() { return y; }
 
 void Unit::renderRange() {
 
-	for (int i = 0; i < 4; ++i) {
-		for (int steps = 1; steps <= mov; ++steps) {
-			int pointsLeft = mov;
 
+
+	for (int i = 0; i < 4; ++i) {
+		switch (i) {
+		case 0:
+			if (x >= 30)
+				break;
+			if (mov - map[x + 1][y].getMov()[movType] < 0)
+				break;
+			if (spritesGround[x + 1][y].getMovType() == ERROR)
+				break;
+			movTemp[x + 1][y] = Mover(x + 1, y, mov - map[x + 1][y].getMov()[movType], range, movType);
+			map[x + 1][y].setIsReachable(true);
+			break;
+		case 1:
+			if (x <= 0)
+				break;
+			if (mov - map[x - 1][y].getMov()[movType] < 0)
+				break;
+			if (spritesGround[x - 1][y].getMovType() == ERROR)
+				break;
+			movTemp[x - 1][y] = Mover(x - 1, y, mov - map[x - 1][y].getMov()[movType], range, movType);
+			map[x - 1][y].setIsReachable(true);
+			break;
+		case 2:
+			if (y >= 11)
+				break;
+			if (mov - map[x][y+1].getMov()[movType] < 0)
+				break;
+			if (spritesGround[x][y+1].getMovType() == ERROR)
+				break;
+			movTemp[x][y+1] = Mover(x, y+1, mov - map[x][y+1].getMov()[movType], range, movType);
+			map[x][y+1].setIsReachable(true);
+			break;
+		case 3:
+			if (y <= 0)
+				break;
+			if (mov - map[x][y - 1].getMov()[movType] < 0)
+				break;
+			if (spritesGround[x][y - 1].getMovType() == ERROR)
+				break;
+			movTemp[x][y - 1] = Mover(x, y - 1, mov - map[x][y - 1].getMov()[movType], range, movType);
+			map[x][y - 1].setIsReachable(true);
+			break;
 		}
 	}
+
+	movTemp[x][y].hasMoved = true;
+
+	for (int d = mov - 1; d > 0; --d) {
+		for (int i = 0; i < 32; ++i)
+			for (int j = 0; j < 12; ++j) {
+				if (movTemp[i][j].movType != ERROR)
+					movTemp[i][j].propagate();
+			}
+	}
+
+	for (int i = 0; i < 32; ++i)
+		for (int j = 0; j < 12; ++j)
+			if (map[i][j].getIsReachable())
+				// reRender() call here with blue effect layer
 
 	/*
 		Notes on how to proceed:
@@ -212,29 +365,7 @@ void Unit::renderRange() {
 }
 
 
-//game loop variables n stuff
-bool w;
-bool s;
-bool a;
-bool d;
-bool shift;
-bool ctrl;
-bool space;
-bool isRunning = true;
-// Tracks whether a unit is selected or not (c for not, s for selecting)
-char moveMode = 'c';
-// Keeps a copy of the currently selected unit
-Unit selUnit;
-//Global temp layer array
-Tile reRenderTemp[4]; //currently will render 4 layers of tiles at once
-Tile reRenderOld[3];
-//fill in when map is created
-Terrain ** map; //32x12
-Unit  ** spritesGround; //32x12
-//Unit spritesAir[30][10];
-SDL_Renderer* renderer = NULL;
-int coords[4]; //temp coords array
-int turn = 1; // odd is red, even is blue
+
 
 //init
 void whatClicked(int x, int y, int mouse);
@@ -286,6 +417,9 @@ SDL_Window* init(SDL_Window * window) {
 	spritesGround = new Unit * [32];
 	for (int i = 0; i < 32; ++i)
 		spritesGround[i] = new Unit[12];
+	movTemp = new Mover * [32];
+	for (int i = 0; i < 32; ++i)
+		movTemp[i] = new Mover[12];
 
 	return window;
 }
@@ -313,9 +447,11 @@ void close(SDL_Window * window) {
 	for (int i = 0; i < 32; ++i) {
 		delete [] map[i];
 		delete [] spritesGround[i];
+		delete[] movTemp[i];
 	}
 	delete [] map;
 	delete [] spritesGround;
+	delete[] movTemp;
 
 	IMG_Quit();
 	SDL_Quit();
@@ -1005,7 +1141,7 @@ void createMap() {
 			if (k == 1 && l == 1)
 				spritesGround[k][l] = APC;
 			else {
-				spritesGround[k][l].setType(0);
+				spritesGround[k][l].setType(1);
 				spritesGround[k][l].setY(k);
 				spritesGround[k][l].setX(l);
 			}
