@@ -456,7 +456,7 @@ int main(int argc, char* argv[])
 				}
 
 				if (s == true) {
-					if (coords[1] >= 10)
+					if (coords[1] >= 19)
 						break;
 
 					setCoord(coords[0], coords[1], 's');
@@ -753,7 +753,12 @@ void reRender(int input[], char effect, char cursorType) {
 		case NULL:
 			tempLayer3.setTexture("assets/null.png");
 			break;
-
+		case 'b':
+			tempLayer3.setTexture("assets/red_tint_overlay.png");
+			break;
+		case 'r':
+			tempLayer3.setTexture("assets/blue_tint_overlay.png");
+			break;
 	}
 
 	//sprites layer 3 (cursor)
@@ -915,71 +920,71 @@ void selectUnit(int x, int y) {
 	return;
 }
 
-void animateRender() {
-	Tile total[4][300]; //supports 300 x 4 frame animations at once, editable tho
-
-	int j = -1;
-	for (int k = 0; k < (sizeof spritesGround / sizeof spritesGround[0]); k++) {
-		for (int l = 0; l < (sizeof spritesGround[0] / sizeof(int)); l++) {
-			if (spritesGround[k][l].getType() != NULL) {
-				j++;
-				const char* dir;
-				dir = setAsset(spritesGround[k][l].getType(), false, true);
-				for (int i = 1; i <= 4; i++) {
-					Tile renderThis;
-					renderThis.setX(k);
-					renderThis.setY(l);
-					renderThis.setRenderer(renderer);
-
-					std::string tempAdd = std::to_string(i);
-					const char* addon = tempAdd.c_str();
-
-					const char* type = ".png";
-
-					std::string finalTotal(dir);
-					finalTotal.append(addon);
-					finalTotal.append(type);
-
-					const char* full = finalTotal.c_str();
-					renderThis.setTexture(full);
-
-					total[i][j] = renderThis;
-
-					std::cout << "j is: " << j;
-				}
-
-			}
-		}
-	}
-
-	//run through frames
-	for (int m = 0; m < 4; m++) {
-		for (int n = 0; n < 30; n++) {
-			//map
-			Tile tempLayer1;
-			tempLayer1.setX(total[m][n].getX());
-			tempLayer1.setY(total[m][n].getY());
-
-			tempLayer1.setT(whatIsTerrain(map[total[m][n].getX()][total[m][n].getY()]));
-			const char* c1 = setAsset(whatIsTerrain(map[total[m][n].getX()][total[m][n].getY()]), true, false);
-			tempLayer1.setRenderer(renderer);
-			tempLayer1.setTexture(c1);
-			reRenderTemp[0] = tempLayer1;
-			tempLayer1.render();
-
-			std::cout << "background setup and rendered layer level!";
-
-			Tile templayer2 = total[m][n];
-			templayer2.render();
-
-			std::cout << "animated tile render set!";
-		}
-		SDL_RenderPresent(renderer);
-		std::cout << "FINAL RENDER!!!";
-	}
-
-	return;
-}
+//void animateRender() {
+//	Tile total[4][300]; //supports 300 x 4 frame animations at once, editable tho
+//
+//	int j = -1;
+//	for (int k = 0; k < (sizeof spritesGround / sizeof spritesGround[0]); k++) {
+//		for (int l = 0; l < (sizeof spritesGround[0] / sizeof(int)); l++) {
+//			if (spritesGround[k][l].getType() != NULL) {
+//				j++;
+//				const char* dir;
+//				dir = setAsset(spritesGround[k][l].getType(), false, true);
+//				for (int i = 1; i <= 4; i++) {
+//					Tile renderThis;
+//					renderThis.setX(k);
+//					renderThis.setY(l);
+//					renderThis.setRenderer(renderer);
+//
+//					std::string tempAdd = std::to_string(i);
+//					const char* addon = tempAdd.c_str();
+//
+//					const char* type = ".png";
+//
+//					std::string finalTotal(dir);
+//					finalTotal.append(addon);
+//					finalTotal.append(type);
+//
+//					const char* full = finalTotal.c_str();
+//					renderThis.setTexture(full);
+//
+//					total[i][j] = renderThis;
+//
+//					std::cout << "j is: " << j;
+//				}
+//
+//			}
+//		}
+//	}
+//
+//	//run through frames
+//	for (int m = 0; m < 4; m++) {
+//		for (int n = 0; n < 30; n++) {
+//			//map
+//			Tile tempLayer1;
+//			tempLayer1.setX(total[m][n].getX());
+//			tempLayer1.setY(total[m][n].getY());
+//
+//			tempLayer1.setT(whatIsTerrain(map[total[m][n].getX()][total[m][n].getY()]));
+//			const char* c1 = setAsset(whatIsTerrain(map[total[m][n].getX()][total[m][n].getY()]), true, false);
+//			tempLayer1.setRenderer(renderer);
+//			tempLayer1.setTexture(c1);
+//			reRenderTemp[0] = tempLayer1;
+//			tempLayer1.render();
+//
+//			std::cout << "background setup and rendered layer level!";
+//
+//			Tile templayer2 = total[m][n];
+//			templayer2.render();
+//
+//			std::cout << "animated tile render set!";
+//		}
+//		SDL_RenderPresent(renderer);
+//		std::cout << "FINAL RENDER!!!";
+//	}
+//
+//	return;
+//}
 
 
 //temp debug
@@ -1012,6 +1017,7 @@ void createMap() {
 		}
 	}
 }
+
 
 
 //Initialize Map and Units
@@ -1057,4 +1063,28 @@ void initialize() {
 	};*/
 
 	//map = temp;
+}
+
+void cameraMove(char direction) {
+	switch (direction){
+	case 'w':
+		if (coords[1] == 0)
+			break;
+
+		break;
+	case 's':
+		break;
+	case 'd':
+		break;
+	case 'a':
+		break;
+	}
+}
+
+void moveTileSet(int newX, int newY) {
+	for (int i = 0; i < 30; i++) {
+		for (int j = 0; j < 20; j++) {
+
+		}
+	}
 }
