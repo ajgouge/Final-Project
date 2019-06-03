@@ -65,6 +65,14 @@ enum TYPE {
 	NUM_TYPES,
 	ERROR = -1
 };
+/*
+enum TERRAIN_TYPE {
+	GRASS,
+	BRIDGE,
+	MOUNTAIN,
+	WATER,
+
+};*/
 
 class Tile {
 private:
@@ -210,6 +218,8 @@ public:
 	~Mover();
 	void propagate();
 };
+
+
 
 //game loop variables n stuff
 bool w;
