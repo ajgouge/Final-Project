@@ -73,6 +73,7 @@ private:
 	int y;
 	int terrain;
 	int unit;
+	const char * source;
 
 public:
 	Tile() : x(0), y(0) {}
@@ -80,6 +81,8 @@ public:
 	~Tile();
 
 	bool setTexture(const char* src);
+	const char* getSource();
+	void setSource(const char*);
 	void render();
 	void setX(int ix);
 	void setY(int iy);
@@ -167,6 +170,21 @@ public:
 
 };
 
+class metaTile {
+private:
+	Tile layers[4];
+	int x;
+	int y;
+
+public:
+	void setX(int ix);
+	void setY(int iy);
+	int getX();
+	int getY();
+	void setLayer(int layer, Tile input);
+	Tile getLayer(int layer);
+};
+
 void Unit::setX(int i) {x = i;}
 void Unit::setY(int i) { y = i;}
 int Unit::getX() { return x; }
@@ -225,9 +243,6 @@ bool isRunning = true;
 char moveMode = 'c';
 // Keeps a copy of the currently selected unit
 Unit selUnit;
-//Global temp layer array
-Tile reRenderTemp[4]; //currently will render 4 layers of tiles at once
-Tile reRenderOld[3];
 //fill in when map is created
 Terrain ** map; //32x12
 Unit  ** spritesGround; //32x12
@@ -236,6 +251,8 @@ SDL_Renderer* renderer = NULL;
 int coords[4]; //temp coords array
 int turn = 1; // odd is red, even is blue
 
+
+
 //init
 void whatClicked(int x, int y, int mouse);
 void keyStatesUp(SDL_Keycode input);
@@ -243,10 +260,11 @@ void keyStatesDown(SDL_Keycode input);
 int whatIsTerrain(Terrain input);
 int whatIsUnit(Unit input);
 const char* setAsset(int masterCode, bool isTerrain, bool animate);
-void reRender(int input[], char effect, char cursorType);
+void reLayer(int input[], char effect, char cursorType);
 void setCoord(int x, int y, char dir);
 void selectUnit(int x, int y);
 void animateRender();
+void reRender(metaTile one, metaTile two);
 void createMap(); //debug
 
 SDL_Window* init(SDL_Window* window);
@@ -368,13 +386,13 @@ int main(int argc, char* argv[])
 		cursor.setRenderer(renderer);
 		cursor.setTexture("assets/red_cursor.png");
 
-		SDL_RenderClear(renderer);
+		/*SDL_RenderClear(renderer);
 		for (int i = 0; i < MAP_W / TILE_SIDE + 1; ++i)
 			for (int j = 0; j < MAP_H / TILE_SIDE + 1; ++j) {
 				land.setX(i);
 				land.setY(j);
 				land.render();
-			}
+			}*/
 		cursor.render();
 		SDL_RenderPresent(renderer);
 
@@ -389,7 +407,7 @@ int main(int argc, char* argv[])
 		for (int lolz = 0; lolz <= 29; lolz++) {
 			for (int yeetus = 0; yeetus <= 10; yeetus++) {
 				int tempInputter[4] = { lolz, yeetus, -1, -1 };
-				reRender(tempInputter, NULL, NULL);
+				reLayer(tempInputter, NULL, NULL);
 			}
 		}
 		SDL_RenderPresent(renderer);
@@ -438,7 +456,7 @@ int main(int argc, char* argv[])
 
 					}
 					setCoord(coords[0], coords[1], 'w');
-					reRender(coords, NULL, moveMode);
+					reLayer(coords, NULL, moveMode);
 					SDL_RenderPresent(renderer);
 					std::cout << "X: " << coords[0] << " Y: " << coords[1];
 					w = false;
@@ -449,7 +467,7 @@ int main(int argc, char* argv[])
 						break;
 
 					setCoord(coords[0], coords[1], 'a');
-					reRender(coords, NULL, moveMode);
+					reLayer(coords, NULL, moveMode);
 					SDL_RenderPresent(renderer);
 					std::cout << "X: " << coords[0] << " Y: " << coords[1];
 					a = false;
@@ -460,7 +478,7 @@ int main(int argc, char* argv[])
 						break;
 
 					setCoord(coords[0], coords[1], 's');
-					reRender(coords, NULL, moveMode);
+					reLayer(coords, NULL, moveMode);
 					SDL_RenderPresent(renderer);
 					std::cout << "X: " << coords[0] << " Y: " << coords[1];
 					s = false;
@@ -471,7 +489,7 @@ int main(int argc, char* argv[])
 						break;
 
 					setCoord(coords[0], coords[1], 'd');
-					reRender(coords, NULL, moveMode);
+					reLayer(coords, NULL, moveMode);
 					SDL_RenderPresent(renderer);
 					std::cout << "X: " << coords[0] << " Y: " << coords[1];
 					d = false;
@@ -483,7 +501,7 @@ int main(int argc, char* argv[])
 					{
 						moveMode = 's';
 						selUnit = spritesGround[coords[0]][coords[1]];
-						reRender(coords, NULL, moveMode);
+						reLayer(coords, NULL, moveMode);
 
 						selUnit.renderRange();
 
@@ -609,7 +627,29 @@ Types of troops:
 */
 
 
+void metaTile::setX(int ix) {
+	x = ix;
+}
 
+void metaTile::setY(int iy) {
+	y = iy;
+}
+
+int metaTile::getX() {
+	return x;
+}
+
+int metaTile::getY() {
+	return y;
+}
+
+void metaTile::setLayer(int layer, Tile input) {
+	layers[layer] = input;
+}
+
+Tile metaTile::getLayer(int layer) {
+	return layers[layer];
+}
 
 Tile::~Tile() {
 	SDL_DestroyTexture(display);
@@ -617,6 +657,13 @@ Tile::~Tile() {
 
 bool Tile::setTexture(const char* src) {
 	return loadTexture(renderer, &display, src);
+}
+const char* Tile::getSource() {
+	return source;
+}
+
+void Tile::setSource(const char* src) {
+	source = src;
 }
 
 void Tile::render() {
@@ -712,118 +759,168 @@ void Unit::setType(int it) {
 	type = it;
 }
 
-void reRender(int input[], char effect, char cursorType) {
-	//debug
+void reLayer(int input[], char effect, char cursorType) {                                                              //OVERHAULED
 	//std::cout << "input array stuff: " << input[0] << input[1] << input[2] << input[3];
+
+	//breakdown
+	int x = input[0];
+	int y = input[1];
+	int xOld = input[2];
+	int yOld = input[3];
+
+	//metaTile
+	metaTile metaOne;
+	metaOne.setX(x);
+	metaOne.setY(y);
 
 	//map
 	Tile tempLayer1;
-	tempLayer1.setX(input[0]);
-	tempLayer1.setY(input[1]);
 
-	tempLayer1.setT(whatIsTerrain(map[input[0]][input[1]]));
-	const char* c1 = setAsset(whatIsTerrain(map[input[0]][input[1]]), true, false);
-	tempLayer1.setRenderer(renderer);
-	tempLayer1.setTexture(c1);
-	reRenderTemp[0] = tempLayer1;
-	tempLayer1.render();
+	tempLayer1.setT(whatIsTerrain(map[x][y]));
+	const char* c1 = setAsset(whatIsTerrain(map[x][y]), true, false);
+	//tempLayer1.setRenderer(renderer);
+	//tempLayer1.setTexture(c1);
+	tempLayer1.setSource(c1);
+	metaOne.setLayer(0, tempLayer1);
 
 	//sprites layer 1 (troops)
 	Tile tempLayer2;
-	tempLayer2.setX(input[0]);
-	tempLayer2.setY(input[1]);
 
-	tempLayer1.setU(whatIsUnit(spritesGround[input[0]][input[1]]));
-	if (spritesGround[input[0]][input[1]].getType() != 0) {
-		const char* c2 = setAsset(whatIsUnit(spritesGround[input[0]][input[1]]), false, false);
-		tempLayer2.setRenderer(renderer);
-		tempLayer2.setTexture(c2);
-		reRenderTemp[1] = tempLayer2;
-		tempLayer2.render();
+	tempLayer1.setU(whatIsUnit(spritesGround[x][y]));
+	if (spritesGround[x][y].getType() != 0) {
+		const char* c2 = setAsset(whatIsUnit(spritesGround[x][y]), false, false);
+		//tempLayer2.setRenderer(renderer);
+		//tempLayer2.setTexture(c2);
+		tempLayer2.setSource(c2);
+		metaOne.setLayer(1, tempLayer2);
 	}
 
 	//sprites layer 2 (effects)
 	Tile tempLayer3;
-	tempLayer3.setX(input[0]);
-	tempLayer3.setY(input[1]);
 
-	tempLayer3.setRenderer(renderer);
+	//tempLayer3.setRenderer(renderer);
 
 	switch (effect) {
 		case NULL:
-			tempLayer3.setTexture("assets/null.png");
+			//tempLayer3.setTexture("assets/null.png");
+			tempLayer1.setSource("assets/null.png");
 			break;
 		case 'b':
-			tempLayer3.setTexture("assets/red_tint_overlay.png");
+			//tempLayer3.setTexture("assets/red_tint_overlay.png");
+			tempLayer1.setSource("assets/red_tint_overlay.png");
 			break;
 		case 'r':
-			tempLayer3.setTexture("assets/blue_tint_overlay.png");
+			//tempLayer3.setTexture("assets/blue_tint_overlay.png");
+			tempLayer1.setSource("assets/blue_tint_overlay.png");
 			break;
 	}
+	metaOne.setLayer(2, tempLayer3);
 
 	//sprites layer 3 (cursor)
 	Tile cursor;
-	cursor.setX(input[0]);
-	cursor.setY(input[1]);
 
-	cursor.setRenderer(renderer);
+	//cursor.setRenderer(renderer);
 
 	switch (cursorType) {
 		case 'c': //cursor
-			cursor.setTexture("assets/red_cursor.png");
+			//cursor.setTexture("assets/red_cursor.png");
+			cursor.setSource("assets/red_cursor.png");
 			break;
 		case 's': //select Unit
-			cursor.setTexture("assets/red_select.png");
+			//cursor.setTexture("assets/red_select.png");
+			cursor.setSource("assets/red_select.png");
 			break;
 		case 't': //target enemy
-			cursor.setTexture("assets/target_red.png");
+			//cursor.setTexture("assets/target_red.png");
+			cursor.setSource("assets/target_red.png");
 			break;
 		case NULL: //no cursor
-			cursor.setTexture("assets/null.png");
+			//cursor.setTexture("assets/null.png");
+			cursor.setSource("assets/null.png");
 			break;
 	}
 
-	reRenderTemp[2] = cursor;
-	cursor.render();
+	metaOne.setLayer(3, cursor);
 	
-	//Rerender Old tile
-	if (input[2] != -1 && input[3] != -1) {
+	//Relayer Old tile
+
+	metaTile metaTwo;
+	metaTwo.setX(xOld);
+	metaTwo.setY(yOld);
+
+	if (xOld != -1 && yOld != -1) {
 
 	Tile tempOld1;
-	tempOld1.setX(input[2]);
-	tempOld1.setY(input[3]);
 
-
-	tempOld1.setT(whatIsTerrain(map[input[2]][input[3]]));
-	const char* c3 = setAsset(whatIsTerrain(map[input[2]][input[3]]), true, false);
-	tempOld1.setRenderer(renderer);
-	tempOld1.setTexture(c3);
-	reRenderOld[0];
-	tempOld1.render();
+	tempOld1.setT(whatIsTerrain(map[xOld][yOld]));
+	const char* c3 = setAsset(whatIsTerrain(map[xOld][yOld]), true, false);
+	//tempOld1.setRenderer(renderer);
+	//tempOld1.setTexture(c3);
+	tempOld1.setSource(c3);
+	metaTwo.setLayer(0, tempOld1);
 
 	Tile tempOld2;
-	tempOld2.setX(input[2]);
-	tempOld2.setY(input[3]);
 
-	tempLayer1.setU(whatIsUnit(spritesGround[input[2]][input[3]]));
-	if (spritesGround[input[2]][input[3]].getType() != 0) {
-		const char* c4 = setAsset(whatIsUnit(spritesGround[input[2]][input[3]]), false, false);
-		tempOld2.setRenderer(renderer);
-		tempOld2.setTexture(c4);
-		reRenderOld[1] = tempOld2;
-		tempOld2.render();
+	tempLayer1.setU(whatIsUnit(spritesGround[xOld][yOld]));
+	if (spritesGround[xOld][yOld].getType() != 0) {
+		const char* c4 = setAsset(whatIsUnit(spritesGround[xOld][yOld]), false, false);
+		//tempOld2.setRenderer(renderer);
+		//tempOld2.setTexture(c4);
+		tempOld2.setSource(c4);
+		metaTwo.setLayer(1, tempOld2);
 	}
 
 	Tile cursorOld;
-	cursor.setX(input[2]);
-	cursor.setY(input[3]);
 
-	cursor.setRenderer(renderer);
-	cursor.setTexture("assets/null.png");
-	reRenderOld[2] = cursor;
-	cursor.render();
+	//cursor.setRenderer(renderer);
+	//cursor.setTexture("assets/red_cursor.png");
+	cursor.setSource("assets/red_cursor.png");
+	metaTwo.setLayer(2, cursorOld);
 }
 
+
+	//ReRedner metaTiles
+	reRender(metaOne, metaTwo);
+	return;
+}
+
+void reRender(metaTile one, metaTile two) {
+	for (int i = 0; i < 4; i++) {
+		Tile input = one.getLayer(i);
+		Tile* pointerOne = &input;
+		Tile temp = *pointerOne;
+		if (temp.getSource() != NULL) {
+			temp.setX(one.getX());
+			temp.setY(one.getY());
+			//std::cout << "tile1 X value: " << temp.getX();
+			//std::cout << "tile1 y value: " << temp.getY();
+			temp.setRenderer(renderer);
+			std::string tempSrc;
+			tempSrc = std::string(temp.getSource());
+			const char* tempSrcConverted = tempSrc.c_str();
+			temp.setTexture(tempSrcConverted);
+			std::cout << "temp1 texture is: " << temp.getSource();
+			temp.render();
+		}
+
+		
+		//Tile temp2 = two.getLayer(i);
+		//if (temp2.getSource() != NULL) {
+		//	temp2.setX(two.getX());
+		//	temp2.setY(two.getY());
+		//	//std::cout << "tile2 X value: " << temp2.getX();
+		//	//std::cout << "tile2 Y value: " << temp2.getY();
+		//	temp2.setRenderer(renderer);
+		//	std::string tempSrc2;
+		//	tempSrc2 = std::string(temp2.getSource());
+		//	const char* tempSrcConverted2 = tempSrc2.c_str();
+		//	temp.setTexture(tempSrcConverted2);
+		//	temp2.render();
+		//}
+	}
+
+	SDL_RenderPresent(renderer);
+	std::cout << "Final meta tile Render!";
 	return;
 }
 
@@ -915,7 +1012,7 @@ void selectUnit(int x, int y) {
 	if (tempType != 0) {
 		//select troop
 		int temp[2] = { x, y };
-		reRender(temp, NULL, 's');
+		reLayer(temp, NULL, 's');
 	}
 	return;
 }
@@ -1022,6 +1119,12 @@ void createMap() {
 
 //Initialize Map and Units
 void initialize() {
+	Terrain debug;
+	
+	
+	
+	
+	
 	Unit mech; 
 	mech.setType(0);
 	
