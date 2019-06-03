@@ -51,30 +51,7 @@ const int MAP_Y = SCREEN_HEIGHT / 10;
 const int MAP_W = SCREEN_WIDTH;
 const int MAP_H = SCREEN_HEIGHT * 7 / 10;
 const int TILE_SIDE = 64;
-//game loop variables n stuff
-bool w;
-bool s;
-bool a;
-bool d;
-bool shift;
-bool ctrl;
-bool space;
-bool isRunning = true;
-// Tracks whether a unit is selected or not (c for not, s for selecting)
-char moveMode = 'c';
-// Keeps a copy of the currently selected unit
-Unit selUnit;
-//Global temp layer array
-Tile reRenderTemp[4]; //currently will render 4 layers of tiles at once
-Tile reRenderOld[3];
-//fill in when map is created
-Terrain** map; //32x12
-Unit** spritesGround; //32x12
-Mover** movTemp; //32x12
-//Unit spritesAir[30][10];
-SDL_Renderer* renderer = NULL;
-int coords[4]; //temp coords array
-int turn = 1; // odd is red, even is blue
+
 
 enum TYPE {
 	FOOT,
@@ -140,8 +117,13 @@ public:
 	int getDef();
 	int* getMov();
 	bool getCanCapture();
+	bool getIsReachable();
 
 };
+
+bool Terrain::getIsReachable() {
+	return isReachable;
+}
 
 void Terrain::setIsReachable(bool r) {
 	isReachable = r;
@@ -161,6 +143,7 @@ private:
 	int cost;
 	TYPE* attack;
 	Tile* display;
+	int team;
 
 public:
 	Unit() : x(0), y(0), type(0), mov(0), ammo(0), fuel(0), vision(0), range(0), movType(ERROR), cost(0), attack(NULL), display(NULL) {}
@@ -191,10 +174,27 @@ public:
 	int getCost();
 	TYPE* getAttack();
 	int getType();
+	int getTeam();
 	void setType(int it);
 	void renderRange();
 
 };
+
+void Unit::setMov(int m) {
+	mov = m;
+}
+
+void Unit::setMovType(TYPE t) {
+	movType = t;
+}
+
+TYPE Unit::getMovType() {
+	return movType;
+}
+
+int Unit::getTeam() {
+	return team;
+}
 
 class Mover {
 public:
@@ -204,15 +204,51 @@ public:
 	int range;
 	bool hasMoved;
 	TYPE movType;
-	Mover() : x(-1), y(-1), mov(-1), range(-1), movType(ERROR), hasMoved(false) {}
-	Mover(int ix, int iy, int m, int r, TYPE t) : x(ix), y(iy), mov(m), range(r), movType(t), hasMoved(false) {}
+	int team;
+	Mover() : x(-1), y(-1), mov(-1), range(-1), movType(ERROR), hasMoved(false), team(-1) {}
+	Mover(int ix, int iy, int m, int r, TYPE t, int te) : x(ix), y(iy), mov(m), range(r), movType(t), hasMoved(false), team(te) {}
 	~Mover();
 	void propagate();
 };
 
-Mover::~Mover() {
+//game loop variables n stuff
+bool w;
+bool s;
+bool a;
+bool d;
+bool shift;
+bool ctrl;
+bool space;
+bool isRunning = true;
+// Tracks whether a unit is selected or not (c for not, s for selecting)
+char moveMode = 'c';
+// Keeps a copy of the currently selected unit
+Unit selUnit;
+//Global temp layer array
+Tile reRenderTemp[4]; //currently will render 4 layers of tiles at once
+Tile reRenderOld[3];
+//fill in when map is created
+Terrain** map; //32x12
+Unit** spritesGround; //32x12
+Mover** movTemp; //32x12
+//Unit spritesAir[30][10];
+SDL_Renderer* renderer = NULL;
+int coords[4]; //temp coords array
+int turn = 1; // odd is red, even is blue
 
-}
+void whatClicked(int x, int y, int mouse);
+void keyStatesUp(SDL_Keycode input);
+void keyStatesDown(SDL_Keycode input);
+int whatIsTerrain(Terrain input);
+int whatIsUnit(Unit input);
+const char* setAsset(int masterCode, bool isTerrain, bool animate);
+void reRender(int input[], char effect, char cursorType);
+void setCoord(int x, int y, char dir);
+void selectUnit(int x, int y);
+void animateRender();
+void createMap(); //debug
+
+Mover::~Mover() {}
 
 void Mover::propagate() {
 	if (hasMoved) return;
@@ -224,44 +260,78 @@ void Mover::propagate() {
 				break;
 			if (mov - map[x + 1][y].getMov()[movType] < 0)
 				break;
-			if (spritesGround[x + 1][y].getMovType() == ERROR)
+			if (spritesGround[x + 1][y].getTeam() != team && spritesGround[x+1][y].getMovType() != ERROR)
 				break;
-			movTemp[x + 1][y] = Mover(x + 1, y, mov - map[x + 1][y].getMov()[movType], range, movType);
-			map[x + 1][y].setIsReachable(true);
+			if (movTemp[x + 1][y].movType != ERROR) {
+				if (movTemp[x + 1][y].hasMoved)
+					break;
+				else
+					if (mov - map[x + 1][y].getMov()[movType] > movTemp[x + 1][y].mov) {
+						movTemp[x + 1][y].mov = mov - map[x + 1][y].getMov()[movType];
+						break;
+					}
+			}
+
+			movTemp[x + 1][y] = Mover(x + 1, y, mov - map[x + 1][y].getMov()[movType], range, movType, team);
 			break;
 		case 1:
 			if (x <= 0)
 				break;
 			if (mov - map[x - 1][y].getMov()[movType] < 0)
 				break;
-			if (spritesGround[x - 1][y].getMovType() == ERROR)
+			if (spritesGround[x + 1][y].getTeam() != team && spritesGround[x + 1][y].getMovType() != ERROR)
 				break;
-			movTemp[x - 1][y] = Mover(x - 1, y, mov - map[x - 1][y].getMov()[movType], range, movType);
-			map[x - 1][y].setIsReachable(true);
+			if (movTemp[x - 1][y].movType != ERROR) {
+				if (movTemp[x - 1][y].hasMoved)
+					break;
+				else
+					if (mov - map[x - 1][y].getMov()[movType] > movTemp[x - 1][y].mov) {
+						movTemp[x - 1][y].mov = mov - map[x - 1][y].getMov()[movType];
+						break;
+					}
+			}
+			movTemp[x - 1][y] = Mover(x - 1, y, mov - map[x - 1][y].getMov()[movType], range, movType, team);
 			break;
 		case 2:
 			if (y >= 11)
 				break;
 			if (mov - map[x][y + 1].getMov()[movType] < 0)
 				break;
-			if (spritesGround[x][y + 1].getMovType() == ERROR)
+			if (spritesGround[x][y+1].getTeam() != team && spritesGround[x][y + 1].getMovType() != ERROR)
 				break;
-			movTemp[x][y + 1] = Mover(x, y + 1, mov - map[x][y + 1].getMov()[movType], range, movType);
-			map[x][y + 1].setIsReachable(true);
+			if (movTemp[x][y + 1].movType != ERROR) {
+				if (movTemp[x][y + 1].hasMoved)
+					break;
+				else
+					if (mov - map[x][y + 1].getMov()[movType] > movTemp[x][y + 1].mov) {
+						movTemp[x][y + 1].mov = mov - map[x][y + 1].getMov()[movType];
+						break;
+					}
+			}
+			movTemp[x][y + 1] = Mover(x, y + 1, mov - map[x][y + 1].getMov()[movType], range, movType, team);
 			break;
 		case 3:
 			if (y <= 0)
 				break;
 			if (mov - map[x][y - 1].getMov()[movType] < 0)
 				break;
-			if (spritesGround[x][y - 1].getMovType() == ERROR)
+			if (spritesGround[x][y - 1].getTeam() != team && spritesGround[x][y - 1].getMovType() != ERROR)
 				break;
-			movTemp[x][y - 1] = Mover(x, y - 1, mov - map[x][y - 1].getMov()[movType], range, movType);
-			map[x][y - 1].setIsReachable(true);
+			if (movTemp[x][y - 1].movType != ERROR) {
+				if (movTemp[x][y - 1].hasMoved)
+					break;
+				else
+					if (mov - map[x][y - 1].getMov()[movType] > movTemp[x][y - 1].mov) {
+						movTemp[x][y - 1].mov = mov - map[x][y - 1].getMov()[movType];
+						break;
+					}
+			}
+			movTemp[x][y - 1] = Mover(x, y - 1, mov - map[x][y - 1].getMov()[movType], range, movType, team);
 			break;
 		}
 	}
-
+	if (spritesGround[x][y].getMovType() == ERROR)
+		map[x][y].setIsReachable(true);
 	hasMoved = true;
 }
 
@@ -281,47 +351,80 @@ void Unit::renderRange() {
 				break;
 			if (mov - map[x + 1][y].getMov()[movType] < 0)
 				break;
-			if (spritesGround[x + 1][y].getMovType() == ERROR)
+			if (spritesGround[x + 1][y].getTeam() != team && spritesGround[x + 1][y].getMovType() != ERROR)
 				break;
-			movTemp[x + 1][y] = Mover(x + 1, y, mov - map[x + 1][y].getMov()[movType], range, movType);
-			map[x + 1][y].setIsReachable(true);
+			if (movTemp[x + 1][y].movType != ERROR) {
+				if (movTemp[x + 1][y].hasMoved)
+					break;
+				else
+					if (mov - map[x + 1][y].getMov()[movType] > movTemp[x + 1][y].mov) {
+						movTemp[x + 1][y].mov = mov - map[x + 1][y].getMov()[movType];
+						break;
+					}
+			}
+
+			movTemp[x + 1][y] = Mover(x + 1, y, mov - map[x + 1][y].getMov()[movType], range, movType, team);
 			break;
 		case 1:
 			if (x <= 0)
 				break;
 			if (mov - map[x - 1][y].getMov()[movType] < 0)
 				break;
-			if (spritesGround[x - 1][y].getMovType() == ERROR)
+			if (spritesGround[x + 1][y].getTeam() != team && spritesGround[x + 1][y].getMovType() != ERROR)
 				break;
-			movTemp[x - 1][y] = Mover(x - 1, y, mov - map[x - 1][y].getMov()[movType], range, movType);
-			map[x - 1][y].setIsReachable(true);
+			if (movTemp[x - 1][y].movType != ERROR) {
+				if (movTemp[x - 1][y].hasMoved)
+					break;
+				else
+					if (mov - map[x - 1][y].getMov()[movType] > movTemp[x - 1][y].mov) {
+						movTemp[x - 1][y].mov = mov - map[x - 1][y].getMov()[movType];
+						break;
+					}
+			}
+			movTemp[x - 1][y] = Mover(x - 1, y, mov - map[x - 1][y].getMov()[movType], range, movType, team);
 			break;
 		case 2:
 			if (y >= 11)
 				break;
-			if (mov - map[x][y+1].getMov()[movType] < 0)
+			if (mov - map[x][y + 1].getMov()[movType] < 0)
 				break;
-			if (spritesGround[x][y+1].getMovType() == ERROR)
+			if (spritesGround[x][y + 1].getTeam() != team && spritesGround[x][y + 1].getMovType() != ERROR)
 				break;
-			movTemp[x][y+1] = Mover(x, y+1, mov - map[x][y+1].getMov()[movType], range, movType);
-			map[x][y+1].setIsReachable(true);
+			if (movTemp[x][y + 1].movType != ERROR) {
+				if (movTemp[x][y + 1].hasMoved)
+					break;
+				else
+					if (mov - map[x][y + 1].getMov()[movType] > movTemp[x][y + 1].mov) {
+						movTemp[x][y + 1].mov = mov - map[x][y + 1].getMov()[movType];
+						break;
+					}
+			}
+			movTemp[x][y + 1] = Mover(x, y + 1, mov - map[x][y + 1].getMov()[movType], range, movType, team);
 			break;
 		case 3:
 			if (y <= 0)
 				break;
 			if (mov - map[x][y - 1].getMov()[movType] < 0)
 				break;
-			if (spritesGround[x][y - 1].getMovType() == ERROR)
+			if (spritesGround[x][y - 1].getTeam() != team && spritesGround[x][y - 1].getMovType() != ERROR)
 				break;
-			movTemp[x][y - 1] = Mover(x, y - 1, mov - map[x][y - 1].getMov()[movType], range, movType);
-			map[x][y - 1].setIsReachable(true);
+			if (movTemp[x][y - 1].movType != ERROR) {
+				if (movTemp[x][y - 1].hasMoved)
+					break;
+				else
+					if (mov - map[x][y - 1].getMov()[movType] > movTemp[x][y - 1].mov) {
+						movTemp[x][y - 1].mov = mov - map[x][y - 1].getMov()[movType];
+						break;
+					}
+			}
+			movTemp[x][y - 1] = Mover(x, y - 1, mov - map[x][y - 1].getMov()[movType], range, movType, team);
 			break;
 		}
 	}
 
 	movTemp[x][y].hasMoved = true;
 
-	for (int d = mov - 1; d > 0; --d) {
+	for (int d = mov; d > 0; --d) {
 		for (int i = 0; i < 32; ++i)
 			for (int j = 0; j < 12; ++j) {
 				if (movTemp[i][j].movType != ERROR)
@@ -331,8 +434,13 @@ void Unit::renderRange() {
 
 	for (int i = 0; i < 32; ++i)
 		for (int j = 0; j < 12; ++j)
-			if (map[i][j].getIsReachable())
-				// reRender() call here with blue effect layer
+			if (map[i][j].getIsReachable()) { 
+				int temp[] = { i,j,i,j };
+				reRender(temp, NULL, 'c');
+
+				/* reRender() call here with blue effect layer*/ 
+			}
+				
 
 	/*
 		Notes on how to proceed:
@@ -368,17 +476,7 @@ void Unit::renderRange() {
 
 
 //init
-void whatClicked(int x, int y, int mouse);
-void keyStatesUp(SDL_Keycode input);
-void keyStatesDown(SDL_Keycode input);
-int whatIsTerrain(Terrain input);
-int whatIsUnit(Unit input);
-const char* setAsset(int masterCode, bool isTerrain, bool animate);
-void reRender(int input[], char effect, char cursorType);
-void setCoord(int x, int y, char dir);
-void selectUnit(int x, int y);
-void animateRender();
-void createMap(); //debug
+
 
 SDL_Window* init(SDL_Window* window);
 
@@ -1122,26 +1220,31 @@ void animateRender() {
 
 void createMap() {
 
-	for (int i = 0; i < (sizeof map / sizeof map[0]); i++) {
-		for (int j = 0; j < (sizeof map[0] / sizeof(int)); j++) {
+	for (int i = 0; i < 30; i++) {
+		for (int j = 0; j < 11; j++) {
 			Terrain debugMap;
 			debugMap.setCanCapture(true);
 			debugMap.setDef(0);
+			int tm[] = {1, 1, 1, 1, 1, 1, 1, 1};
+			debugMap.setMov(tm);
 			map[i][j] = debugMap;
 		}
 
 	}
 	
-	for (int k = 0; k < (sizeof spritesGround / sizeof spritesGround[0]); k++) {
-		for (int l = 0; l < (sizeof spritesGround[0] / sizeof(int)); l++) {
+	for (int k = 0; k < 30; k++) {
+		for (int l = 0; l < 11; l++) {
 			Unit APC;
 			APC.setType(1);
-			APC.setX(1);
-			APC.setY(1);
-			if (k == 1 && l == 1)
+			APC.setX(3);
+			APC.setY(10);
+			APC.setMovType(TREADS);
+			APC.setMov(4);
+			if (k == 10 && l == 3) {
 				spritesGround[k][l] = APC;
+			}
 			else {
-				spritesGround[k][l].setType(1);
+				spritesGround[k][l].setType(0);
 				spritesGround[k][l].setY(k);
 				spritesGround[k][l].setX(l);
 			}
