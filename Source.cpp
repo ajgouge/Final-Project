@@ -54,25 +54,65 @@ const int TILE_SIDE = 64;
 
 
 enum TYPE {
-	FOOT,
-	BOOTS,
-	TREADS,
-	TIRES,
-	AIR,
-	SEA,
-	LANDER,
-	PIPE,
-	NUM_TYPES,
+	FOOT = 0,
+	BOOTS = 1,
+	TREADS = 2,
+	TIRES = 3,
+	AIR = 4,
+	SEA = 5,
+	LANDER = 6,
+	PIPE = 7,
+	NUM_TYPES = 8,
 	ERROR = -1
 };
-/*
-enum TERRAIN_TYPE {
-	GRASS,
-	BRIDGE,
-	MOUNTAIN,
-	WATER,
 
-};*/
+enum TERRAIN_TYPE {
+	GRASS = 0,
+	BRIDGE = 1,
+	MOUNTAIN = 2,
+	WATER = 3,
+	NUM_TERRAIN = 4,
+	TERRAIN_ERROR = -1
+};
+
+enum UNIT_TYPE {
+	APC = 0,
+	NUM_UNITS = 1,
+	UNIT_ERROR = -1
+};
+
+TERRAIN_TYPE testMapInit[30][11] = {
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS}
+};
 
 class Tile {
 private:
@@ -137,15 +177,15 @@ void Terrain::setIsReachable(bool r) {
 	isReachable = r;
 }
 
+int gtemp[NUM_TYPES] = { 1,1,1,1,1,1,1,1 };
+Terrain debugMap = Terrain(0, gtemp, false, NULL);
+
 class Unit {
 private:
 	int x;
 	int y;
 	int type;
 	int mov;
-	int ammo;
-	int fuel;
-	int vision;
 	int range;
 	TYPE movType;
 	int cost;
@@ -154,8 +194,8 @@ private:
 	int team;
 
 public:
-	Unit() : x(0), y(0), type(0), mov(0), ammo(0), fuel(0), vision(0), range(0), movType(ERROR), cost(0), attack(NULL), display(NULL) {}
-	Unit(int m, int a, int f, int v, int r, TYPE mt, int c, TYPE* atk, Tile* d) : mov(m), ammo(a), fuel(f), vision(v), range(r), movType(mt), cost(c), attack(atk), display(d) {}
+	Unit() : x(0), y(0), type(0), mov(0), range(0), movType(ERROR), cost(0), attack(NULL), display(NULL), team(0) {}
+	Unit(int x, int y, int t, int m, int r, TYPE mt, int c, TYPE* atk, Tile* d, int te) : x(x), y(y), type(t), mov(m), range(r), movType(mt), cost(c), attack(atk), display(d), team(te) {}
 	//~Unit();
 
 	void setX(int i);
@@ -187,6 +227,9 @@ public:
 	void renderRange();
 
 };
+
+
+Unit testAPC = Unit(-1,-1,1,6,1,TREADS,500,NULL,NULL,0);
 
 void Unit::setMov(int m) {
 	mov = m;
@@ -445,7 +488,7 @@ void Unit::renderRange() {
 	for (int i = 0; i < 32; ++i)
 		for (int j = 0; j < 12; ++j)
 			if (map[i][j].getIsReachable()) { 
-				int temp[] = { i,j,i,j };
+				int temp[] = { i,j,-1,-1 };
 				reRender(temp, NULL, 'c');
 
 				/* reRender() call here with blue effect layer*/ 
@@ -609,24 +652,28 @@ int main(int argc, char* argv[])
 		land.setRenderer(renderer);
 		land.setTexture("assets/testbk.png");
 
+		debugMap.setDisplay(&land);
+
 		cursor.setRenderer(renderer);
 		cursor.setTexture("assets/red_cursor.png");
 
 		SDL_RenderClear(renderer);
-		for (int i = 0; i < MAP_W / TILE_SIDE + 1; ++i)
+		/*for (int i = 0; i < MAP_W / TILE_SIDE + 1; ++i)
 			for (int j = 0; j < MAP_H / TILE_SIDE + 1; ++j) {
 				land.setX(i);
 				land.setY(j);
 				land.render();
 			}
-		cursor.render();
-		SDL_RenderPresent(renderer);
+		cursor.render();*/
+		//SDL_RenderPresent(renderer);
 
 		int x = 0;
 		int y = 0;
 
 		coords[0] = 15;
 		coords[1] = 5;
+
+
 
 		//debug
 		createMap();
@@ -1232,14 +1279,9 @@ void createMap() {
 
 	for (int i = 0; i < 30; i++) {
 		for (int j = 0; j < 11; j++) {
-			Terrain debugMap;
-			debugMap.setCanCapture(true);
-			debugMap.setDef(0);
-			int tm[] = {1, 1, 1, 1, 1, 1, 1, 1};
-			debugMap.setMov(tm);
-			map[i][j] = debugMap;
+			if (testMapInit[i][j] == GRASS)
+				map[i][j] = debugMap;
 		}
-
 	}
 	
 	for (int k = 0; k < 30; k++) {
