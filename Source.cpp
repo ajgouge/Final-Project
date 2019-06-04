@@ -55,7 +55,7 @@ const int TILE_SIDE = 64;
 
 void close(SDL_Window* window);
 
-
+// Mov Types
 enum TYPE {
 	FOOT = 0,
 	BOOTS = 1,
@@ -69,6 +69,7 @@ enum TYPE {
 	ERROR = -1
 };
 
+// Terrain Types
 enum TERRAIN_TYPE {
 	GRASS = 0,
 	BRIDGE = 1,
@@ -78,12 +79,14 @@ enum TERRAIN_TYPE {
 	TERRAIN_ERROR = -1
 };
 
+// Unit Types
 enum UNIT_TYPE {
 	APC = 0,
 	NUM_UNITS = 1,
 	UNIT_ERROR = -1
 };
 
+// Debug Map -- Format all other levels like this array
 TERRAIN_TYPE testMapInit[30][11] = {
 	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
 	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
@@ -117,6 +120,7 @@ TERRAIN_TYPE testMapInit[30][11] = {
 	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS}
 };
 
+// Tile class -- Used to store display information for 
 class Tile {
 private:
 	SDL_Renderer* renderer = NULL;
