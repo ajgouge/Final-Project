@@ -51,6 +51,8 @@ const int MAP_Y = SCREEN_HEIGHT / 10;
 const int MAP_W = SCREEN_WIDTH;
 const int MAP_H = SCREEN_HEIGHT * 7 / 10;
 const int TILE_SIDE = 64;
+const int MAP_TILE_W = 30;
+const int MAP_TILE_H = 20;
 
 enum TYPE {
 	FOOT,
@@ -239,6 +241,7 @@ bool shift;
 bool ctrl;
 bool space;
 bool isRunning = true;
+
 // Tracks whether a unit is selected or not (c for not, s for selecting)
 char moveMode = 'c';
 // Keeps a copy of the currently selected unit
@@ -247,9 +250,11 @@ Unit selUnit;
 Terrain ** map; //32x12
 Unit  ** spritesGround; //32x12
 //Unit spritesAir[30][10];
+metaTile ** demTiles;
 SDL_Renderer* renderer = NULL;
 int coords[4]; //temp coords array
 int turn = 1; // odd is red, even is blue
+int cameraY;
 
 
 
@@ -263,9 +268,12 @@ const char* setAsset(int masterCode, bool isTerrain, bool animate);
 void reLayer(int input[], char effect, char cursorType);
 void setCoord(int x, int y, char dir);
 void selectUnit(int x, int y);
-void animateRender();
-void reRender(metaTile one, metaTile two);
+//void animateRender();
+void reRender(metaTile one, metaTile two, int camY);
 void createMap(); //debug
+void cameraMove(char direction);
+
+//NULL defaults
 Tile nullTile;
 
 SDL_Window* init(SDL_Window* window);
@@ -299,12 +307,15 @@ SDL_Window* init(SDL_Window * window) {
 		}
 	}
 
-	map = new Terrain*[32];
-	for (int i = 0; i < 32; ++i)
-		map[i] = new Terrain[12];
-	spritesGround = new Unit * [32];
-	for (int i = 0; i < 32; ++i)
-		spritesGround[i] = new Unit[12];
+	map = new Terrain*[MAP_TILE_W];
+	for (int i = 0; i < MAP_TILE_W; ++i)
+		map[i] = new Terrain[MAP_TILE_H];
+	spritesGround = new Unit * [MAP_TILE_W];
+	for (int i = 0; i < MAP_TILE_W; ++i)
+		spritesGround[i] = new Unit[MAP_TILE_H];
+	demTiles = new metaTile * [MAP_TILE_W];
+	for (int i = 0; i < MAP_TILE_W; ++i)
+		demTiles[i] = new metaTile[MAP_TILE_W];
 
 	return window;
 }
@@ -329,12 +340,14 @@ bool loadTexture(SDL_Renderer * renderer, SDL_Texture * *tex, const char* src) {
 void close(SDL_Window * window) {
 	SDL_DestroyWindow(window);
 
-	for (int i = 0; i < 32; ++i) {
+	for (int i = 0; i < MAP_TILE_W; ++i) {
 		delete [] map[i];
 		delete [] spritesGround[i];
+		delete[] demTiles[i];
 	}
 	delete [] map;
 	delete [] spritesGround;
+	delete[] demTiles;
 
 	IMG_Quit();
 	SDL_Quit();
@@ -357,17 +370,6 @@ int main(int argc, char* argv[])
 
 		printf("Everything initialized!\n");
 
-		Tile land;
-		Tile cursor;
-
-		for (int i = 0; i < 32; ++i)
-			for (int j = 0; j < 12; ++j) {
-				map[i][j].setDef(0);
-				map[i][j].setCanCapture(false);
-				//map[i][j].setDisplay(NULL);
-				map[i][j].setMov(NULL);
-			}
-
 		screenSurface = SDL_GetWindowSurface(window);
 		printf("Got the window surface\n");
 		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -386,8 +388,12 @@ int main(int argc, char* argv[])
 
 		//debug
 		createMap();
-		for (int lolz = 0; lolz <= 29; lolz++) {
-			for (int yeetus = 0; yeetus <= 10; yeetus++) {
+		for (int lolz = 0; lolz < MAP_TILE_W; lolz++) {
+			for (int yeetus = 0; yeetus < MAP_TILE_H; yeetus++) {
+				Tile land;
+				land.setT(whatIsTerrain(map[lolz][yeetus]));
+				demTiles[lolz][yeetus].setLayer(0, land);
+
 				int tempInputter[4] = { lolz, yeetus, -1, -1 };
 				reLayer(tempInputter, NULL, NULL);
 			}
@@ -461,6 +467,8 @@ int main(int argc, char* argv[])
 
 					setCoord(coords[0], coords[1], 's');
 					reLayer(coords, NULL, moveMode);
+					SDL_RenderPresent(renderer);
+					cameraMove('s');
 					SDL_RenderPresent(renderer);
 					std::cout << "X: " << coords[0] << " Y: " << coords[1];
 					s = false;
@@ -842,43 +850,66 @@ void reLayer(int input[], char effect, char cursorType) {                       
 
 
 	//ReRedner metaTiles
-	reRender(metaOne, metaTwo);
+	reRender(metaOne, metaTwo, -1);
 	return;
 }
 
-void reRender(metaTile one, metaTile two) {
-	for (int i = 0; i < 4; i++) {
-		Tile* pointerOne = &(one.getLayer(i));
-		Tile temp = *pointerOne;
-		if (temp.getSource() != nullTile.getSource()) {
-			temp.setX(one.getX());
-			temp.setY(one.getY());
-			std::cout << "tile1 X value: " << temp.getX();
-			std::cout << "tile1 Y value: " << temp.getY();
-			temp.setRenderer(renderer);
-			std::string tempSrc(temp.getSource());
-			const char* tempSrcConverted = tempSrc.c_str();
-			temp.setTexture(tempSrcConverted);
+void reRender(metaTile one, metaTile two, int camY) {
+	if (camY == -1) {
+		for (int i = 0; i < 4; i++) {
+			Tile temp = one.getLayer(i);
+			if (temp.getSource() != nullTile.getSource()) {
+				temp.setX(one.getX());
+				temp.setY(one.getY());
+				temp.setRenderer(renderer);
+				std::string tempSrc(temp.getSource());
+				const char* tempSrcConverted = tempSrc.c_str();
+				temp.setTexture(tempSrcConverted);
+				temp.render();
+			}
 
-			temp.render();
-		}
 
-		
-		Tile temp2 = two.getLayer(i);
-		if (temp2.getSource() != nullTile.getSource()) {
-			temp2.setX(two.getX());
-			temp2.setY(two.getY());
-			std::cout << "tile2 X value: " << temp2.getX();
-			std::cout << "tile2 Y value: " << temp2.getY();
-			temp2.setRenderer(renderer);
-			std::string tempSrc2;
-			tempSrc2 = std::string(temp2.getSource());
-			const char* tempSrcConverted2 = tempSrc2.c_str();
-			temp2.setTexture(tempSrcConverted2);
-			temp2.render();
+			Tile temp2 = two.getLayer(i);
+			if (temp2.getSource() != nullTile.getSource()) {
+				temp2.setX(two.getX());
+				temp2.setY(two.getY());
+				temp2.setRenderer(renderer);
+				std::string tempSrc2;
+				tempSrc2 = std::string(temp2.getSource());
+				const char* tempSrcConverted2 = tempSrc2.c_str();
+				temp2.setTexture(tempSrcConverted2);
+				temp2.render();
+			}
 		}
 	}
 
+	if (camY >= 0) {
+		for (int i = 0; i < 4; i++) {
+			Tile temp = one.getLayer(i);
+			if (temp.getSource() != nullTile.getSource()) {
+				temp.setX(one.getX());
+				temp.setY(one.getY() + camY);
+				temp.setRenderer(renderer);
+				std::string tempSrc(temp.getSource());
+				const char* tempSrcConverted = tempSrc.c_str();
+				temp.setTexture(tempSrcConverted);
+				temp.render();
+			}
+
+
+			Tile temp2 = two.getLayer(i);
+			if (temp2.getSource() != nullTile.getSource()) {
+				temp2.setX(two.getX());
+				temp2.setY(two.getY() + camY);
+				temp2.setRenderer(renderer);
+				std::string tempSrc2;
+				tempSrc2 = std::string(temp2.getSource());
+				const char* tempSrcConverted2 = tempSrc2.c_str();
+				temp2.setTexture(tempSrcConverted2);
+				temp2.render();
+			}
+		}
+	}
 	return;
 }
 
@@ -1052,6 +1083,7 @@ void createMap() {
 			debugMap.setCanCapture(true);
 			debugMap.setDef(0);
 			map[i][j] = debugMap;
+
 		}
 
 	}
@@ -1079,65 +1111,27 @@ void createMap() {
 void initialize() {
 	Terrain debug;
 	
-	
-	
-	
-	
 	Unit mech; 
 	mech.setType(0);
 	
 	spritesGround[0][0] = mech; spritesGround[0][1] = mech; spritesGround[0][2] = mech; spritesGround[0][3] = mech; spritesGround[0][4] = mech; spritesGround[0][5] = mech;
-	
-	
-	
-	 /*spritesGround = {  
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech}
-	};*/
 
-	//map = temp;
 }
 
 void cameraMove(char direction) {
-	switch (direction){
+	switch (direction) {
 	case 'w':
-		if (coords[1] == 0)
-			break;
-
 		break;
 	case 's':
-		break;
-	case 'd':
-		break;
-	case 'a':
+		if (coords[1] >= 9) {
+			cameraY = coords[1] + 1;
+			for (int i = 0; i < MAP_TILE_W; ++i) {
+				for (int j = 0; i < MAP_TILE_H; ++j) {
+					reRender(demTiles[i][j], demTiles[i][j], cameraY);
+					std::cout << "Camera Render: " << j;
+				}
+			}
+		}
 		break;
 	}
 }
