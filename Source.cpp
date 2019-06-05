@@ -52,6 +52,8 @@ const int MAP_Y = SCREEN_HEIGHT / 10;
 const int MAP_W = SCREEN_WIDTH;
 const int MAP_H = SCREEN_HEIGHT * 7 / 10;
 const int TILE_SIDE = 64;
+const int MAP_TILE_W = 30;
+const int MAP_TILE_H = 20;
 
 void close(SDL_Window* window);
 
@@ -87,37 +89,37 @@ enum UNIT_TYPE {
 };
 
 // Debug Map -- Format all other levels like this array
-TERRAIN_TYPE testMapInit[30][11] = {
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS}
+TERRAIN_TYPE testMapInit[MAP_TILE_W][MAP_TILE_H] = {
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS}
 };
 
 // Tile class -- Used to store display information for 
@@ -152,9 +154,11 @@ public:
 	int getU();
 };
 
+Tile nullTile;
+
 class Terrain {
 private:
-	int def;
+	int def = -1;
 	int* mov;
 	bool canCapture;
 	Tile* display;
@@ -181,6 +185,8 @@ public:
 	bool getIsReachable();
 
 };
+
+Terrain nullTerrain;
 
 bool Terrain::getIsReachable() {
 	return isReachable;
@@ -278,11 +284,20 @@ int Unit::getTeam() {
 
 class metaTile {
 private:
-	Tile layers[4];
+	Tile *layers = NULL;
 	int x;
 	int y;
 
 public:
+	metaTile() : x(-1), y(-1) {
+		layers = new Tile[4];
+		for (int i = 0; i < 4; ++i) setLayer(i, nullTile);
+	}
+	metaTile(int x, int y, Tile* l) : x(x), y(y) {
+		layers = new Tile[4];
+		for (int i = 0; i < 4; ++i) setLayer(i, l[i]);
+	}
+	~metaTile();
 	void setX(int ix);
 	void setY(int iy);
 	int getX();
@@ -290,6 +305,11 @@ public:
 	void setLayer(int layer, Tile input);
 	Tile getLayer(int layer);
 };
+
+metaTile::~metaTile() {
+	delete[] layers;
+	return;
+}
 
 class Mover {
 public:
@@ -345,7 +365,7 @@ void reRender(metaTile one, metaTile two);
 void setCoord(int x, int y, char dir);
 void selectUnit(int x, int y);
 void createMap(); //debug
-Tile nullTile;
+
 
 Mover::~Mover() {}
 
@@ -378,7 +398,7 @@ void Mover::propagate() {
 			newY--;
 			break;
 		}
-		if (newX < 0 || newY < 0 || newX > 29 || newY > 10)
+		if (newX < 0 || newY < 0 || newX >= MAP_TILE_W || newY >= MAP_TILE_H)
 			continue;
 		int movDiff = mov - map[newX][newY].getMov()[movType];
 		if (movDiff < 0)
@@ -442,7 +462,7 @@ void Unit::renderRange() {
 			newY--;
 			break;
 		}
-		if (newX < 0 || newY < 0 || newX > 29 || newY > 10)
+		if (newX < 0 || newY < 0 || newX >= MAP_TILE_W || newY >= MAP_TILE_H)
 			continue;
 		int movDiff = mov - map[newX][newY].getMov()[movType];
 		if (movDiff < 0)
@@ -463,15 +483,15 @@ void Unit::renderRange() {
 	movTemp[x][y].hasMoved = true;
 
 	for (int d = mov; d > 0; --d) {
-		for (int i = 0; i < 32; ++i)
-			for (int j = 0; j < 12; ++j) {
+		for (int i = 0; i < MAP_TILE_W; ++i)
+			for (int j = 0; j < MAP_TILE_H; ++j) {
 				if (movTemp[i][j].movType != ERROR)
 					movTemp[i][j].propagate();
 			}
 	}
 
-	for (int i = 0; i < 32; ++i)
-		for (int j = 0; j < 12; ++j)
+	for (int i = 0; i < MAP_TILE_W; ++i)
+		for (int j = 0; j < MAP_TILE_H; ++j)
 			if (map[i][j].getIsReachable()) { 
 				int temp[] = { i,j,-1,-1 };
 				reLayer(temp, 'r', NULL);
@@ -531,15 +551,15 @@ SDL_Window* init(SDL_Window * window) {
 		}
 	}
 
-	map = new Terrain*[30];
-	for (int i = 0; i < 30; ++i)
-		map[i] = new Terrain[11];
-	spritesGround = new Unit * [30];
-	for (int i = 0; i < 30; ++i)
-		spritesGround[i] = new Unit[11];
-	movTemp = new Mover * [30];
-	for (int i = 0; i < 30; ++i)
-		movTemp[i] = new Mover[11];
+	map = new Terrain*[MAP_TILE_W];
+	for (int i = 0; i < MAP_TILE_W; ++i)
+		map[i] = new Terrain[MAP_TILE_H];
+	spritesGround = new Unit * [MAP_TILE_W];
+	for (int i = 0; i < MAP_TILE_W; ++i)
+		spritesGround[i] = new Unit[MAP_TILE_H];
+	movTemp = new Mover * [MAP_TILE_W];
+	for (int i = 0; i < MAP_TILE_W; ++i)
+		movTemp[i] = new Mover[MAP_TILE_H];
 
 	return window;
 }
@@ -564,7 +584,7 @@ bool loadTexture(SDL_Renderer * renderer, SDL_Texture * *tex, const char* src) {
 void close(SDL_Window * window) {
 	SDL_DestroyWindow(window);
 
-	for (int i = 0; i < 30; ++i) {
+	for (int i = 0; i < MAP_TILE_W; ++i) {
 		delete [] map[i];
 		delete [] spritesGround[i];
 		delete[] movTemp[i];
@@ -584,6 +604,7 @@ void close(SDL_Window * window) {
 int main(int argc, char* argv[])
 {
 	nullTile.setSource(NULL);
+	nullTerrain.setDef(-1);
 
 	window = NULL;
 	SDL_Surface* screenSurface = NULL;
@@ -644,12 +665,15 @@ int main(int argc, char* argv[])
 		coords[0] = 15;
 		coords[1] = 5;
 
-
+		std::cout << "About to make the map\n";
 
 		//debug
 		createMap();
-		for (int lolz = 0; lolz < 30; lolz++) {
-			for (int yeetus = 0; yeetus < 11; yeetus++) {
+
+		std::cout << "Made the map, getting ready to render it\n";
+
+		for (int lolz = 0; lolz < MAP_TILE_W; lolz++) {
+			for (int yeetus = 0; yeetus < MAP_TILE_H; yeetus++) {
 				int tempInputter[4] = { lolz, yeetus, -1, -1 };
 				reLayer(tempInputter, NULL, NULL);
 			}
@@ -721,9 +745,8 @@ int main(int argc, char* argv[])
 				 }
 
 				 if (s == true) {
-					 if (coords[1] >= 10)
-						 if (coords[1] >= 19)
-							 break;
+					 if (coords[1] >= MAP_TILE_H)
+						break;
 
 					 setCoord(coords[0], coords[1], 's');
 					 //reRender(coords, NULL, moveMode);
@@ -733,7 +756,7 @@ int main(int argc, char* argv[])
 					 s = false;
 				 }
 				 if (d == true) {
-					 if (coords[0] >= 29)
+					 if (coords[0] >= MAP_TILE_W)
 						 break;
 
 					 setCoord(coords[0], coords[1], 'd');
@@ -753,8 +776,8 @@ int main(int argc, char* argv[])
 						 //reRender(coords, NULL, moveMode);
 						 reLayer(coords, NULL, moveMode);
 
-						 for (int i = 0; i < 30; ++i)
-							 for (int j = 0; j < 11; ++j) {
+						 for (int i = 0; i < MAP_TILE_W; ++i)
+							 for (int j = 0; j < MAP_TILE_H; ++j) {
 								 for (int k = 0; k < NUM_TYPES; ++k)
 									 std::cout << map[i][j].getMov()[k];
 								 std::cout << spritesGround[i][j].getX() << spritesGround[i][j].getY();
@@ -911,10 +934,7 @@ Tile metaTile::getLayer(int layer) {
 	return layers[layer];
 }
 
-
-Tile::~Tile() {
-	SDL_DestroyTexture(display);
-}
+Tile::~Tile() {}
 
 bool Tile::setTexture(const char* src) {
 	return loadTexture(renderer, &display, src);
@@ -1023,6 +1043,8 @@ void Unit::setType(int it) {
 
 void reLayer(int input[], char effect, char cursorType) {
 
+	std::cout << "Rendering a tile\n";
+
 	//breakdown
 	int x = input[0];
 	int y = input[1];
@@ -1036,29 +1058,10 @@ void reLayer(int input[], char effect, char cursorType) {
 
 	//map
 	Tile *tempLayer1 = new Tile();
-	/*tempLayer1.setX(input[0]);
-	tempLayer1.setY(input[1]);*/
-
-	/*tempLayer1.setT(whatIsTerrain(map[input[0]][input[1]]));
-	const char* c1 = setAsset(whatIsTerrain(map[input[0]][input[1]]), true, false);
-	tempLayer1.setRenderer(renderer);
-	tempLayer1.setTexture(c1);
-	reRenderTemp[0] = tempLayer1;
-	tempLayer1.render();*/
 
 	//sprites layer 1 (troops)
 	Tile *tempLayer2 = new Tile();
-	/*tempLayer2.setX(input[0]);
-	tempLayer2.setY(input[1]);
 
-	tempLayer1.setU(whatIsUnit(spritesGround[input[0]][input[1]]));
-	if (spritesGround[input[0]][input[1]].getType() != 0) {
-		const char* c2 = setAsset(whatIsUnit(spritesGround[input[0]][input[1]]), false, false);
-		tempLayer2.setRenderer(renderer);
-		tempLayer2.setTexture(c2);
-		reRenderTemp[1] = tempLayer2;
-		tempLayer2.render();
-	}*/
 	const char* c1 = setAsset(whatIsTerrain(map[x][y]), true, false);
 	tempLayer1->setSource(c1);
 	metaOne->setLayer(0, *tempLayer1);
@@ -1069,10 +1072,6 @@ void reLayer(int input[], char effect, char cursorType) {
 	}
 
 	Tile *tempLayer3 = new Tile();
-	/*tempLayer3.setX(input[0]);
-	tempLayer3.setY(input[1]);*/
-
-	//tempLayer3.setRenderer(renderer);
 
 	switch (effect) {
 		case NULL:
@@ -1091,10 +1090,6 @@ void reLayer(int input[], char effect, char cursorType) {
 
 	//sprites layer 3 (cursor)
 	Tile *cursor = new Tile();
-	/*cursor.setX(input[0]);
-	cursor.setY(input[1]);*/
-
-	//cursor.setRenderer(renderer);
 
 	switch (cursorType) {
 		case 'c': //cursor
@@ -1112,9 +1107,6 @@ void reLayer(int input[], char effect, char cursorType) {
 	}
 
 	metaOne->setLayer(3, *cursor);
-
-	/*reRenderTemp[2] = cursor;
-	cursor.render();*/
 	
 	metaTile* metaTwo = new metaTile();
 	metaTwo->setX(xOld);
@@ -1122,41 +1114,19 @@ void reLayer(int input[], char effect, char cursorType) {
 
 
 	//Rerender Old tile
-	if (xOld == -1 || yOld == -1) {
+	if (xOld != -1 && yOld != -1) {
 
 	Tile* tempOld1 = new Tile();
 
 	std::cout << tempOld1;
-	/*tempOld1.setX(input[2]);
-	tempOld1.setY(input[3]);
 
 
-	tempOld1.setT(whatIsTerrain(map[input[2]][input[3]]));
-	const char* c3 = setAsset(whatIsTerrain(map[input[2]][input[3]]), true, false);
-	tempOld1.setRenderer(renderer);
-	tempOld1.setTexture(c3);
-	reRenderOld[0];
-	tempOld1.render();*/
-
-	//Tile tempOld1;
-	// map is uninitialized here for some reason
 	tempOld1->setT(whatIsTerrain(map[xOld][yOld]));
 	const char* c3 = setAsset(whatIsTerrain(map[xOld][yOld]), true, false);
 	tempOld1->setSource(c3);
 	metaTwo->setLayer(0, *tempOld1);
 
 	Tile *tempOld2 = new Tile();
-	/*tempOld2.setX(input[2]);
-	tempOld2.setY(input[3]);
-
-	tempLayer1.setU(whatIsUnit(spritesGround[input[2]][input[3]]));
-	if (spritesGround[input[2]][input[3]].getType() != 0) {
-		const char* c4 = setAsset(whatIsUnit(spritesGround[input[2]][input[3]]), false, false);
-		tempOld2.setRenderer(renderer);
-		tempOld2.setTexture(c4);
-		reRenderOld[1] = tempOld2;
-		tempOld2.render();
-	}*/
 
 	tempOld2->setU(whatIsUnit(spritesGround[xOld][yOld]));
 	if (spritesGround[xOld][yOld].getType() != 0) {
@@ -1179,13 +1149,7 @@ void reLayer(int input[], char effect, char cursorType) {
 		break;
 
 	}
-	/*cursor.setX(input[2]);
-	cursor.setY(input[3]);*/
 
-	/*cursor.setRenderer(renderer);
-	cursor.setTexture("assets/null.png");
-	reRenderOld[2] = cursor;
-	cursor.render();*/
 	metaTwo->setLayer(2, *effectOld);
 
 	delete tempOld1;
@@ -1408,15 +1372,15 @@ void selectUnit(int x, int y) {
 
 void createMap() {
 
-	for (int i = 0; i < 30; i++) {
-		for (int j = 0; j < 11; j++) {
+	for (int i = 0; i < MAP_TILE_W; i++) {
+		for (int j = 0; j < MAP_TILE_H; j++) {
 			if (testMapInit[i][j] == GRASS)
 				map[i][j] = *debugMap;
 		}
 	}
 	
-	for (int k = 0; k < 30; k++) {
-		for (int l = 0; l < 11; l++) {
+	for (int k = 0; k < MAP_TILE_W; k++) {
+		for (int l = 0; l < MAP_TILE_H; l++) {
 			if (k == 12 && l == 6) {
 				spritesGround[k][l] = *testAPC;
 			}
@@ -1429,8 +1393,8 @@ void createMap() {
 		}
 	}
 
-	for (int i = 0; i < 30; ++i) {
-		for (int j = 0; j < 11; ++j) {
+	for (int i = 0; i < MAP_TILE_W; ++i) {
+		for (int j = 0; j < MAP_TILE_H; ++j) {
 			modMovTemp(i, j, 0, 0, ERROR, 0);
 		}
 	}
