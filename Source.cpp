@@ -878,14 +878,13 @@ void reRender(metaTile one, metaTile two, int camY, bool skipSecond) {
 			Tile temp2 = two.getLayer(i);
 			if (temp2.getSource() != nullTile.getSource()) {
 				temp2.setX(two.getX());
-				temp2.setY(two.getY());
+				temp2.setY(two.getY() - cameraY);
 				temp2.setRenderer(renderer);
 				std::string tempSrc2;
 				tempSrc2 = std::string(temp2.getSource());
 				const char* tempSrcConverted2 = tempSrc2.c_str();
 				temp2.setTexture(tempSrcConverted2);
 				temp2.render();
-				std::cout << "Ran lol";
 			}
 		}
 	}
@@ -1121,13 +1120,13 @@ void cameraMove(char direction) {
 	switch (direction) {
 	case 'w':
 		difference = coords[1] - cameraY;
-		if (difference < 2) {
+		if (difference < 2 && coords[1] >= 2) {
 			cameraY--;
 			//coords[1] = coords[1] - 1;
 			for (int i = 0; i < MAP_TILE_W; ++i) {
 				for (int j = 0; j < MAP_TILE_H; ++j) {
 					if (j >= cameraY)
-						reRender(demTiles[i][j], nullMetaTile, 1, true);
+						reRender(demTiles[i][j], nullMetaTile, -1, true);
 					//std::cout << "Camera Render: " << j;
 				}
 			}
@@ -1137,7 +1136,7 @@ void cameraMove(char direction) {
 		break;
 	case 's':
 		difference = coords[1] - cameraY;
-		if (difference > 9 ) {
+		if (difference > 9 && coords[1] <= 18) {
 			cameraY++;
 			//coords[1] = coords[1] - 1;
 			for (int i = 0; i < MAP_TILE_W; ++i) {
