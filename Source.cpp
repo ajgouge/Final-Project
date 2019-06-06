@@ -57,6 +57,19 @@ const int MAP_TILE_H = 20;
 
 void close(SDL_Window* window);
 
+enum TEXTURE {
+	T_GRASS = 0,
+	T_APC = 1,
+	T_RED = 2,
+	T_BLUE = 3,
+	T_CURSOR = 4,
+	T_SELECT = 5,
+	T_TARGET = 6,
+	T_NULL = 7,
+	NUM_TEXTURES = 8,
+	T_ERROR = -1
+};
+
 // Mov Types
 enum TYPE {
 	FOOT = 0,
@@ -131,16 +144,16 @@ private:
 	int y;
 	int terrain;
 	int unit;
-	const char* source = NULL;
+	TEXTURE source = T_ERROR;
 
 public:
 	Tile() : x(0), y(0), renderer(NULL), display(NULL), terrain(-1), unit(-1) {}
 	Tile(int x, int y, SDL_Renderer* r, SDL_Texture* d) : x(x), y(y), renderer(r), display(d), terrain(-1), unit(-1) {}
 	~Tile();
 
-	bool setTexture(const char* src);
-	void setSource(const char*);
-	const char* getSource();
+	void setTexture(SDL_Texture * tex);
+	void setSource(TEXTURE src);
+	TEXTURE getSource();
 	void render();
 	void setX(int ix);
 	void setY(int iy);
@@ -172,7 +185,7 @@ public:
 	}
 	~Terrain();
 
-	bool setDisplay(const char* src);
+	void setDisplay(TEXTURE src);
 	void setDisplay(Tile* src);
 	Tile* getDisplay();
 	void setDef(int d);
@@ -351,15 +364,17 @@ Unit** spritesGround; //32x12
 Mover** movTemp; //32x12
 //Unit spritesAir[30][10];
 SDL_Renderer* renderer = NULL;
+SDL_Surface* screenSurface = NULL;
 int coords[4]; //temp coords array
 int turn = 1; // odd is red, even is blue
+SDL_Texture** textures = NULL;
 
 void whatClicked(int x, int y, int mouse);
 void keyStatesUp(SDL_Keycode input);
 void keyStatesDown(SDL_Keycode input);
 int whatIsTerrain(Terrain input);
 int whatIsUnit(Unit input);
-const char* setAsset(int masterCode, bool isTerrain, bool animate);
+TEXTURE setAsset(int masterCode, bool isTerrain);
 void reLayer(int input[], char effect, char cursorType);
 void reRender(metaTile one, metaTile two);
 void setCoord(int x, int y, char dir);
@@ -561,6 +576,33 @@ SDL_Window* init(SDL_Window * window) {
 	for (int i = 0; i < MAP_TILE_W; ++i)
 		movTemp[i] = new Mover[MAP_TILE_H];
 
+	screenSurface = SDL_GetWindowSurface(window);
+	printf("Got the window surface\n");
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	if (renderer == NULL) {
+		printf("Renderer could not be initialized! SDL_Error: %s\n", SDL_GetError());
+	}
+	SDL_SetRenderDrawColor(renderer, 0x0, 0x0, 0x0, 0xFF);
+	printf("Renderer initialized\n");
+
+	textures = new SDL_Texture*[NUM_TERRAIN];
+	if (!loadTexture(renderer, &textures[T_GRASS], "assets/teskbk.png"))
+		std::cout << "Texture \"grass\" failed to load!\n";
+	if (!loadTexture(renderer, &textures[T_APC], "assets/apc/1.png"))
+		std::cout << "Texture \"apc\" failed to load!\n";
+	if (!loadTexture(renderer, &textures[T_BLUE], "assets/blue_tint_overlay.png"))
+		std::cout << "Texture \"blue_tint\" failed to load!\n";
+	if (!loadTexture(renderer, &textures[T_RED], "assets/red_tint_overlay.png"))
+		std::cout << "Texture \"red_tint\" failed to load!\n";
+	if (!loadTexture(renderer, &textures[T_CURSOR], "assets/red_cursor.png"))
+		std::cout << "Texture \"red_cursor\" failed to load!\n";
+	if (!loadTexture(renderer, &textures[T_SELECT], "assets/red_select.png"))
+		std::cout << "Texture \"red_select\" failed to load!\n";
+	if (!loadTexture(renderer, &textures[T_TARGET], "assets/target_red.png"))
+		std::cout << "Texture \"red_target\" failed to load!\n";
+	if (!loadTexture(renderer, &textures[T_NULL], "assets/null.png"))
+		std::cout << "Texture \"null\" failed to load!\n";
+
 	return window;
 }
 
@@ -584,6 +626,12 @@ bool loadTexture(SDL_Renderer * renderer, SDL_Texture * *tex, const char* src) {
 void close(SDL_Window * window) {
 	SDL_DestroyWindow(window);
 
+	for (int i = 0; i < NUM_TEXTURES; ++i) {
+		SDL_DestroyTexture(textures[i]);
+	}
+
+	delete[] textures;
+
 	for (int i = 0; i < MAP_TILE_W; ++i) {
 		delete [] map[i];
 		delete [] spritesGround[i];
@@ -603,11 +651,11 @@ void close(SDL_Window * window) {
 
 int main(int argc, char* argv[])
 {
-	nullTile.setSource(NULL);
+	nullTile.setSource(T_ERROR);
 	nullTerrain.setDef(-1);
 
 	window = NULL;
-	SDL_Surface* screenSurface = NULL;
+	
 
 	window = init(window);
 
@@ -626,16 +674,9 @@ int main(int argc, char* argv[])
 		land.setX(0);
 		land.setY(0);*/
 
-		screenSurface = SDL_GetWindowSurface(window);
-		printf("Got the window surface\n");
-		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-		if (renderer == NULL) {
-			printf("Renderer could not be initialized! SDL_Error: %s\n", SDL_GetError());
-		}
-		SDL_SetRenderDrawColor(renderer, 0x0, 0x0, 0x0, 0xFF);
-		printf("Renderer initialized\n");
-
-		land->setRenderer(renderer);
+		
+		
+		/*land->setRenderer(renderer);
 		land->setTexture("assets/testbk.png");
 
 		debugMap->setDisplay(land);
@@ -644,7 +685,7 @@ int main(int argc, char* argv[])
 		apcDisplay->setRenderer(renderer);
 		apcDisplay->setTexture("assets/apc/1.png");
 
-		testAPC->setDisplay(apcDisplay);
+		testAPC->setDisplay(apcDisplay);*/
 
 		/*cursor.setRenderer(renderer);
 		cursor.setTexture("assets/red_cursor.png");
@@ -936,8 +977,8 @@ Tile metaTile::getLayer(int layer) {
 
 Tile::~Tile() {}
 
-bool Tile::setTexture(const char* src) {
-	return loadTexture(renderer, &display, src);
+void Tile::setTexture(SDL_Texture * tex) {
+	display = tex;
 }
 
 void Tile::render() {
@@ -986,18 +1027,18 @@ int Tile::getU() {
 SDL_Texture* Tile::getDisplay() {
 	return display;
 }
-const char* Tile::getSource() {
+TEXTURE Tile::getSource() {
 	return source;
 }
 
-void Tile::setSource(const char* src) {
+void Tile::setSource(TEXTURE src) {
 	source = src;
 }
 
 Terrain::~Terrain() { delete[] mov; }
 
-bool Terrain::setDisplay(const char* src) {
-	return display->setTexture(src);
+void Terrain::setDisplay(TEXTURE src) {
+	display->setSource(src);
 }
 
 void Terrain::setDisplay(Tile * src) {
@@ -1062,11 +1103,11 @@ void reLayer(int input[], char effect, char cursorType) {
 	//sprites layer 1 (troops)
 	Tile *tempLayer2 = new Tile();
 
-	const char* c1 = setAsset(whatIsTerrain(map[x][y]), true, false);
+	TEXTURE c1 = setAsset(whatIsTerrain(map[x][y]), true);
 	tempLayer1->setSource(c1);
 	metaOne->setLayer(0, *tempLayer1);
 	if (spritesGround[x][y].getType() != 0) {
-		const char* c2 = setAsset(whatIsUnit(spritesGround[x][y]), false, false);
+		TEXTURE c2 = setAsset(whatIsUnit(spritesGround[x][y]), false);
 		tempLayer2->setSource(c2);
 		metaOne->setLayer(1, *tempLayer2);
 	}
@@ -1075,13 +1116,13 @@ void reLayer(int input[], char effect, char cursorType) {
 
 	switch (effect) {
 		case NULL:
-			tempLayer3->setSource("assets/null.png");
+			tempLayer3->setSource(T_NULL);
 			break;
 		case 'b':
-			tempLayer3->setSource("assets/red_tint_overlay.png");
+			tempLayer3->setSource(T_RED);
 			break;
 		case 'r':
-			tempLayer3->setSource("assets/blue_tint_overlay.png");
+			tempLayer3->setSource(T_BLUE);
 			break;
 
 	}
@@ -1093,16 +1134,16 @@ void reLayer(int input[], char effect, char cursorType) {
 
 	switch (cursorType) {
 		case 'c': //cursor
-			cursor->setSource("assets/red_cursor.png");
+			cursor->setSource(T_CURSOR);
 			break;
 		case 's': //select Unit
-			cursor->setSource("assets/red_select.png");
+			cursor->setSource(T_SELECT);
 			break;
 		case 't': //target enemy
-			cursor->setSource("assets/target_red.png");
+			cursor->setSource(T_TARGET);
 			break;
 		case NULL: //no cursor
-			cursor->setSource("assets/null.png");
+			cursor->setSource(T_NULL);
 			break;
 	}
 
@@ -1122,7 +1163,7 @@ void reLayer(int input[], char effect, char cursorType) {
 
 
 	tempOld1->setT(whatIsTerrain(map[xOld][yOld]));
-	const char* c3 = setAsset(whatIsTerrain(map[xOld][yOld]), true, false);
+	TEXTURE c3 = setAsset(whatIsTerrain(map[xOld][yOld]), true);
 	tempOld1->setSource(c3);
 	metaTwo->setLayer(0, *tempOld1);
 
@@ -1130,7 +1171,7 @@ void reLayer(int input[], char effect, char cursorType) {
 
 	tempOld2->setU(whatIsUnit(spritesGround[xOld][yOld]));
 	if (spritesGround[xOld][yOld].getType() != 0) {
-		const char* c4 = setAsset(whatIsUnit(spritesGround[xOld][yOld]), false, false);
+		TEXTURE c4 = setAsset(whatIsUnit(spritesGround[xOld][yOld]), false);
 		tempOld2->setSource(c4);
 		metaTwo->setLayer(1, *tempOld2);
 	}
@@ -1139,13 +1180,13 @@ void reLayer(int input[], char effect, char cursorType) {
 
 	switch (effect) {
 	case NULL:
-		effectOld->setSource("assets/null.png");
+		effectOld->setSource(T_NULL);
 		break;
 	case 'b':
-		effectOld->setSource("assets/red_tint_overlay.png");
+		effectOld->setSource(T_RED);
 		break;
 	case 'r':
-		effectOld->setSource("assets/blue_tint_overlay.png");
+		effectOld->setSource(T_BLUE);
 		break;
 
 	}
@@ -1181,9 +1222,7 @@ void reRender(metaTile one, metaTile two) {
 			//std::cout << "tile1 X value: " << temp.getX();
 			//std::cout << "tile1 Y value: " << temp.getY();
 			temp.setRenderer(renderer);
-			std::string tempSrc(temp.getSource());
-			const char* tempSrcConverted = tempSrc.c_str();
-			temp.setTexture(tempSrcConverted);
+			temp.setTexture(textures[temp.getSource()]);
 
 			temp.render();
 		}
@@ -1196,10 +1235,7 @@ void reRender(metaTile one, metaTile two) {
 			//std::cout << "tile2 X value: " << temp2.getX();
 			//std::cout << "tile2 Y value: " << temp2.getY();
 			temp2.setRenderer(renderer);
-			std::string tempSrc2;
-			tempSrc2 = std::string(temp2.getSource());
-			const char* tempSrcConverted2 = tempSrc2.c_str();
-			temp2.setTexture(tempSrcConverted2);
+			temp2.setTexture(textures[temp2.getSource()]);
 			temp2.render();
 		}
 	}
@@ -1229,33 +1265,24 @@ int whatIsUnit(Unit input) {
 	return NULL;
 }
 
-const char * setAsset(int masterCode, bool isTerrain, bool animate) {
-	const char* address = NULL;
+TEXTURE setAsset(int masterCode, bool isTerrain) {
+	TEXTURE address = T_ERROR;
 	if (isTerrain) {
 		//terrain asset set
 		switch (masterCode) {
 		case 0:
-			address = "assets/testbk.png";
+			address = T_GRASS;
 			break;
 		}
 	}
 	else {
-		if (animate == true) {
-			switch (masterCode) {
-			case NULL:
-				return "assets/null.png";
-			case 1:
-				address = "assets/apc/";
-			}
-		}
-		else if (animate == false){
-			switch (masterCode) {
-			case NULL:
-				return "assets/null.png";
-			case 1:
-				address = "assets/apc/1.png";
-			}
-		
+		switch (masterCode) {
+		case NULL:
+			address = T_NULL;
+			break;
+		case 1:
+			address = T_APC;
+			break;
 		}
 	}
 	return address;
