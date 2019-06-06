@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <vector>
+#include <chrono>
 
 /*
 
@@ -257,6 +258,7 @@ int turn = 1; // odd is red, even is blue
 int cameraY = 0;
 std::vector<metaTile> animatedTiles;
 int frame = 1;
+int seconds;
 
 //init
 void whatClicked(int x, int y, int mouse);
@@ -362,6 +364,7 @@ int main(int argc, char* argv[])
 	nullTile.setSource(NULL);
 	nullMetaTile.setLayer(0, nullTile);
 
+	auto start = std::chrono::steady_clock::now();
 
 	SDL_Window* window = NULL;
 	SDL_Surface* screenSurface = NULL;
@@ -505,7 +508,10 @@ int main(int argc, char* argv[])
 				}
 
 			}
-			animateRender();
+			auto end = std::chrono::steady_clock::now();
+			seconds = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+			if (seconds % 2 == 0)
+				animateRender();
 
 			if (isRunning == false)
 				break;
