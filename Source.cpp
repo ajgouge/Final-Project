@@ -3,7 +3,7 @@
 #include <string>
 #include <SDL.h>
 #include <SDL_image.h>
-//#include <algorithm.h>
+#include <vector>
 
 /*
 
@@ -255,8 +255,7 @@ SDL_Renderer* renderer = NULL;
 int coords[4]; //temp coords array
 int turn = 1; // odd is red, even is blue
 int cameraY = 0;
-
-//debug
+std::vector<metaTile> animatedTiles;
 
 //init
 void whatClicked(int x, int y, int mouse);
@@ -1084,19 +1083,29 @@ void createMap() {
 
 	}
 	
-	//for (int k = 0; k < (sizeof spritesGround / sizeof spritesGround[0]); k++) {
-	//	for (int l = 0; l < (sizeof spritesGround[0] / sizeof(int)); l++) {
-	//		Unit APC;
-	//		APC.setType(1);
-	//		APC.setX(1);
-	//		APC.setY(1);
-	//		if (k == 1 && l == 1)
-	//			spritesGround[k][l] = APC;
-	//		else {
-	//			spritesGround[k][l].setType(0);
-	//			spritesGround[k][l].setY(k);
-	//			spritesGround[k][l].setX(l);
-	//		}
+	//for (int k = 0; k < MAP_TILE_W; k++) {
+	//	for (int l = 0; l < MAP_TILE_H; l++) {
+			Unit APC;
+			APC.setType(1);
+			APC.setX(5);
+			APC.setY(4);
+
+			/*if (k == 1 && l == 1)
+				spritesGround[k][l] = APC;
+			else {
+				spritesGround[k][l].setType(0);
+				spritesGround[k][l].setY(k);
+				spritesGround[k][l].setX(l);
+			}*/
+
+			spritesGround[5][4] = APC;
+
+			Tile unit;
+			unit.setU(whatIsUnit(APC));
+			unit.setSource(setAsset(whatIsUnit(APC), false, false));
+
+			demTiles[5][4].setLayer(1, unit);
+			animatedTiles.push_back(demTiles[5][4]);
 	//	}
 	//}
 }
@@ -1122,32 +1131,25 @@ void cameraMove(char direction) {
 		difference = coords[1] - cameraY;
 		if (difference < 2 && coords[1] >= 2) {
 			cameraY--;
-			//coords[1] = coords[1] - 1;
 			for (int i = 0; i < MAP_TILE_W; ++i) {
 				for (int j = 0; j < MAP_TILE_H; ++j) {
 					if (j >= cameraY)
 						reRender(demTiles[i][j], nullMetaTile, -1, true);
-					//std::cout << "Camera Render: " << j;
 				}
 			}
-
-			//reLayer(coords, NULL, moveMode);
 		}
 		break;
 	case 's':
 		difference = coords[1] - cameraY;
 		if (difference > 9 && coords[1] <= 18) {
 			cameraY++;
-			//coords[1] = coords[1] - 1;
 			for (int i = 0; i < MAP_TILE_W; ++i) {
 				for (int j = 0; j < MAP_TILE_H; ++j) {
 					if ( j >= cameraY)
 						reRender(demTiles[i][j], nullMetaTile, 1, true);
-					//std::cout << "Camera Render: " << j;
 				}
 			}
 
-			//reLayer(coords, NULL, moveMode);
 		}
 		break;
 	}
