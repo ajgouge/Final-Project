@@ -256,6 +256,7 @@ int coords[4]; //temp coords array
 int turn = 1; // odd is red, even is blue
 int cameraY = 0;
 std::vector<metaTile> animatedTiles;
+int frame = 1;
 
 //init
 void whatClicked(int x, int y, int mouse);
@@ -267,7 +268,7 @@ const char* setAsset(int masterCode, bool isTerrain, bool animate);
 void reLayer(int input[], char effect, char cursorType);
 void setCoord(int x, int y, char dir);
 void selectUnit(int x, int y);
-//void animateRender();
+void animateRender();
 void reRender(metaTile one, metaTile two, int camY, bool skipSecond);
 void createMap(); //debug
 void cameraMove(char direction);
@@ -504,7 +505,7 @@ int main(int argc, char* argv[])
 				}
 
 			}
-			//animateRender();
+			animateRender();
 
 			if (isRunning == false)
 				break;
@@ -988,71 +989,43 @@ void selectUnit(int x, int y) {
 	return;
 }
 
-//void animateRender() {
-//	Tile total[4][300]; //supports 300 x 4 frame animations at once, editable tho
-//
-//	int j = -1;
-//	for (int k = 0; k < (sizeof spritesGround / sizeof spritesGround[0]); k++) {
-//		for (int l = 0; l < (sizeof spritesGround[0] / sizeof(int)); l++) {
-//			if (spritesGround[k][l].getType() != NULL) {
-//				j++;
-//				const char* dir;
-//				dir = setAsset(spritesGround[k][l].getType(), false, true);
-//				for (int i = 1; i <= 4; i++) {
-//					Tile renderThis;
-//					renderThis.setX(k);
-//					renderThis.setY(l);
-//					renderThis.setRenderer(renderer);
-//
-//					std::string tempAdd = std::to_string(i);
-//					const char* addon = tempAdd.c_str();
-//
-//					const char* type = ".png";
-//
-//					std::string finalTotal(dir);
-//					finalTotal.append(addon);
-//					finalTotal.append(type);
-//
-//					const char* full = finalTotal.c_str();
-//					renderThis.setTexture(full);
-//
-//					total[i][j] = renderThis;
-//
-//					std::cout << "j is: " << j;
-//				}
-//
-//			}
-//		}
-//	}
-//
-//	//run through frames
-//	for (int m = 0; m < 4; m++) {
-//		for (int n = 0; n < 30; n++) {
-//			//map
-//			Tile tempLayer1;
-//			tempLayer1.setX(total[m][n].getX());
-//			tempLayer1.setY(total[m][n].getY());
-//
-//			tempLayer1.setT(whatIsTerrain(map[total[m][n].getX()][total[m][n].getY()]));
-//			const char* c1 = setAsset(whatIsTerrain(map[total[m][n].getX()][total[m][n].getY()]), true, false);
-//			tempLayer1.setRenderer(renderer);
-//			tempLayer1.setTexture(c1);
-//			reRenderTemp[0] = tempLayer1;
-//			tempLayer1.render();
-//
-//			std::cout << "background setup and rendered layer level!";
-//
-//			Tile templayer2 = total[m][n];
-//			templayer2.render();
-//
-//			std::cout << "animated tile render set!";
-//		}
-//		SDL_RenderPresent(renderer);
-//		std::cout << "FINAL RENDER!!!";
-//	}
-//
-//	return;
-//}
+void animateRender() {
+
+	for (int i = 0; i < animatedTiles.size(); i++) {
+		Tile animate = animatedTiles.at(i).getLayer(1);
+		int unit = animate.getT();
+		int x = animatedTiles.at(i).getX();
+		int y = animatedTiles.at(i).getY();
+
+		std::string finalTotal;
+		const char* base = setAsset(unit, false, true);
+		const char* type = ".png";
+		std::string tempAdd = std::to_string(frame);
+		const char* addon = tempAdd.c_str();
+
+		finalTotal.append(base);
+		finalTotal.append(addon);
+		finalTotal.append(type);
+
+		const char* full = finalTotal.c_str();
+
+		animate.setSource(full);
+		demTiles[x][y].setLayer(1, animate);
+
+		if (frame < 4) {
+			frame++;
+		}
+		else {
+			frame = 1;
+		}
+
+		reRender(demTiles[x][y], nullMetaTile, 0, true);
+	}
+
+	SDL_RenderPresent(renderer);
+	return;
+
+}
 
 
 //temp debug
@@ -1079,16 +1052,29 @@ void createMap() {
 			demTiles[i][j].setY(j);
 
 			flip = !flip;
+
+			if ((i % 3) == 0 && (j % 3) == 0) {
+				Unit APC;
+				APC.setType(1);
+				APC.setX(i);
+				APC.setY(j);
+
+				spritesGround[i][j] = APC;
+
+				Tile unit;
+				unit.setU(whatIsUnit(APC));
+				unit.setSource(setAsset(whatIsUnit(APC), false, false));
+
+				demTiles[i][j].setLayer(1, unit);
+				animatedTiles.push_back(demTiles[i][j]);
+			}
 		}
 
 	}
 	
 	//for (int k = 0; k < MAP_TILE_W; k++) {
 	//	for (int l = 0; l < MAP_TILE_H; l++) {
-			Unit APC;
-			APC.setType(1);
-			APC.setX(5);
-			APC.setY(4);
+
 
 			/*if (k == 1 && l == 1)
 				spritesGround[k][l] = APC;
@@ -1098,14 +1084,7 @@ void createMap() {
 				spritesGround[k][l].setX(l);
 			}*/
 
-			spritesGround[5][4] = APC;
-
-			Tile unit;
-			unit.setU(whatIsUnit(APC));
-			unit.setSource(setAsset(whatIsUnit(APC), false, false));
-
-			demTiles[5][4].setLayer(1, unit);
-			animatedTiles.push_back(demTiles[5][4]);
+			
 	//	}
 	//}
 }
