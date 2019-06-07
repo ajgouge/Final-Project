@@ -91,11 +91,11 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\SDL\SDL2-2.0.9\include;$(ProjectDir)\SDL\SDL2_image-2.0.4\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\SDL\SDL2_image-2.0.4\include;C:\SDL\SDL2-2.0.9\include;C:\Users\ajgouge481\SDL\SDLProject\SDL\SDL2_image-2.0.4\include;C:\Users\ajgouge481\SDL\SDLProject\SDL\SDL2-2.0.9\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(ProjectDir)\SDL\SDL2_image-2.0.4\lib\x64;$(ProjectDir)\SDL\SDL2-2.0.9\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\SDL\SDL2_image-2.0.4\lib\x64;C:\SDL\SDL2-2.0.9\lib\x64;C:\Users\ajgouge481\SDL\SDLProject\SDL\SDL2-2.0.9\lib\x64;C:\Users\ajgouge481\SDL\SDLProject\SDL\SDL2_image-2.0.4\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
