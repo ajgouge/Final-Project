@@ -4,72 +4,9 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <cassert>
-//#include <algorithm.h>
-
-/*
 
 
-░░░█░░░░▄▀█▀▀▄░░▀▀▀▄░░░░▐█░░░░░░░░░▄▀█▀▀▄░░░▀█▄
-░░█░░░░▀░▐▌( ͡° ͜ʖ ͡°)▐▌░░░▀░░░▐█░░░░░░░░▀░▐▌( ͡° ͜ʖ ͡°)▐▌░░█▀
-░▐▌░░░░░░░▀▄▄▀░░░░░░░░░░▐█▄▄░░░░░░░░░▀▄▄▀░░░░░▐▌
-░█░░░░░░░░░░░░░░░░░░░░░░░░░▀█░░░░░░░░░░░░░░░░░░█
-▐█░░░░░░░░░░░░░░░░░░░░░░░░░░█▌░░░░░░░░░░░░░░░░░█
-▐█░░░░░░░░░░░░░░░░░░░░░░░░░░█▌░░░░░░░░░░░░░░░░░█
-░█░░░░░░░░░░░░░░░░░░░░█▄░░░▄█░░░░░░░░░░░░░░░░░░█
-░▐▌░░░░░░░░░░░░░░░░░░░░▀███▀░░░░░░░░░░░░░░░░░░▐
-░░█░░░░░░░░░░░░░░░░░▀▄░░░░░░░░░░▄▀░░░░░░░░░░░░█
-░░░█░░░░░░░░░░░░░░░░░░▀▄▄▄▄▄▄▄▀▀░░░░░░░░░░░░░█
-
-RIP VS font lol
-
-
-
-
-*code doesn't compile
-Everyone:
-
-⢀⣠⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⣠⣤⣶⣶
-⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⢰⣿⣿⣿⣿
-⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⣀⣀⣾⣿⣿⣿⣿
-⣿⣿⣿⣿⣿⡏⠉⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣿
-⣿⣿⣿⣿⣿⣿⠀⠀⠀⠈⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠛⠉⠁⠀⣿
-⣿⣿⣿⣿⣿⣿⣧⡀⠀⠀⠀⠀⠙⠿⠿⠿⠻⠿⠿⠟⠿⠛⠉⠀⠀⠀⠀⠀⣸⣿
-⣿⣿⣿⣿⣿⣿⣿⣷⣄⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⣿
-⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠠⣴⣿⣿⣿⣿
-⣿⣿⣿⣿⣿⣿⣿⣿⡟⠀⠀⢰⣹⡆⠀⠀⠀⠀⠀⠀⣭⣷⠀⠀⠀⠸⣿⣿⣿⣿
-⣿⣿⣿⣿⣿⣿⣿⣿⠃⠀⠀⠈⠉⠀⠀⠤⠄⠀⠀⠀⠉⠁⠀⠀⠀⠀⢿⣿⣿⣿
-⣿⣿⣿⣿⣿⣿⣿⣿⢾⣿⣷⠀⠀⠀⠀⡠⠤⢄⠀⠀⠀⠠⣿⣿⣷⠀⢸⣿⣿⣿
-⣿⣿⣿⣿⣿⣿⣿⣿⡀⠉⠀⠀⠀⠀⠀⢄⠀⢀⠀⠀⠀⠀⠉⠉⠁⠀⠀⣿⣿⣿
-⣿⣿⣿⣿⣿⣿⣿⣿⣧⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢹⣿⣿
-⣿⣿⣿⣿⣿⣿⣿⣿⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿
-
-*/
-
-const int SCREEN_WIDTH = 1920;
-const int SCREEN_HEIGHT = 1080;
-const int MAP_X = 0;
-const int MAP_Y = SCREEN_HEIGHT / 10;
-const int MAP_W = SCREEN_WIDTH;
-const int MAP_H = SCREEN_HEIGHT * 7 / 10;
-const int TILE_SIDE = 64;
-const int MAP_TILE_W = 30;
-const int MAP_TILE_H = 20;
-
-void close(SDL_Window* window);
-
-enum TEXTURE {
-	T_GRASS = 0,
-	T_APC = 1,
-	T_RED = 2,
-	T_BLUE = 3,
-	T_CURSOR = 4,
-	T_SELECT = 5,
-	T_TARGET = 6,
-	T_NULL = 7,
-	NUM_TEXTURES = 8,
-	T_ERROR = -1
-};
-
+/* Enums */
 // Mov Types
 enum TYPE {
 	FOOT = 0,
@@ -101,8 +38,32 @@ enum UNIT_TYPE {
 	UNIT_ERROR = -1
 };
 
+enum TEXTURE {
+	T_GRASS = 0,
+	T_APC = 1,
+	T_RED = 2,
+	T_BLUE = 3,
+	T_CURSOR = 4,
+	T_SELECT = 5,
+	T_TARGET = 6,
+	T_NULL = 7,
+	NUM_TEXTURES = 8,
+	T_ERROR = -1
+};
+
+
+/* Constants */
+const int SCREEN_WIDTH = 1920;
+const int SCREEN_HEIGHT = 1080;
+const int MAP_X = 0;
+const int MAP_Y = SCREEN_HEIGHT / 10;
+const int MAP_W = SCREEN_WIDTH;
+const int MAP_H = SCREEN_HEIGHT * 7 / 10;
+const int TILE_SIDE = 64;
+const int MAP_TILE_W = 30;
+const int MAP_TILE_H = 20;
 // Debug Map -- Format all other levels like this array
-TERRAIN_TYPE testMapInit[MAP_TILE_W][MAP_TILE_H] = {
+const TERRAIN_TYPE testMapInit[MAP_TILE_W][MAP_TILE_H] = {
 	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
 	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
 	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
@@ -135,7 +96,56 @@ TERRAIN_TYPE testMapInit[MAP_TILE_W][MAP_TILE_H] = {
 	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS}
 };
 
-// Tile class -- Used to store display information for 
+
+/* Globals */
+Tile nullTile;
+Terrain nullTerrain;
+int gtemp[NUM_TYPES] = { 1,1,1,1,1,1,1,1 };
+Terrain* debugMap = new Terrain(0, gtemp, false, NULL);
+Unit* testAPC = new Unit(-1, -1, 1, 6, 1, TREADS, 500, NULL, NULL, 0);
+bool w;
+bool s;
+bool a;
+bool d;
+bool shift;
+bool ctrl;
+bool space;
+bool isRunning = true;
+SDL_Window* window;
+// Tracks whether a unit is selected or not (c for not, s for selecting)
+char moveMode = 'c';
+// Keeps a copy of the currently selected unit
+Unit* selUnit;
+//fill in when map is created
+Terrain** map;
+Unit** spritesGround;
+Mover** movTemp;
+SDL_Renderer* renderer = NULL;
+SDL_Surface* screenSurface = NULL;
+int coords[4]; //temp coords array
+int turn = 1; // odd is red, even is blue
+SDL_Texture** textures = NULL;
+
+
+/* Prototypes */
+SDL_Window* init(SDL_Window* window);
+bool loadTexture(SDL_Renderer* renderer, SDL_Texture** tex, const char* src);
+void close(SDL_Window* window);
+void whatClicked(int x, int y, int mouse);
+void keyStatesUp(SDL_Keycode input);
+void keyStatesDown(SDL_Keycode input);
+int whatIsTerrain(Terrain input);
+int whatIsUnit(Unit input);
+TEXTURE setAsset(int masterCode, bool isTerrain);
+void reLayer(int input[], char effect, char cursorType);
+void reRender(metaTile one, metaTile two);
+void setCoord(int x, int y, char dir);
+void createMap(); //debug
+void modMovTemp(int x, int y, int mov, int range, TYPE movType, int team);
+
+
+/* Classes */
+// Tile class -- Used to store display information for each tile on the map
 class Tile {
 private:
 	SDL_Renderer* renderer = NULL;
@@ -167,11 +177,35 @@ public:
 	int getU();
 };
 
-Tile nullTile;
+// Simple mutators, accessors, and deconstructors
+Tile::~Tile() {}
+void Tile::setTexture(SDL_Texture* tex) {display = tex;}
+void Tile::setX(int ix) { x = ix; }
+void Tile::setY(int iy) { y = iy; }
+void Tile::setRenderer(SDL_Renderer* irenderer) { renderer = irenderer; }
+int Tile::getX() { return x; }
+int Tile::getY() { return y; }
+void Tile::setT(int it) { terrain = it; }
+void Tile::setU(int iu) { unit = iu; }
+int Tile::getT() { return terrain; }
+int Tile::getU() { return unit; }
+SDL_Texture* Tile::getDisplay() { return display; }
+TEXTURE Tile::getSource() { return source; }
+void Tile::setSource(TEXTURE src) { source = src; }
 
+void Tile::render() {
+	if (x * TILE_SIDE + MAP_X > MAP_W || y * TILE_SIDE + MAP_Y > MAP_H)
+		return;
+	SDL_Rect dest = { x * TILE_SIDE + MAP_X, y * TILE_SIDE + MAP_Y, TILE_SIDE, TILE_SIDE };
+	SDL_RenderCopy(renderer, display, NULL, &dest);
+}
+
+
+// Used to store both the display and other game info about different terrains in the map array
 class Terrain {
 private:
 	int def = -1;
+	// When mov is indexed by a TYPE, it returns the number of movement points a unit of that type must expend to enter that Terrain
 	int* mov;
 	bool canCapture;
 	Tile* display;
@@ -199,19 +233,25 @@ public:
 
 };
 
-Terrain nullTerrain;
+// Simple mutators, accessors, and deconstructors
+Terrain::~Terrain() { delete[] mov; }
+void Terrain::setDisplay(TEXTURE src) {display->setSource(src);}
+void Terrain::setDisplay(Tile* src) {display = src;}
+Tile* Terrain::getDisplay() {return display;}
+void Terrain::setDef(int d) {def = d;}
+void Terrain::setCanCapture(bool c) { canCapture = c; }
+int Terrain::getDef() { return def; }
+int* Terrain::getMov() { return mov; }
+bool Terrain::getCanCapture() { return canCapture; }
+bool Terrain::getIsReachable() { return isReachable; }
+void Terrain::setIsReachable(bool r) { isReachable = r; }
 
-bool Terrain::getIsReachable() {
-	return isReachable;
+void Terrain::setMov(int* m) {
+	for (int i = 0; i < NUM_TYPES; ++i)
+		mov[i] = m[i];
 }
 
-void Terrain::setIsReachable(bool r) {
-	isReachable = r;
-}
-
-int gtemp[NUM_TYPES] = { 1,1,1,1,1,1,1,1 };
-Terrain *debugMap = new Terrain(0, gtemp, false, NULL);
-
+// Used to store both the display and other game information about the units in the spritesGround array
 class Unit {
 private:
 	int x;
@@ -236,27 +276,13 @@ public:
 
 	void setX(int i);
 	void setY(int i);
-	bool setDisplay(const char* src);
 	void setDisplay(Tile* src);
-	Tile* getDisplay();
 	void setMov(int m);
-	void setAmmo(int a);
-	void setFuel(int f);
-	void setVision(int v);
-	void setRange(int r);
 	void setMovType(TYPE t);
-	void setCost(int c);
 	void setAttack(TYPE* a);
 	int getX();
 	int getY();
-	int getMov();
-	int getAmmo();
-	int getFuel();
-	int getVision();
-	int getRange();
 	TYPE getMovType();
-	int getCost();
-	TYPE* getAttack();
 	int getType();
 	int getTeam();
 	void setType(int it);
@@ -264,203 +290,27 @@ public:
 
 };
 
-Unit::~Unit() {
-	//delete[] attack;
-}
+// Simple mutators, accessors, and deconstructors
+Unit::~Unit() {/*delete[] attack;*/}
+void Unit::setDisplay(Tile* src) { display = src; }
+void Unit::setMov(int m) { mov = m; }
+void Unit::setMovType(TYPE t) { movType = t; }
+TYPE Unit::getMovType() { return movType; }
+int Unit::getTeam() { return team; }
+void Unit::setX(int i) { x = i; }
+void Unit::setY(int i) { y = i; }
+int Unit::getX() { return x; }
+int Unit::getY() { return y; }
+int Unit::getType() { return type; }
+void Unit::setType(int it) { type = it; }
 
 void Unit::setAttack(TYPE* a) {
 	//for (int i = 0; i < NUM_UNITS; ++i)
 		//attack[i] = a[i];
 }
 
-Unit *testAPC = new Unit(-1,-1,1,6,1,TREADS,500,NULL,NULL,0);
-
-void Unit::setDisplay(Tile* src) {
-	display = src;
-}
-
-void Unit::setMov(int m) {
-	mov = m;
-}
-
-void Unit::setMovType(TYPE t) {
-	movType = t;
-}
-
-TYPE Unit::getMovType() {
-	return movType;
-}
-
-int Unit::getTeam() {
-	return team;
-}
-
-class metaTile {
-private:
-	Tile *layers = NULL;
-	int x;
-	int y;
-
-public:
-	metaTile() : x(-1), y(-1) {
-		layers = new Tile[4];
-		for (int i = 0; i < 4; ++i) setLayer(i, nullTile);
-	}
-	metaTile(int x, int y, Tile* l) : x(x), y(y) {
-		layers = new Tile[4];
-		for (int i = 0; i < 4; ++i) setLayer(i, l[i]);
-	}
-	~metaTile();
-	void setX(int ix);
-	void setY(int iy);
-	int getX();
-	int getY();
-	void setLayer(int layer, Tile input);
-	Tile getLayer(int layer);
-};
-
-metaTile::~metaTile() {
-	delete[] layers;
-	return;
-}
-
-class Mover {
-public:
-	int x;
-	int y;
-	int mov;
-	int range;
-	bool hasMoved;
-	TYPE movType;
-	int team;
-	Mover() : x(-1), y(-1), mov(-1), range(-1), movType(ERROR), hasMoved(false), team(-1) {}
-	Mover(int ix, int iy, int m, int r, TYPE t, int te) : x(ix), y(iy), mov(m), range(r), movType(t), hasMoved(false), team(te) {}
-	~Mover();
-	void propagate();
-};
-
-
-
-//game loop variables n stuff
-bool w;
-bool s;
-bool a;
-bool d;
-bool shift;
-bool ctrl;
-bool space;
-bool isRunning = true;
-SDL_Window* window;
-// Tracks whether a unit is selected or not (c for not, s for selecting)
-char moveMode = 'c';
-// Keeps a copy of the currently selected unit
-Unit * selUnit;
-/*//Global temp layer array
-Tile reRenderTemp[4]; //currently will render 4 layers of tiles at once
-Tile reRenderOld[3];*/
-//fill in when map is created
-Terrain** map; //32x12
-Unit** spritesGround; //32x12
-Mover** movTemp; //32x12
-//Unit spritesAir[30][10];
-SDL_Renderer* renderer = NULL;
-SDL_Surface* screenSurface = NULL;
-int coords[4]; //temp coords array
-int turn = 1; // odd is red, even is blue
-SDL_Texture** textures = NULL;
-
-void whatClicked(int x, int y, int mouse);
-void keyStatesUp(SDL_Keycode input);
-void keyStatesDown(SDL_Keycode input);
-int whatIsTerrain(Terrain input);
-int whatIsUnit(Unit input);
-TEXTURE setAsset(int masterCode, bool isTerrain);
-void reLayer(int input[], char effect, char cursorType);
-void reRender(metaTile one, metaTile two);
-void setCoord(int x, int y, char dir);
-void selectUnit(int x, int y);
-void createMap(); //debug
-
-
-Mover::~Mover() {}
-
-void modMovTemp(int x, int y, int mov, int range, TYPE movType, int team) {
-	movTemp[y][x].x = x;
-	movTemp[y][x].y = y;
-	movTemp[y][x].mov = mov;
-	movTemp[y][x].range = range;
-	movTemp[y][x].movType = movType;
-	movTemp[y][x].team = team;
-	movTemp[y][x].hasMoved = false;
-}
-
-void Mover::propagate() {
-	if (hasMoved) return;
-	
-	for (int i = 0; i < 4; ++i) {
-		int newX = x, newY = y;
-		switch (i) {
-		case 0:
-			newX++;
-			break;
-		case 1:
-			newX--;
-			break;
-		case 2:
-			newY++;
-			break;
-		case 3:
-			newY--;
-			break;
-		}
-		if (newX < 0 || newY < 0 || newX >= MAP_TILE_W || newY >= MAP_TILE_H)
-			continue;
-		int movDiff = mov - map[newX][newY].getMov()[movType];
-		if (movDiff < 0)
-			continue;
-		if (spritesGround[newX][newY].getTeam() != team && spritesGround[newX][newY].getMovType() != ERROR)
-			continue;
-		if (movTemp[newX][newY].movType != ERROR)
-			if (movTemp[newX][newY].hasMoved)
-				continue;
-			else
-				if (movDiff > movTemp[newX][newY].mov) {
-					movTemp[newX][newY].mov = movDiff;
-					continue;
-				}
-		modMovTemp(newX, newY, movDiff, range, movType, team);
-	}
-
-	if (spritesGround[x][y].getMovType() == ERROR)
-		map[x][y].setIsReachable(true);
-	hasMoved = true;
-}
-
-void Unit::setX(int i) {x = i;}
-void Unit::setY(int i) { y = i;}
-int Unit::getX() { return x; }
-int Unit::getY() { return y; }
-
-
-
 void Unit::renderRange() {
 
-	//std::cout << map[x + 1][y].getMov()[movType] << map[x][y + 1].getMov()[movType] << map[x - 1][y].getMov()[movType]  << map[x][y - 1].getMov()[movType];
-	/*
-		Log -- 6-3
-		This still doesn't quite work. There are two main issues that need to be fixed:
-		1. For whatever reason, calling renderRange() corrupts the heap memory. The problem is most certainly isolated to
-		renderRange and no other function. I'm not sure why yet.
-		2. Even so, when the reachable tiles render with blue overlays, not all of the tiles that should be loading end up
-		loading blue. It seems unlikely that they're being rendered incorrectly, so the problem is most likely that the
-		algorithm doesn't flag them as 'reachable' for some reason. It occurs at the top-left and bottom-right edges.
-		Potential leads:
-		-- There's something stinky about the x,y system we're using. It tends to be inconsistent and I cannot confirm whether
-		any of the array indexings or xy field writing is being handled correctly. This could lead to funky indicies on arrays, so
-		it's worth a look.
-		-- renderRange() calls propagate(), and both of these call modMovTemp(), so check all three of these for errors or
-		leaks or something.
-	*/
 	for (int i = 0; i < 4; ++i) {
 		int newX = x, newY = y;
 		switch (i) {
@@ -507,147 +357,115 @@ void Unit::renderRange() {
 
 	for (int i = 0; i < MAP_TILE_W; ++i)
 		for (int j = 0; j < MAP_TILE_H; ++j)
-			if (map[i][j].getIsReachable()) { 
+			if (map[i][j].getIsReachable()) {
 				int temp[] = { i,j,-1,-1 };
 				reLayer(temp, 'r', NULL);
 
-				/* reRender() call here with blue effect layer*/ 
-			}
-				
-
-	/*
-		Notes on how to proceed:
-		
-		4. Once a unit is deselected, all of the Terrain tiles in that reachable diamond (or really on the whole map if that's
-		easier) need to have their isReachable members reset to false. These also need reRender()ing.
-		
-		6. Once the movement range is set, the attack range will effectively be the move range + the attack range (just a
-		bigger diamond over the movement range diamond). 
-		
-		7. Also, simply rendering the movement range isn't useful. Once in movement mode 's', make sure that the cursor can't
-		move outside of that range. Also, if the deselect key is pressed, execute point 4 and change the cursor mode back to
-		move mode 'c' as well.
-	*/
-	
-}
-
-
-
-
-//init
-
-
-SDL_Window* init(SDL_Window* window);
-
-bool loadTexture(SDL_Renderer* renderer, SDL_Texture** tex, const char* src);
-
-
-SDL_Window* init(SDL_Window * window) {
-	SDL_DestroyWindow(window);
-	window = NULL;
-
-	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-		return false;
-	}
-	else {
-		window = SDL_CreateWindow("Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-		if (window == NULL) {
-			printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-			return NULL;
-		}
-		else {
-			int imgFlags = IMG_INIT_PNG;
-			if (!(IMG_Init(imgFlags) & imgFlags)) {
-				printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
-				return NULL;
+				/* reRender() call here with blue effect layer*/
 			}
 
+}
+
+
+// Used to store the different Tiles that need to be rendered to one 'metaTile' -- Up to four Tiles could render in one spot,
+// layered on top of one another: Terrain, Unit, Effect, Cursor
+class metaTile {
+private:
+	Tile *layers = NULL;
+	int x;
+	int y;
+
+public:
+	metaTile() : x(-1), y(-1) {
+		layers = new Tile[4];
+		for (int i = 0; i < 4; ++i) setLayer(i, nullTile);
+	}
+	metaTile(int x, int y, Tile* l) : x(x), y(y) {
+		layers = new Tile[4];
+		for (int i = 0; i < 4; ++i) setLayer(i, l[i]);
+	}
+	~metaTile();
+	void setX(int ix);
+	void setY(int iy);
+	int getX();
+	int getY();
+	void setLayer(int layer, Tile input);
+	Tile getLayer(int layer);
+};
+
+metaTile::~metaTile() {
+	delete[] layers;
+	return;
+}
+
+void metaTile::setX(int ix) {x = ix;}
+void metaTile::setY(int iy) {y = iy;}
+int metaTile::getX() {return x;}
+int metaTile::getY() {return y;}
+void metaTile::setLayer(int layer, Tile input) {layers[layer] = input;}
+Tile metaTile::getLayer(int layer) {return layers[layer];}
+
+// Helper object used to determine movement range of Units -- Created by the Unit::renderRange() method and can propagate()
+// causing it to attempt to make more Movers next to it, following the rules of movement. Also destroyed by Unit::renderRange().
+class Mover {
+public:
+	int x;
+	int y;
+	int mov;
+	int range;
+	bool hasMoved;
+	TYPE movType;
+	int team;
+
+	Mover() : x(-1), y(-1), mov(-1), range(-1), movType(ERROR), hasMoved(false), team(-1) {}
+	Mover(int ix, int iy, int m, int r, TYPE t, int te) : x(ix), y(iy), mov(m), range(r), movType(t), hasMoved(false), team(te) {}
+	~Mover();
+	void propagate();
+};
+
+Mover::~Mover() {}
+
+void Mover::propagate() {
+	if (hasMoved) return;
+
+	for (int i = 0; i < 4; ++i) {
+		int newX = x, newY = y;
+		switch (i) {
+		case 0:
+			newX++;
+			break;
+		case 1:
+			newX--;
+			break;
+		case 2:
+			newY++;
+			break;
+		case 3:
+			newY--;
+			break;
 		}
+		if (newX < 0 || newY < 0 || newX >= MAP_TILE_W || newY >= MAP_TILE_H)
+			continue;
+		int movDiff = mov - map[newX][newY].getMov()[movType];
+		if (movDiff < 0)
+			continue;
+		if (spritesGround[newX][newY].getTeam() != team && spritesGround[newX][newY].getMovType() != ERROR)
+			continue;
+		if (movTemp[newX][newY].movType != ERROR)
+			if (movTemp[newX][newY].hasMoved)
+				continue;
+			else
+				if (movDiff > movTemp[newX][newY].mov) {
+					movTemp[newX][newY].mov = movDiff;
+					continue;
+				}
+		modMovTemp(newX, newY, movDiff, range, movType, team);
 	}
 
-	map = new Terrain*[MAP_TILE_W];
-	for (int i = 0; i < MAP_TILE_W; ++i)
-		map[i] = new Terrain[MAP_TILE_H];
-	spritesGround = new Unit * [MAP_TILE_W];
-	for (int i = 0; i < MAP_TILE_W; ++i)
-		spritesGround[i] = new Unit[MAP_TILE_H];
-	movTemp = new Mover * [MAP_TILE_W];
-	for (int i = 0; i < MAP_TILE_W; ++i)
-		movTemp[i] = new Mover[MAP_TILE_H];
-
-	screenSurface = SDL_GetWindowSurface(window);
-	printf("Got the window surface\n");
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	if (renderer == NULL) {
-		printf("Renderer could not be initialized! SDL_Error: %s\n", SDL_GetError());
-	}
-	SDL_SetRenderDrawColor(renderer, 0x0, 0x0, 0x0, 0xFF);
-	printf("Renderer initialized\n");
-
-	textures = new SDL_Texture*[NUM_TERRAIN];
-	if (!loadTexture(renderer, &textures[T_GRASS], "assets/teskbk.png"))
-		std::cout << "Texture \"grass\" failed to load!\n";
-	if (!loadTexture(renderer, &textures[T_APC], "assets/apc/1.png"))
-		std::cout << "Texture \"apc\" failed to load!\n";
-	if (!loadTexture(renderer, &textures[T_BLUE], "assets/blue_tint_overlay.png"))
-		std::cout << "Texture \"blue_tint\" failed to load!\n";
-	if (!loadTexture(renderer, &textures[T_RED], "assets/red_tint_overlay.png"))
-		std::cout << "Texture \"red_tint\" failed to load!\n";
-	if (!loadTexture(renderer, &textures[T_CURSOR], "assets/red_cursor.png"))
-		std::cout << "Texture \"red_cursor\" failed to load!\n";
-	if (!loadTexture(renderer, &textures[T_SELECT], "assets/red_select.png"))
-		std::cout << "Texture \"red_select\" failed to load!\n";
-	if (!loadTexture(renderer, &textures[T_TARGET], "assets/target_red.png"))
-		std::cout << "Texture \"red_target\" failed to load!\n";
-	if (!loadTexture(renderer, &textures[T_NULL], "assets/null.png"))
-		std::cout << "Texture \"null\" failed to load!\n";
-
-	return window;
+	if (spritesGround[x][y].getMovType() == ERROR)
+		map[x][y].setIsReachable(true);
+	hasMoved = true;
 }
-
-bool loadTexture(SDL_Renderer * renderer, SDL_Texture * *tex, const char* src) {
-	SDL_Surface* surface = IMG_Load(src);
-	if (surface == NULL) {
-		printf("Source image for texture @ %s failed to load! SDL_image Error: %s\n", src, IMG_GetError());
-		return false;
-	}
-
-	*tex = SDL_CreateTextureFromSurface(renderer, surface);
-	if (tex == NULL) {
-		printf("Texture @ %s failed to initialize! SDL_image Error: %s\n", src, IMG_GetError());
-		return false;
-	}
-	SDL_FreeSurface(surface);
-
-	return true;
-}
-
-void close(SDL_Window * window) {
-	SDL_DestroyWindow(window);
-
-	for (int i = 0; i < NUM_TEXTURES; ++i) {
-		SDL_DestroyTexture(textures[i]);
-	}
-
-	delete[] textures;
-
-	for (int i = 0; i < MAP_TILE_W; ++i) {
-		delete [] map[i];
-		delete [] spritesGround[i];
-		delete[] movTemp[i];
-	}
-	delete [] map;
-	delete [] spritesGround;
-	delete[] movTemp;
-
-	delete debugMap;
-	delete testAPC;
-
-	IMG_Quit();
-	SDL_Quit();
-}
-
 
 int main(int argc, char* argv[])
 {
@@ -664,41 +482,6 @@ int main(int argc, char* argv[])
 	else {
 
 		printf("Everything initialized!\n");
-
-		Tile *land = new Tile();
-		Tile *cursor = new Tile();
-
-		/*cursor.setX(15);
-		cursor.setY(5);
-
-		land.setX(0);
-		land.setY(0);*/
-
-		
-		
-		/*land->setRenderer(renderer);
-		land->setTexture("assets/testbk.png");
-
-		debugMap->setDisplay(land);
-
-		Tile *apcDisplay = new Tile();
-		apcDisplay->setRenderer(renderer);
-		apcDisplay->setTexture("assets/apc/1.png");
-
-		testAPC->setDisplay(apcDisplay);*/
-
-		/*cursor.setRenderer(renderer);
-		cursor.setTexture("assets/red_cursor.png");
-
-		SDL_RenderClear(renderer);
-		/*for (int i = 0; i < MAP_W / TILE_SIDE + 1; ++i)
-			for (int j = 0; j < MAP_H / TILE_SIDE + 1; ++j) {
-				land.setX(i);
-				land.setY(j);
-				land.render();
-			}
-		cursor.render();*/
-		//SDL_RenderPresent(renderer);
 
 		int x = 0;
 		int y = 0;
@@ -721,14 +504,10 @@ int main(int argc, char* argv[])
 		}
 		SDL_RenderPresent(renderer);
 
-		
-
 		std::cout << "Map Created!";
 
 		while (isRunning) {
 			SDL_Event scanner;
-
-
 			while (SDL_PollEvent(&scanner)) {
 
 				//mouse scanner
@@ -763,11 +542,7 @@ int main(int argc, char* argv[])
 				 if (w == true) {
 					 if (coords[1] == 0)
 						 break;
-					 if (moveMode == 's') {
-
-					 }
 					 setCoord(coords[0], coords[1], 'w');
-					 //reRender(coords, NULL, moveMode);
 					 reLayer(coords, NULL, moveMode);
 					 SDL_RenderPresent(renderer);
 					 //std::cout << "X: " << coords[0] << " Y: " << coords[1];
@@ -776,21 +551,17 @@ int main(int argc, char* argv[])
 				 if (a == true) {
 					 if (coords[0] == 0)
 						 break;
-
 					 setCoord(coords[0], coords[1], 'a');
-					 //reRender(coords, NULL, moveMode);
 					 reLayer(coords, NULL, moveMode);
 					 SDL_RenderPresent(renderer);
 					 //std::cout << "X: " << coords[0] << " Y: " << coords[1];
 					 a = false;
 				 }
-
 				 if (s == true) {
 					 if (coords[1] >= MAP_TILE_H)
 						break;
 
 					 setCoord(coords[0], coords[1], 's');
-					 //reRender(coords, NULL, moveMode);
 					 reLayer(coords, NULL, moveMode);
 					 SDL_RenderPresent(renderer);
 					 //std::cout << "X: " << coords[0] << " Y: " << coords[1];
@@ -801,7 +572,6 @@ int main(int argc, char* argv[])
 						 break;
 
 					 setCoord(coords[0], coords[1], 'd');
-					 //reRender(coords, NULL, moveMode);
 					 reLayer(coords, NULL, moveMode);
 					 SDL_RenderPresent(renderer);
 					 //std::cout << "X: " << coords[0] << " Y: " << coords[1];
@@ -814,7 +584,6 @@ int main(int argc, char* argv[])
 					 {
 						 moveMode = 's';
 						 selUnit = &(spritesGround[coords[0]][coords[1]]);
-						 //reRender(coords, NULL, moveMode);
 						 reLayer(coords, NULL, moveMode);
 
 						 for (int i = 0; i < MAP_TILE_W; ++i)
@@ -824,17 +593,12 @@ int main(int argc, char* argv[])
 								 std::cout << spritesGround[i][j].getX() << spritesGround[i][j].getY();
 							 }
 						 selUnit->renderRange();
-
-
-
-
 						 SDL_RenderPresent(renderer);
 					 }
 					 space = !space;
 				 }
 
 			}
-			//animateRender();
 
 			if (isRunning == false)
 				break;
@@ -854,12 +618,139 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
+// Helper function to change values in the movTemp array
+void modMovTemp(int x, int y, int mov, int range, TYPE movType, int team) {
+	movTemp[y][x].x = x;
+	movTemp[y][x].y = y;
+	movTemp[y][x].mov = mov;
+	movTemp[y][x].range = range;
+	movTemp[y][x].movType = movType;
+	movTemp[y][x].team = team;
+	movTemp[y][x].hasMoved = false;
+}
+
+// Called on startup to initialized both SDL and the relevant global arrays and textures
+SDL_Window* init(SDL_Window* window) {
+	SDL_DestroyWindow(window);
+	window = NULL;
+
+	// SDL and window
+	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+		return false;
+	}
+	else {
+		window = SDL_CreateWindow("Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+		if (window == NULL) {
+			printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+			return NULL;
+		}
+		else {
+			int imgFlags = IMG_INIT_PNG;
+			if (!(IMG_Init(imgFlags) & imgFlags)) {
+				printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
+				return NULL;
+			}
+
+		}
+	}
+
+	// global arrays
+	map = new Terrain * [MAP_TILE_W];
+	for (int i = 0; i < MAP_TILE_W; ++i)
+		map[i] = new Terrain[MAP_TILE_H];
+	spritesGround = new Unit * [MAP_TILE_W];
+	for (int i = 0; i < MAP_TILE_W; ++i)
+		spritesGround[i] = new Unit[MAP_TILE_H];
+	movTemp = new Mover * [MAP_TILE_W];
+	for (int i = 0; i < MAP_TILE_W; ++i)
+		movTemp[i] = new Mover[MAP_TILE_H];
+
+	// surface and renderer
+	screenSurface = SDL_GetWindowSurface(window);
+	printf("Got the window surface\n");
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	if (renderer == NULL) {
+		printf("Renderer could not be initialized! SDL_Error: %s\n", SDL_GetError());
+	}
+	SDL_SetRenderDrawColor(renderer, 0x0, 0x0, 0x0, 0xFF);
+	printf("Renderer initialized\n");
+
+	// textures
+	textures = new SDL_Texture * [NUM_TERRAIN];
+	if (!loadTexture(renderer, &textures[T_GRASS], "assets/teskbk.png"))
+		std::cout << "Texture \"grass\" failed to load!\n";
+	if (!loadTexture(renderer, &textures[T_APC], "assets/apc/1.png"))
+		std::cout << "Texture \"apc\" failed to load!\n";
+	if (!loadTexture(renderer, &textures[T_BLUE], "assets/blue_tint_overlay.png"))
+		std::cout << "Texture \"blue_tint\" failed to load!\n";
+	if (!loadTexture(renderer, &textures[T_RED], "assets/red_tint_overlay.png"))
+		std::cout << "Texture \"red_tint\" failed to load!\n";
+	if (!loadTexture(renderer, &textures[T_CURSOR], "assets/red_cursor.png"))
+		std::cout << "Texture \"red_cursor\" failed to load!\n";
+	if (!loadTexture(renderer, &textures[T_SELECT], "assets/red_select.png"))
+		std::cout << "Texture \"red_select\" failed to load!\n";
+	if (!loadTexture(renderer, &textures[T_TARGET], "assets/target_red.png"))
+		std::cout << "Texture \"red_target\" failed to load!\n";
+	if (!loadTexture(renderer, &textures[T_NULL], "assets/null.png"))
+		std::cout << "Texture \"null\" failed to load!\n";
+
+	return window;
+}
+
+// Takes in a source string and renderer and saves the resulting texture to the address of a SDL_Texture**. Returns whether
+// loading the texture was successful.
+bool loadTexture(SDL_Renderer* renderer, SDL_Texture** tex, const char* src) {
+	// Make surface
+	SDL_Surface* surface = IMG_Load(src);
+	if (surface == NULL) {
+		printf("Source image for texture @ %s failed to load! SDL_image Error: %s\n", src, IMG_GetError());
+		return false;
+	}
+
+	// Turn that surface into a texture
+	*tex = SDL_CreateTextureFromSurface(renderer, surface);
+	if (tex == NULL) {
+		printf("Texture @ %s failed to initialize! SDL_image Error: %s\n", src, IMG_GetError());
+		return false;
+	}
+	SDL_FreeSurface(surface);
+
+	return true;
+}
+
+// Called on termination to deallocate globals and close SDL
+void close(SDL_Window* window) {
+	SDL_DestroyWindow(window);
+
+	for (int i = 0; i < NUM_TEXTURES; ++i) {
+		SDL_DestroyTexture(textures[i]);
+	}
+	delete[] textures;
+
+	for (int i = 0; i < MAP_TILE_W; ++i) {
+		delete[] map[i];
+		delete[] spritesGround[i];
+		delete[] movTemp[i];
+	}
+	delete[] map;
+	delete[] spritesGround;
+	delete[] movTemp;
+
+	delete debugMap;
+	delete testAPC;
+
+	IMG_Quit();
+	SDL_Quit();
+}
+
+// Debug function
 void whatClicked(int x, int y, int mouse){
 	std::cout << "X position: " << x;
 	std::cout << "Y position: " << y;
-
 }
 
+// Updates the key globals to match the current keystates. Used when a key is pressed.
 void keyStatesDown(SDL_Keycode input){
 	switch (input) {
 	case SDLK_w:
@@ -900,6 +791,7 @@ void keyStatesDown(SDL_Keycode input){
 	}
 }
 
+// Like keyStatesDown, but called when a key is released
 void keyStatesUp(SDL_Keycode input) {
 	switch (input) {
 	case SDLK_w:
@@ -933,155 +825,8 @@ void keyStatesUp(SDL_Keycode input) {
 	}
 }
 
-// Tile stuff (figure out how to movw to a different file and implement?
-
-
-//Stock Map Data
-
-/*
-Types of tiles:  ??? Talk about this
-0. land
-1. water
-2. air
-3. mountain
-4. untraversable
-
-Types of troops:
-0. null/none
-1. mech (debugger)
-*/
-
-void metaTile::setX(int ix) {
-	x = ix;
-}
-
-void metaTile::setY(int iy) {
-	y = iy;
-}
-
-int metaTile::getX() {
-	return x;
-}
-
-int metaTile::getY() {
-	return y;
-}
-
-void metaTile::setLayer(int layer, Tile input) {
-	layers[layer] = input;
-}
-
-Tile metaTile::getLayer(int layer) {
-	return layers[layer];
-}
-
-Tile::~Tile() {}
-
-void Tile::setTexture(SDL_Texture * tex) {
-	display = tex;
-}
-
-void Tile::render() {
-	if (x * TILE_SIDE + MAP_X > MAP_W || y * TILE_SIDE + MAP_Y > MAP_H)
-		return;
-	SDL_Rect dest = { x * TILE_SIDE + MAP_X, y * TILE_SIDE + MAP_Y, TILE_SIDE, TILE_SIDE };
-	SDL_RenderCopy(renderer, display, NULL, &dest);
-}
-
-void Tile::setX(int ix) {
-	x = ix;
-}
-
-void Tile::setY(int iy) {
-	y = iy;
-}
-
-void Tile::setRenderer(SDL_Renderer * irenderer) {
-	renderer = irenderer;
-}
-
-int Tile::getX() {
-	return x;
-}
-
-int Tile::getY() {
-	return y;
-}
-
-void Tile::setT(int it) {
-	terrain = it;
-}
-
-void Tile::setU(int iu) {
-	unit = iu;
-}
-
-int Tile::getT() {
-	return terrain;
-}
-
-int Tile::getU() {
-	return unit;
-}
-
-SDL_Texture* Tile::getDisplay() {
-	return display;
-}
-TEXTURE Tile::getSource() {
-	return source;
-}
-
-void Tile::setSource(TEXTURE src) {
-	source = src;
-}
-
-Terrain::~Terrain() { delete[] mov; }
-
-void Terrain::setDisplay(TEXTURE src) {
-	display->setSource(src);
-}
-
-void Terrain::setDisplay(Tile * src) {
-	display = src;
-}
-
-Tile* Terrain::getDisplay() {
-	return display;
-}
-
-void Terrain::setDef(int d) {
-	def = d;
-}
-
-void Terrain::setMov(int* m) {
-	for (int i = 0; i < NUM_TYPES; ++i)
-		mov[i] = m[i];
-}
-
-void Terrain::setCanCapture(bool c) {
-	canCapture = c;
-}
-
-int Terrain::getDef() {
-	return def;
-}
-
-int* Terrain::getMov() {
-	return mov;
-}
-
-bool Terrain::getCanCapture() {
-	return canCapture;
-}
-
-int Unit::getType() {
-	return type;
-}
-
-void Unit::setType(int it) {
-	type = it;
-}
-
+// Creates two metaTiles (one for the old position, one for the new one) based on the current condition of the map and
+// spritesGround arrays, as well as whether an effect or cursor should be applied. These metaTiles are then reRender()-ed.
 void reLayer(int input[], char effect, char cursorType) {
 
 	std::cout << "Rendering a tile\n";
@@ -1212,6 +957,7 @@ void reLayer(int input[], char effect, char cursorType) {
 	return;
 }
 
+// Calls the render() method of each Tile in a metaTile in the correct order.
 void reRender(metaTile one, metaTile two) {
 	for (int i = 0; i < 4; i++) {
 		Tile* pointerOne = &(one.getLayer(i));
@@ -1243,16 +989,17 @@ void reRender(metaTile one, metaTile two) {
 	return;
 }
 
-
+// Debug function
 int whatIsTerrain(Terrain input) {
 	switch (input.getDef()) {
 	case 0:
 		return 0;
 	}
-	std::cout << "Returnign null!!!";
+	std::cout << "Returning null!!!";
 	return NULL;
 }
 
+// Debug function
 int whatIsUnit(Unit input) {
 	switch (input.getType()) {
 	case 0:
@@ -1265,6 +1012,8 @@ int whatIsUnit(Unit input) {
 	return NULL;
 }
 
+// Reads one code and returns a conversion to a TEXTURE code. Used in reLayer() to determine which textures from textures[] should
+// be used.
 TEXTURE setAsset(int masterCode, bool isTerrain) {
 	TEXTURE address = T_ERROR;
 	if (isTerrain) {
@@ -1288,6 +1037,7 @@ TEXTURE setAsset(int masterCode, bool isTerrain) {
 	return address;
 }
 
+// Updates the coords[] array when up, down, left, or right is pressed
 void setCoord(int x, int y, char dir) {
 	switch (dir) {
 	case 'w':
@@ -1318,85 +1068,7 @@ void setCoord(int x, int y, char dir) {
 	}
 }
 
-void selectUnit(int x, int y) {
-	int tempType = (spritesGround[x][y].getType());
-	if (tempType != 0) {
-		//select troop
-		int temp[2] = { x, y };
-		reLayer(temp, NULL, 's');
-	}
-	return;
-}
-
-/*void animateRender() {
-	Tile total[4][300]; //supports 300 x 4 frame animations at once, editable tho
-
-	int j = -1;
-	for (int k = 0; k < (sizeof spritesGround / sizeof spritesGround[0]); k++) {
-		for (int l = 0; l < (sizeof spritesGround[0] / sizeof(int)); l++) {
-			if (spritesGround[k][l].getType() != NULL) {
-				j++;
-				const char* dir;
-				dir = setAsset(spritesGround[k][l].getType(), false, true);
-				for (int i = 1; i <= 4; i++) {
-					Tile renderThis;
-					renderThis.setX(k);
-					renderThis.setY(l);
-					renderThis.setRenderer(renderer);
-
-					std::string tempAdd = std::to_string(i);
-					const char* addon = tempAdd.c_str();
-
-					const char* type = ".png";
-
-					std::string finalTotal(dir);
-					finalTotal.append(addon);
-					finalTotal.append(type);
-
-					const char* full = finalTotal.c_str();
-					renderThis.setTexture(full);
-
-					total[i][j] = renderThis;
-
-					std::cout << "j is: " << j;
-				}
-
-			}
-		}
-	}
-
-	//run through frames
-	for (int m = 0; m < 4; m++) {
-		for (int n = 0; n < 30; n++) {
-			//map
-			Tile tempLayer1;
-			tempLayer1.setX(total[m][n].getX());
-			tempLayer1.setY(total[m][n].getY());
-
-			tempLayer1.setT(whatIsTerrain(map[total[m][n].getX()][total[m][n].getY()]));
-			const char* c1 = setAsset(whatIsTerrain(map[total[m][n].getX()][total[m][n].getY()]), true, false);
-			tempLayer1.setRenderer(renderer);
-			tempLayer1.setTexture(c1);
-			reRenderTemp[0] = tempLayer1;
-			tempLayer1.render();
-
-			std::cout << "background setup and rendered layer level!";
-
-			Tile templayer2 = total[m][n];
-			templayer2.render();
-
-			std::cout << "animated tile render set!";
-		}
-		SDL_RenderPresent(renderer);
-		std::cout << "FINAL RENDER!!!";
-	}
-
-	return;
-}*/
-
-
-//temp debug
-
+//temp debug -- initializes the map[] and spritesGround[] and movTemp[] arrays
 void createMap() {
 
 	for (int i = 0; i < MAP_TILE_W; i++) {
@@ -1426,75 +1098,4 @@ void createMap() {
 		}
 	}
 
-}
-
-
-//Initialize Map and Units
-void initialize() {
-	/*Terrain debug;
-	Unit mech; 
-	mech.setType(0);
-	
-	spritesGround[0][0] = mech; spritesGround[0][1] = mech; spritesGround[0][2] = mech; spritesGround[0][3] = mech; spritesGround[0][4] = mech; spritesGround[0][5] = mech;
-	
-	
-	
-	 /*spritesGround = {  
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech},
-		{mech, mech, mech, mech, mech, mech, mech, mech, mech, mech}
-	};*/
-
-	//map = temp;
-}
-
-void cameraMove(char direction) {
-	switch (direction) {
-	case 'w':
-		if (coords[1] == 0)
-			break;
-
-		break;
-	case 's':
-		break;
-	case 'd':
-		break;
-	case 'a':
-		break;
-	}
-}
-
-void moveTileSet(int newX, int newY) {
-	for (int i = 0; i < 30; i++) {
-		for (int j = 0; j < 20; j++) {
-
-		}
-	}
 }
