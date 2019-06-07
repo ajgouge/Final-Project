@@ -6,6 +6,10 @@
 #include <cassert>
 
 
+//double tempAtk[] = { <percents written as decimals showing the attack modifier> };
+//Unit <name> = new Unit(-1, -1, -1, <movement points>, <attack range>, <movement type>, <cost>, tempAtk, NULL, -1);
+
+
 /* Enums */
 // Mov Types
 enum TYPE {
@@ -96,36 +100,11 @@ const TERRAIN_TYPE testMapInit[MAP_TILE_W][MAP_TILE_H] = {
 	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS}
 };
 
-
-/* Globals */
-Tile nullTile;
-Terrain nullTerrain;
-int gtemp[NUM_TYPES] = { 1,1,1,1,1,1,1,1 };
-Terrain* debugMap = new Terrain(0, gtemp, false, NULL);
-Unit* testAPC = new Unit(-1, -1, 1, 6, 1, TREADS, 500, NULL, NULL, 0);
-bool w;
-bool s;
-bool a;
-bool d;
-bool shift;
-bool ctrl;
-bool space;
-bool isRunning = true;
-SDL_Window* window;
-// Tracks whether a unit is selected or not (c for not, s for selecting)
-char moveMode = 'c';
-// Keeps a copy of the currently selected unit
-Unit* selUnit;
-//fill in when map is created
-Terrain** map;
-Unit** spritesGround;
-Mover** movTemp;
-SDL_Renderer* renderer = NULL;
-SDL_Surface* screenSurface = NULL;
-int coords[4]; //temp coords array
-int turn = 1; // odd is red, even is blue
-SDL_Texture** textures = NULL;
-
+class Tile;
+class Terrain;
+class Unit;
+class metaTile;
+class Mover;
 
 /* Prototypes */
 SDL_Window* init(SDL_Window* window);
@@ -176,6 +155,9 @@ public:
 	int getT();
 	int getU();
 };
+
+
+Tile nullTile;
 
 // Simple mutators, accessors, and deconstructors
 Tile::~Tile() {}
@@ -232,6 +214,8 @@ public:
 	bool getIsReachable();
 
 };
+
+Terrain nullTerrain;
 
 // Simple mutators, accessors, and deconstructors
 Terrain::~Terrain() { delete[] mov; }
@@ -290,6 +274,9 @@ public:
 
 };
 
+Terrain** map;
+Unit** spritesGround;
+
 // Simple mutators, accessors, and deconstructors
 Unit::~Unit() {/*delete[] attack;*/}
 void Unit::setDisplay(Tile* src) { display = src; }
@@ -307,63 +294,6 @@ void Unit::setType(int it) { type = it; }
 void Unit::setAttack(TYPE* a) {
 	//for (int i = 0; i < NUM_UNITS; ++i)
 		//attack[i] = a[i];
-}
-
-void Unit::renderRange() {
-
-	for (int i = 0; i < 4; ++i) {
-		int newX = x, newY = y;
-		switch (i) {
-		case 0:
-			newX++;
-			break;
-		case 1:
-			newX--;
-			break;
-		case 2:
-			newY++;
-			break;
-		case 3:
-			newY--;
-			break;
-		}
-		if (newX < 0 || newY < 0 || newX >= MAP_TILE_W || newY >= MAP_TILE_H)
-			continue;
-		int movDiff = mov - map[newX][newY].getMov()[movType];
-		if (movDiff < 0)
-			continue;
-		if (spritesGround[newX][newY].getTeam() != team && spritesGround[newX][newY].getMovType() != ERROR)
-			continue;
-		if (movTemp[newX][newY].movType != ERROR)
-			if (movTemp[newX][newY].hasMoved)
-				continue;
-			else
-				if (movDiff > movTemp[newX][newY].mov) {
-					movTemp[newX][newY].mov = movDiff;
-					continue;
-				}
-		modMovTemp(newX, newY, movDiff, range, movType, team);
-	}
-
-	movTemp[x][y].hasMoved = true;
-
-	for (int d = mov; d > 0; --d) {
-		for (int i = 0; i < MAP_TILE_W; ++i)
-			for (int j = 0; j < MAP_TILE_H; ++j) {
-				if (movTemp[i][j].movType != ERROR)
-					movTemp[i][j].propagate();
-			}
-	}
-
-	for (int i = 0; i < MAP_TILE_W; ++i)
-		for (int j = 0; j < MAP_TILE_H; ++j)
-			if (map[i][j].getIsReachable()) {
-				int temp[] = { i,j,-1,-1 };
-				reLayer(temp, 'r', NULL);
-
-				/* reRender() call here with blue effect layer*/
-			}
-
 }
 
 
@@ -423,6 +353,8 @@ public:
 	void propagate();
 };
 
+Mover** movTemp;
+
 Mover::~Mover() {}
 
 void Mover::propagate() {
@@ -466,6 +398,88 @@ void Mover::propagate() {
 		map[x][y].setIsReachable(true);
 	hasMoved = true;
 }
+
+void Unit::renderRange() {
+
+	for (int i = 0; i < 4; ++i) {
+		int newX = x, newY = y;
+		switch (i) {
+		case 0:
+			newX++;
+			break;
+		case 1:
+			newX--;
+			break;
+		case 2:
+			newY++;
+			break;
+		case 3:
+			newY--;
+			break;
+		}
+		if (newX < 0 || newY < 0 || newX >= MAP_TILE_W || newY >= MAP_TILE_H)
+			continue;
+		int movDiff = mov - map[newX][newY].getMov()[movType];
+		if (movDiff < 0)
+			continue;
+		if (spritesGround[newX][newY].getTeam() != team && spritesGround[newX][newY].getMovType() != ERROR)
+			continue;
+		if (movTemp[newX][newY].movType != ERROR)
+			if (movTemp[newX][newY].hasMoved)
+				continue;
+			else
+				if (movDiff > movTemp[newX][newY].mov) {
+					movTemp[newX][newY].mov = movDiff;
+					continue;
+				}
+		modMovTemp(newX, newY, movDiff, range, movType, team);
+	}
+
+	movTemp[x][y].hasMoved = true;
+
+	for (int d = mov; d > 0; --d) {
+		for (int i = 0; i < MAP_TILE_W; ++i)
+			for (int j = 0; j < MAP_TILE_H; ++j) {
+				if (movTemp[i][j].movType != ERROR)
+					movTemp[i][j].propagate();
+			}
+	}
+
+	for (int i = 0; i < MAP_TILE_W; ++i)
+		for (int j = 0; j < MAP_TILE_H; ++j)
+			if (map[i][j].getIsReachable()) {
+				int temp[] = { i,j,-1,-1 };
+				reLayer(temp, 'r', NULL);
+
+				/* reRender() call here with blue effect layer*/
+			}
+
+}
+
+/* Globals */
+int gtemp[NUM_TYPES] = { 1,1,1,1,1,1,1,1 };
+Terrain* debugMap = new Terrain(0, gtemp, false, NULL);
+Unit* testAPC = new Unit(-1, -1, 1, 6, 1, TREADS, 500, NULL, NULL, 0);
+bool w;
+bool s;
+bool a;
+bool d;
+bool shift;
+bool ctrl;
+bool space;
+bool isRunning = true;
+SDL_Window* window;
+// Tracks whether a unit is selected or not (c for not, s for selecting)
+char moveMode = 'c';
+// Keeps a copy of the currently selected unit
+Unit* selUnit;
+//fill in when map is created
+SDL_Renderer* renderer = NULL;
+SDL_Surface* screenSurface = NULL;
+int coords[4]; //temp coords array
+int turn = 1; // odd is red, even is blue
+SDL_Texture** textures = NULL;
+
 
 int main(int argc, char* argv[])
 {
