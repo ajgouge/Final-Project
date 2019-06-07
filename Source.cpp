@@ -258,7 +258,8 @@ int turn = 1; // odd is red, even is blue
 int cameraY = 0;
 std::vector<metaTile> animatedTiles;
 int frame = 1;
-int seconds;
+int fakeSeconds = 0;
+bool camMov;
 
 //init
 void whatClicked(int x, int y, int mouse);
@@ -271,7 +272,7 @@ void reLayer(int input[], char effect, char cursorType);
 void setCoord(int x, int y, char dir);
 void selectUnit(int x, int y);
 void animateRender();
-void reRender(metaTile one, metaTile two, int camY, bool skipSecond);
+void reRender(metaTile one, metaTile two, bool skipSecond);
 void createMap(); //debug
 void cameraMove(char direction);
 
@@ -361,6 +362,8 @@ void close(SDL_Window * window) {
 
 int main(int argc, char* argv[])
 {
+	camMov = false;
+
 	nullTile.setSource(NULL);
 	nullMetaTile.setLayer(0, nullTile);
 
@@ -401,7 +404,7 @@ int main(int argc, char* argv[])
 
 				//int tempInputter[4] = { lolz, yeetus, -1, -1 };
 				//reLayer(tempInputter, NULL, NULL);
-				reRender(demTiles[lolz][yeetus], nullMetaTile, 0, true);
+				reRender(demTiles[lolz][yeetus], nullMetaTile, true);
 			}
 		}
 		SDL_RenderPresent(renderer);
@@ -508,10 +511,17 @@ int main(int argc, char* argv[])
 				}
 
 			}
-			auto end = std::chrono::steady_clock::now();
-			seconds = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
-			if (seconds % 2 == 0)
-				animateRender();
+			//auto end = std::chrono::steady_clock::now();
+			//seconds = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+			if (!camMov) {
+				if (fakeSeconds % 10000 == 0)
+					animateRender();
+			}
+
+			fakeSeconds++;
+
+			if (fakeSeconds >= 2147483600)
+				fakeSeconds = 0;
 
 			if (isRunning == false)
 				break;
@@ -861,11 +871,11 @@ void reLayer(int input[], char effect, char cursorType) {                       
 
 
 	//ReRedner metaTiles
-	reRender(metaOne, metaTwo, 0, false);
+	reRender(metaOne, metaTwo, false);
 	return;
 }
 
-void reRender(metaTile one, metaTile two, int camY, bool skipSecond) {
+void reRender(metaTile one, metaTile two, bool skipSecond) {
 
 	for (int i = 0; i < 4; i++) {
 		Tile temp = one.getLayer(i);
@@ -1018,14 +1028,13 @@ void animateRender() {
 		animate.setSource(full);
 		demTiles[x][y].setLayer(1, animate);
 
-		if (frame < 4) {
-			frame++;
-		}
-		else {
-			frame = 1;
-		}
+		
+		reRender(demTiles[x][y], nullMetaTile, true);
+	}
 
-		reRender(demTiles[x][y], nullMetaTile, 0, true);
+	frame++;
+	if (frame > 4) {
+		frame = 1;
 	}
 
 	SDL_RenderPresent(renderer);
@@ -1110,7 +1119,7 @@ void initialize() {
 
 void cameraMove(char direction) {
 	int difference;
-
+	camMov = true;
 	switch (direction) {
 	case 'w':
 		difference = coords[1] - cameraY;
@@ -1119,7 +1128,7 @@ void cameraMove(char direction) {
 			for (int i = 0; i < MAP_TILE_W; ++i) {
 				for (int j = 0; j < MAP_TILE_H; ++j) {
 					if (j >= cameraY)
-						reRender(demTiles[i][j], nullMetaTile, -1, true);
+						reRender(demTiles[i][j], nullMetaTile, true);
 				}
 			}
 		}
@@ -1131,11 +1140,13 @@ void cameraMove(char direction) {
 			for (int i = 0; i < MAP_TILE_W; ++i) {
 				for (int j = 0; j < MAP_TILE_H; ++j) {
 					if ( j >= cameraY)
-						reRender(demTiles[i][j], nullMetaTile, 1, true);
+						reRender(demTiles[i][j], nullMetaTile, true);
 				}
 			}
 
 		}
 		break;
 	}
+
+	return;
 }
