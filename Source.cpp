@@ -691,8 +691,8 @@ SDL_Window* init(SDL_Window* window) {
 	printf("Renderer initialized\n");
 
 	// textures
-	textures = new SDL_Texture * [NUM_TERRAIN];
-	if (!loadTexture(renderer, &textures[T_GRASS], "assets/teskbk.png"))
+	textures = new SDL_Texture * [NUM_TEXTURES];
+	if (!loadTexture(renderer, &textures[T_GRASS], "assets/testbk.png"))
 		std::cout << "Texture \"grass\" failed to load!\n";
 	if (!loadTexture(renderer, &textures[T_APC], "assets/apc/1.png"))
 		std::cout << "Texture \"apc\" failed to load!\n";
