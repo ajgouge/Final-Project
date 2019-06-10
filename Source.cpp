@@ -72,10 +72,10 @@ const TERRAIN_TYPE testMapInit[MAP_TILE_W][MAP_TILE_H] = {
 	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
 	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
 	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
-	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,MOUNTAIN,MOUNTAIN,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,MOUNTAIN,MOUNTAIN,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,MOUNTAIN,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
+	{GRASS,GRASS,GRASS,GRASS,GRASS,MOUNTAIN,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
 	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
 	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
 	{GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS,GRASS},
@@ -275,6 +275,7 @@ public:
 	int getCost();
 	void setType(TEXTURE it);
 	void renderRange();
+	void setTeam(int t);
 
 };
 
@@ -292,13 +293,13 @@ void Unit::setX(int i) { x = i; }
 void Unit::setY(int i) { y = i; }
 int Unit::getX() { return x; }
 int Unit::getY() { return y; }
-
 TEXTURE Unit::getType() { return type; }
 void Unit::setType(TEXTURE it) { type = it; }
 int Unit::getMov() { return mov; }
 int Unit::getRange() { return range; }
 Tile* Unit::getDisplay() { return display; }
 int Unit::getCost() { return cost; }
+void Unit::setTeam(int t) { team = t; }
 
 void Unit::setAttack(TYPE* a) {
 	//for (int i = 0; i < NUM_UNITS; ++i)
@@ -404,6 +405,8 @@ void Mover::propagate() {
 					movTemp[newX][newY]->mov = movDiff;
 					continue;
 				}
+				else
+					continue;
 		movTemp[newX][newY] = new Mover(newX, newY, movDiff, range, movType, team);
 	}
 
@@ -452,6 +455,8 @@ bool shift;
 bool ctrl;
 bool space;
 bool isRunning = true;
+int blueFunds = 0;
+int redFunds = 0;
 SDL_Window* window;
 // Tracks whether a unit is selected or not (c for not, s for selecting)
 char moveMode = 'c';
@@ -461,7 +466,7 @@ Unit* selUnit;
 SDL_Renderer* renderer = NULL;
 SDL_Surface* screenSurface = NULL;
 int coords[4]; //temp coords array
-int turn = 1; // odd is red, even is blue
+int turn = 0; // odd is red, even is blue
 // Points to all loaded png assets
 SDL_Texture** textures = NULL;
 // Points to Tile versions of these assets
@@ -470,6 +475,8 @@ Tile** spritesheet = NULL;
 Terrain** terrainsheet = NULL;
 // Points to initial states of all units
 Unit** unitsheet = NULL;
+// true when the player just moved a unit, false after that unit does an action
+bool openMenu = false;
 
 
 int main(int argc, char* argv[])
@@ -540,6 +547,7 @@ int main(int argc, char* argv[])
 				 if (scanner.type == SDL_KEYUP) {
 					keyStatesUp(scanner.key.keysym.sym);
 				}
+
 				//game changing stuff
 				 if (w == true) {
 					 if (coords[1] == 0)
@@ -612,7 +620,9 @@ int main(int argc, char* argv[])
 							 }
 						 reLayer(coords, NULL, moveMode);
 						 SDL_RenderPresent(renderer);
+
 					 }
+					 openMenu = true;
 					 space = !space;
 				 }
 
@@ -1038,11 +1048,11 @@ void initTerrain() {
 	int temp1[] = { 1, 1, 1, 1, 1, 1 };
 	terrainsheet[GRASS] = new Terrain(0, temp1, false, spritesheet[T_GRASS], T_GRASS);
 	int temp2[] = { 1, 1, 1, 1, 1, 1 };
-	terrainsheet[BRIDGE] = new Terrain(0, temp2, false, spritesheet[T_BRIDGE], T_GRASS);
-	int temp3[] = { 1, 1, 1, 1, 1, 1 };
-	terrainsheet[MOUNTAIN] = new Terrain(0, temp3, false, spritesheet[T_MOUNTAIN], T_GRASS);
+	terrainsheet[BRIDGE] = new Terrain(0, temp2, false, spritesheet[T_BRIDGE], T_BRIDGE);
+	int temp3[] = { 3, 3, 3, 3, 3, 3 };
+	terrainsheet[MOUNTAIN] = new Terrain(0, temp3, false, spritesheet[T_MOUNTAIN], T_MOUNTAIN);
 	int temp4[] = { 1, 1, 1, 1, 1, 1 };
-	terrainsheet[WATER] = new Terrain(0, temp4, false, spritesheet[T_WATER], T_GRASS);
+	terrainsheet[WATER] = new Terrain(0, temp4, false, spritesheet[T_WATER], T_WATER);
 	
 }
 
@@ -1079,5 +1089,8 @@ void createMap() {
 	}
 	
 	initSpritesGround(10, 5, unitsheet[APC]);
+	initSpritesGround(10, 3, unitsheet[APC]);
+
+	spritesGround[10][3]->setTeam(1);
 
 }
