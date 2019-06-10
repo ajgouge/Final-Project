@@ -416,7 +416,7 @@ void Unit::renderRange() {
 
 	movTemp[x][y] = new Mover(x, y, mov, range, movType, team);
 
-	for (int d = mov; d > 0; --d) {
+	for (int d = mov+1; d > 0; --d) {
 		for (int i = 0; i < MAP_TILE_W; ++i)
 			for (int j = 0; j < MAP_TILE_H; ++j) {
 				if (movTemp[i][j] != NULL)
@@ -429,6 +429,16 @@ void Unit::renderRange() {
 			if (map[i][j]->getIsReachable()) {
 				int temp[] = { i,j,-1,-1 };
 				reLayer(temp, 'r', NULL);
+			}
+	int temp[] = { x, y, -1, -1 };
+	reLayer(temp, 'r', 's');
+	map[x][y]->setIsReachable(true);
+
+	for (int i = 0; i < MAP_TILE_W; ++i)
+		for (int j = 0; j < MAP_TILE_H; ++j)
+			if (movTemp[i][j] != NULL) {
+				delete movTemp[i][j];
+				movTemp[i][j] = NULL;
 			}
 
 }
@@ -534,49 +544,73 @@ int main(int argc, char* argv[])
 				 if (w == true) {
 					 if (coords[1] == 0)
 						 break;
-					 setCoord(coords[0], coords[1], 'w');
-					 reLayer(coords, NULL, moveMode);
-					 SDL_RenderPresent(renderer);
-					 //std::cout << "X: " << coords[0] << " Y: " << coords[1];
+					 if ((moveMode == 's' && map[coords[0]][coords[1] - 1]->getIsReachable()) || moveMode == 'c') {
+						 setCoord(coords[0], coords[1], 'w');
+						 reLayer(coords, NULL, moveMode);
+						 SDL_RenderPresent(renderer);
+						 //std::cout << "X: " << coords[0] << " Y: " << coords[1];
+					 }
 					 w = false;
 				 }
 				 if (a == true) {
 					 if (coords[0] == 0)
 						 break;
-					 setCoord(coords[0], coords[1], 'a');
-					 reLayer(coords, NULL, moveMode);
-					 SDL_RenderPresent(renderer);
-					 //std::cout << "X: " << coords[0] << " Y: " << coords[1];
+					 if ((moveMode == 's' && map[coords[0] - 1][coords[1]]->getIsReachable()) || moveMode == 'c') {
+						 setCoord(coords[0], coords[1], 'a');
+						 reLayer(coords, NULL, moveMode);
+						 SDL_RenderPresent(renderer);
+						 //std::cout << "X: " << coords[0] << " Y: " << coords[1];
+					 }
 					 a = false;
 				 }
 				 if (s == true) {
 					 if (coords[1] == MAP_TILE_H-1)
 						break;
-
-					 setCoord(coords[0], coords[1], 's');
-					 reLayer(coords, NULL, moveMode);
-					 SDL_RenderPresent(renderer);
-					 //std::cout << "X: " << coords[0] << " Y: " << coords[1];
+					 if ((moveMode == 's' && map[coords[0]][coords[1] + 1]->getIsReachable()) || moveMode == 'c') {
+						 setCoord(coords[0], coords[1], 's');
+						 reLayer(coords, NULL, moveMode);
+						 SDL_RenderPresent(renderer);
+						 //std::cout << "X: " << coords[0] << " Y: " << coords[1];
+					 }
 					 s = false;
 				 }
 				 if (d == true) {
 					 if (coords[0] == MAP_TILE_W-1)
 						 break;
-
-					 setCoord(coords[0], coords[1], 'd');
-					 reLayer(coords, NULL, moveMode);
-					 SDL_RenderPresent(renderer);
-					 //std::cout << "X: " << coords[0] << " Y: " << coords[1];
+					 if ((moveMode == 's' && map[coords[0] + 1][coords[1]]->getIsReachable()) || moveMode == 'c') {
+						 setCoord(coords[0], coords[1], 'd');
+						 reLayer(coords, NULL, moveMode);
+						 SDL_RenderPresent(renderer);
+						 //std::cout << "X: " << coords[0] << " Y: " << coords[1];
+					 }
 					 d = false;
 				 }
 				 if (space == true) {
 					 // coords[0],coords[1] == coordinates of cursor currently
-  					 if (spritesGround[coords[0]][coords[1]] != NULL && moveMode == 'c')
+					 if (spritesGround[coords[0]][coords[1]] != NULL && moveMode == 'c')
 					 {
 						 moveMode = 's';
 						 selUnit = spritesGround[coords[0]][coords[1]];
 						 reLayer(coords, NULL, moveMode);
 						 selUnit->renderRange();
+						 SDL_RenderPresent(renderer);
+					 }
+					 else if (moveMode == 's') {
+						 moveMode = 'c';
+						 initSpritesGround(coords[0], coords[1], selUnit);
+						 spritesGround[selUnit->getX()][selUnit->getY()] = NULL;
+						 int temp[] = { selUnit->getX(), selUnit->getY(), -1, -1 };
+						 reLayer(temp, NULL, NULL);
+						 delete selUnit;
+						 for (int i = 0; i < MAP_TILE_W; ++i)
+							 for (int j = 0; j < MAP_TILE_H; ++j) {
+								 if (map[i][j]->getIsReachable()) {
+									 map[i][j]->setIsReachable(false);
+									 int temp[] = { i, j, -1, -1 };
+									 reLayer(temp, NULL, NULL);
+								 }
+							 }
+						 reLayer(coords, NULL, moveMode);
 						 SDL_RenderPresent(renderer);
 					 }
 					 space = !space;
@@ -859,6 +893,8 @@ void reLayer(int input[], char effect, char cursorType) {
 		metaOne->setLayer(1, spritesheet[T_NULL]);
 
 	//effect layer 2 (shading)
+	if (map[x][y]->getIsReachable())
+		effect = 'r';
 	switch (effect) {
 		case NULL:
 			metaOne->setLayer(2, spritesheet[T_NULL]);
