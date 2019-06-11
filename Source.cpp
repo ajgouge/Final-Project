@@ -1358,10 +1358,10 @@ void reLayer(int input[], char effect, char cursorType) {
 		else
 			metaTwo->setLayer(4, spritesheet[T_NULL]);
 
+		demTiles[xOld][yOld] = metaTwo;
 	}
 
 	demTiles[x][y] = metaOne;
-	demTiles[xOld][yOld] = metaTwo;
 	reRender(metaOne, metaTwo, false);
 
 	delete metaOne;
