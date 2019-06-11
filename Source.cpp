@@ -511,7 +511,7 @@ int main(int argc, char* argv[])
 			auto end = std::chrono::steady_clock::now();
 			seconds = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
 			if (seconds % 2 == 0)
-				animateRender();
+				//animateRender();
 
 			if (isRunning == false)
 				break;
