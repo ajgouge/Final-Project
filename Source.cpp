@@ -140,13 +140,14 @@ void whatClicked(int x, int y, int mouse);
 void keyStatesUp(SDL_Keycode input);
 void keyStatesDown(SDL_Keycode input);
 void reLayer(int input[], char effect, char cursorType);
-void reRender(metaTile* one, metaTile* two);
+void reRender(metaTile* one, metaTile* two, bool skipSecond);
 void setCoord(int x, int y, char dir);
 void createMap(); //debug
 void initTerrain();
 void initUnit();
 void initMap(int i, int j, Terrain* t);
 void initSpritesGround(int i, int j, Unit* u);
+void cameraMove(char direction);
 
 
 /* Classes */
@@ -324,20 +325,20 @@ public:
 
 };
 
-class metaTile {
-private:
-	Tile layers[4];
-	int x;
-	int y;
-
-public:
-	void setX(int ix);
-	void setY(int iy);
-	int getX();
-	int getY();
-	void setLayer(int layer, Tile input);
-	Tile getLayer(int layer);
-};
+//class metaTile {
+//private:
+//	Tile layers[4];
+//	int x;
+//	int y;
+//
+//public:
+//	void setX(int ix);
+//	void setY(int iy);
+//	int getX();
+//	int getY();
+//	void setLayer(int layer, Tile input);
+//	Tile getLayer(int layer);
+//};
 
 Terrain*** map;
 Unit*** spritesGround;
@@ -604,14 +605,25 @@ Terrain** terrainsheet = NULL;
 Unit** unitsheet = NULL;
 // true when the player just moved a unit, false after that unit does an action
 bool openMenu = false;
+//camera Offest by y value
 int cameraY = 0;
+//animated tiles vector
 std::vector<metaTile> animatedTiles;
+//frame for animation
 int frame = 1;
+//int timer for animate delay
 int seconds;
-
+//metaTile map for camera and animation
+metaTile*** demTiles;
+//Null Tile and MetaTile for passthrough
+Tile nullTile;
+metaTile nullMetaTile;
 
 int main(int argc, char* argv[])
 {
+	//Null Objects allocation
+	nullMetaTile.setLayer(0, &nullTile);
+
 	window = NULL;
 	window = init(window);
 
@@ -687,6 +699,8 @@ int main(int argc, char* argv[])
 						setCoord(coords[0], coords[1], 'w');
 						reLayer(coords, NULL, moveMode);
 						SDL_RenderPresent(renderer);
+						cameraMove('w');
+						SDL_RenderPresent(renderer);
 						//std::cout << "X: " << coords[0] << " Y: " << coords[1];
 					}
 					w = false;
@@ -719,6 +733,8 @@ int main(int argc, char* argv[])
 					if ((moveMode == 's' && map[coords[0]][coords[1] + 1]->getIsReachable()) || moveMode == 'c') {
 						setCoord(coords[0], coords[1], 's');
 						reLayer(coords, NULL, moveMode);
+						SDL_RenderPresent(renderer);
+						cameraMove('s');
 						SDL_RenderPresent(renderer);
 						//std::cout << "X: " << coords[0] << " Y: " << coords[1];
 					}
@@ -900,6 +916,9 @@ SDL_Window* init(SDL_Window* window) {
 		for (int j = 0; j < MAP_TILE_H; ++j)
 			movTemp[i][j] = NULL;
 	}
+	demTiles = new metaTile ** [MAP_TILE_W];
+	for (int i = 0; i < MAP_TILE_W; ++i)
+		demTiles[i] = new metaTile * [MAP_TILE_H];
 
 	// surface and renderer
 	screenSurface = SDL_GetWindowSurface(window);
@@ -1182,7 +1201,6 @@ void reLayer(int input[], char effect, char cursorType) {
 			metaOne->setLayer(2, spritesheet[T_BLUE]);
 			break;
 	}
-	metaOne.setLayer(2, tempLayer3);
 
 	//sprites layer 3 (cursor)
 	switch (cursorType) {
@@ -1342,7 +1360,9 @@ void reLayer(int input[], char effect, char cursorType) {
 
 	}
 
-	reRender(metaOne, metaTwo);
+	demTiles[x][y] = metaOne;
+	demTiles[xOld][yOld] = metaTwo;
+	reRender(metaOne, metaTwo, false);
 
 	delete metaOne;
 	delete metaTwo;
@@ -1356,19 +1376,22 @@ void reRender(metaTile* one, metaTile* two, bool skipSecond) {
 		Tile* pointerOne = one->getLayer(i);
 		if (pointerOne != NULL) {
 			pointerOne->setX(one->getX());
-			pointerOne->setY(one->getY());
+			pointerOne->setY(one->getY() - cameraY);
 			pointerOne->render();
 		}
 
-		Tile* temp2 = two->getLayer(i);
-		if (temp2 != NULL) {
-			temp2->setX(two->getX());
-			temp2->setY(two->getY());
-			temp2->render();
-		}
+		if (skipSecond == false) {
+			Tile* temp2 = two->getLayer(i);
+			if (temp2 != NULL) {
+				temp2->setX(two->getX());
+				temp2->setY(two->getY() - cameraY);
+				temp2->render();
+			}
 
+			temp2 = NULL;
+		}
 		pointerOne = NULL;
-		temp2 = NULL;
+		
 	}
 
 	return;
@@ -1417,25 +1440,6 @@ void initTerrain() {
 		TERRAIN_ERROR = -1
 	};
 	*/
-void animateRender() {
-
-	for (int i = 0; i < animatedTiles.size(); i++) {
-		Tile animate = animatedTiles.at(i).getLayer(1);
-		int unit = animate.getT();
-		int x = animatedTiles.at(i).getX();
-		int y = animatedTiles.at(i).getY();
-
-		std::string finalTotal;
-		const char* base = setAsset(unit, false, true);
-		const char* type = ".png";
-		std::string tempAdd = std::to_string(frame);
-		const char* addon = tempAdd.c_str();
-
-		finalTotal.append(base);
-		finalTotal.append(addon);
-		finalTotal.append(type);
-
-		const char* full = finalTotal.c_str();
 
 	terrainsheet = new Terrain * [NUM_TERRAIN];
 	int temp1[] = { 1, 1, 1, 1, 1, 1 };
@@ -1446,20 +1450,49 @@ void animateRender() {
 	terrainsheet[MOUNTAIN] = new Terrain(0, temp3, false, spritesheet[T_MOUNTAIN], T_MOUNTAIN);
 	int temp4[] = { 1, 1, 1, 1, 1, 1 };
 	terrainsheet[WATER] = new Terrain(0, temp4, false, spritesheet[T_WATER], T_WATER);
-	
+
+	//for (int i = 0; i <= WATER; i++) {
+	//	Tile tempTerrain;
+	//	tempTerrain.setT(terrainsheet[i]->getType());  //defunct?
+	//	tempTerrain.setSource(terrainsheet[i]->getType);
+	//}
+
 }
-		animate.setSource(full);
-		demTiles[x][y].setLayer(1, animate);
+//void animateRender() {
+//
+//	for (int i = 0; i < animatedTiles.size(); i++) {
+//		Tile animate = animatedTiles.at(i).getLayer(1);
+//		int unit = animate.getT();
+//		int x = animatedTiles.at(i).getX();
+//		int y = animatedTiles.at(i).getY();
+//
+//		std::string finalTotal;
+//		const char* base = setAsset(unit, false, true);
+//		const char* type = ".png";
+//		std::string tempAdd = std::to_string(frame);
+//		const char* addon = tempAdd.c_str();
+//
+//		finalTotal.append(base);
+//		finalTotal.append(addon);
+//		finalTotal.append(type);
+//
+//		const char* full = finalTotal.c_str();
+//
+//
+//}
+//		animate.setSource(full);
+//		demTiles[x][y].setLayer(1, animate);
+//
+//		if (frame < 4) {
+//			frame++;
+//		}
+//		else {
+//			frame = 1;
+//		}
+//
+//		reRender(demTiles[x][y], nullMetaTile, 0, true);
+//	}
 
-		if (frame < 4) {
-			frame++;
-		}
-		else {
-			frame = 1;
-		}
-
-		reRender(demTiles[x][y], nullMetaTile, 0, true);
-	}
 void initUnit() {
 
 	/*
@@ -1500,6 +1533,17 @@ void createMap() {
 
 	spritesGround[10][5]->setTeam(1);
 
+	//add test units to animate render vector
+
+	/*Tile unit1;
+	unit1.setT(spritesGround[10][5]->getType);
+	unit1.setSource(T_APC);
+	unit1.setX(10);
+	unit1.setY(5);
+
+
+
+	animatedTiles.push_back();*/
 }
 
 void cameraMove(char direction) {
@@ -1513,7 +1557,7 @@ void cameraMove(char direction) {
 			for (int i = 0; i < MAP_TILE_W; ++i) {
 				for (int j = 0; j < MAP_TILE_H; ++j) {
 					if (j >= cameraY)
-						reRender(demTiles[i][j], nullMetaTile, -1, true);
+						reRender(demTiles[i][j], &nullMetaTile, true);
 				}
 			}
 		}
@@ -1525,7 +1569,7 @@ void cameraMove(char direction) {
 			for (int i = 0; i < MAP_TILE_W; ++i) {
 				for (int j = 0; j < MAP_TILE_H; ++j) {
 					if (j >= cameraY)
-						reRender(demTiles[i][j], nullMetaTile, 1, true);
+						reRender(demTiles[i][j], &nullMetaTile, true);
 				}
 			}
 
