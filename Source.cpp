@@ -8,6 +8,8 @@
 #include <cassert>
 #include <cmath>
 
+//camera Offest by y value
+int cameraY = 0;
 
 //double tempAtk[] = { <percents written as decimals showing the attack modifier> };
 //Unit <name> = new Unit(-1, -1, -1, <movement points>, <attack range>, <movement type>, <cost>, tempAtk, NULL, -1);
@@ -502,10 +504,11 @@ void Unit::renderRange() {
 		for (int j = 0; j < MAP_TILE_H; ++j)
 			if (map[i][j]->getIsReachable()) {
 				int temp[] = { i,j,-1,-1 };
-				reLayer(temp, 'r', NULL);
+				if (!((j - cameraY) < 0))
+					reLayer(temp, 'b', NULL);
 			}
 	int temp[] = { x, y, -1, -1 };
-	reLayer(temp, 'r', 's');
+	reLayer(temp, 'b', 's');
 	map[x][y]->setIsReachable(true);
 
 	for (int i = 0; i < MAP_TILE_W; ++i)
@@ -564,6 +567,7 @@ bool Unit::renderAttack() {
 	reLayer(temp1, 'b', 't');
 
 	for (int i = 1; i < numTargets; ++i) {
+		bool shouldDisplay = true;
 		int temp[] = { targets[i]->getX(), targets[i]->getY(), -1, -1 };
 		reLayer(temp, 'b', NULL);
 	}
@@ -605,8 +609,6 @@ Terrain** terrainsheet = NULL;
 Unit** unitsheet = NULL;
 // true when the player just moved a unit, false after that unit does an action
 bool openMenu = false;
-//camera Offest by y value
-int cameraY = 0;
 //animated tiles vector
 std::vector<metaTile> animatedTiles;
 //frame for animation
@@ -701,7 +703,7 @@ int main(int argc, char* argv[])
 						SDL_RenderPresent(renderer);
 						cameraMove('w');
 						SDL_RenderPresent(renderer);
-						//std::cout << "X: " << coords[0] << " Y: " << coords[1];
+						std::cout << "X: " << coords[0] << " Y: " << coords[1];
 					}
 					w = false;
 				}
@@ -712,7 +714,7 @@ int main(int argc, char* argv[])
 						setCoord(coords[0], coords[1], 'a');
 						reLayer(coords, NULL, moveMode);
 						SDL_RenderPresent(renderer);
-						//std::cout << "X: " << coords[0] << " Y: " << coords[1];
+						std::cout << "X: " << coords[0] << " Y: " << coords[1];
 					}
 					else if (moveMode == 't') {
 						if (targetsIndex == 0)
@@ -736,7 +738,7 @@ int main(int argc, char* argv[])
 						SDL_RenderPresent(renderer);
 						cameraMove('s');
 						SDL_RenderPresent(renderer);
-						//std::cout << "X: " << coords[0] << " Y: " << coords[1];
+					std::cout << "X: " << coords[0] << " Y: " << coords[1];
 					}
 					s = false;
 				}
@@ -747,7 +749,7 @@ int main(int argc, char* argv[])
 						setCoord(coords[0], coords[1], 'd');
 						reLayer(coords, NULL, moveMode);
 						SDL_RenderPresent(renderer);
-						//std::cout << "X: " << coords[0] << " Y: " << coords[1];
+						std::cout << "X: " << coords[0] << " Y: " << coords[1];
 					}
 					else if (moveMode == 't') {
 						if (targetsIndex == targetsSize-1)
@@ -856,6 +858,8 @@ int main(int argc, char* argv[])
 					SDL_RenderPresent(renderer);
 				}
 			}
+
+
 
 			if (isRunning == false)
 				break;
@@ -1195,10 +1199,10 @@ void reLayer(int input[], char effect, char cursorType) {
 			metaOne->setLayer(2, spritesheet[T_NULL]);
 			break;
 		case 'b':
-			metaOne->setLayer(2, spritesheet[T_RED]);
+			metaOne->setLayer(2, spritesheet[T_BLUE]);
 			break;
 		case 'r':
-			metaOne->setLayer(2, spritesheet[T_BLUE]);
+			metaOne->setLayer(2, spritesheet[T_RED]);
 			break;
 	}
 
@@ -1363,9 +1367,6 @@ void reLayer(int input[], char effect, char cursorType) {
 
 	demTiles[x][y] = metaOne;
 	reRender(metaOne, metaTwo, false);
-
-	delete metaOne;
-	delete metaTwo;
 
 	return;
 }
@@ -1535,15 +1536,15 @@ void createMap() {
 
 	//add test units to animate render vector
 
-	/*Tile unit1;
-	unit1.setT(spritesGround[10][5]->getType);
-	unit1.setSource(T_APC);
-	unit1.setX(10);
-	unit1.setY(5);
+	//Tile unit1;
+	//unit1.setT(spritesGround[10][5]->getType);
+	//unit1.setSource(T_APC);
+	//unit1.setX(10);
+	//unit1.setY(5);
 
 
 
-	animatedTiles.push_back();*/
+	//animatedTiles.push_back();
 }
 
 void cameraMove(char direction) {
@@ -1564,7 +1565,7 @@ void cameraMove(char direction) {
 		break;
 	case 's':
 		difference = coords[1] - cameraY;
-		if (difference > 9 && coords[1] <= 18) {
+		if (difference > 8 && coords[1] <= 18) {
 			cameraY++;
 			for (int i = 0; i < MAP_TILE_W; ++i) {
 				for (int j = 0; j < MAP_TILE_H; ++j) {
