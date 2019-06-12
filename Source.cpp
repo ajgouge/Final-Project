@@ -504,11 +504,10 @@ void Unit::renderRange() {
 		for (int j = 0; j < MAP_TILE_H; ++j)
 			if (map[i][j]->getIsReachable()) {
 				int temp[] = { i,j,-1,-1 };
-				if (!((j - cameraY) < 0))
 					reLayer(temp, 'b', NULL);
 			}
 	int temp[] = { x, y, -1, -1 };
-	reLayer(temp, 'b', 's');
+	reLayer(temp, 'r', 's');
 	map[x][y]->setIsReachable(true);
 
 	for (int i = 0; i < MAP_TILE_W; ++i)
@@ -569,7 +568,7 @@ bool Unit::renderAttack() {
 	for (int i = 1; i < numTargets; ++i) {
 		bool shouldDisplay = true;
 		int temp[] = { targets[i]->getX(), targets[i]->getY(), -1, -1 };
-		reLayer(temp, 'b', NULL);
+			reLayer(temp, 'b', NULL);
 	}
 
 	targetsSize = numTargets;
@@ -653,7 +652,8 @@ int main(int argc, char* argv[])
 		for (int lolz = 0; lolz < MAP_TILE_W; lolz++) {
 			for (int yeetus = 0; yeetus < MAP_TILE_H; yeetus++) {
 				int tempInputter[4] = { lolz, yeetus, -1, -1 };
-				reLayer(tempInputter, NULL, NULL);
+				if (!((yeetus - cameraY) < 0))
+					reLayer(tempInputter, NULL, NULL);
 			}
 		}
 		SDL_RenderPresent(renderer);
@@ -1361,12 +1361,11 @@ void reLayer(int input[], char effect, char cursorType) {
 		}
 		else
 			metaTwo->setLayer(4, spritesheet[T_NULL]);
-
-		demTiles[xOld][yOld] = metaTwo;
+			demTiles[xOld][yOld] = metaTwo;
 	}
 
 	demTiles[x][y] = metaOne;
-	reRender(metaOne, metaTwo, false);
+		reRender(metaOne, metaTwo, false);
 
 	return;
 }
@@ -1378,7 +1377,8 @@ void reRender(metaTile* one, metaTile* two, bool skipSecond) {
 		if (pointerOne != NULL) {
 			pointerOne->setX(one->getX());
 			pointerOne->setY(one->getY() - cameraY);
-			pointerOne->render();
+			if (!((one->getY() - cameraY) < 0))
+				pointerOne->render();
 		}
 
 		if (skipSecond == false) {
@@ -1386,7 +1386,8 @@ void reRender(metaTile* one, metaTile* two, bool skipSecond) {
 			if (temp2 != NULL) {
 				temp2->setX(two->getX());
 				temp2->setY(two->getY() - cameraY);
-				temp2->render();
+				if (!((two->getY() - cameraY) < 0))
+					temp2->render();
 			}
 
 			temp2 = NULL;
@@ -1553,7 +1554,7 @@ void cameraMove(char direction) {
 	switch (direction) {
 	case 'w':
 		difference = coords[1] - cameraY;
-		if (difference < 2 && coords[1] >= 2) {
+		if (difference < 1 && coords[1] >= 1) {
 			cameraY--;
 			for (int i = 0; i < MAP_TILE_W; ++i) {
 				for (int j = 0; j < MAP_TILE_H; ++j) {
@@ -1565,7 +1566,7 @@ void cameraMove(char direction) {
 		break;
 	case 's':
 		difference = coords[1] - cameraY;
-		if (difference > 8 && coords[1] <= 18) {
+		if (difference > 9 && coords[1] <= 18) {
 			cameraY++;
 			for (int i = 0; i < MAP_TILE_W; ++i) {
 				for (int j = 0; j < MAP_TILE_H; ++j) {
