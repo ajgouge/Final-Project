@@ -363,6 +363,7 @@ void initUnit();
 void initMap(int i, int j, Terrain* t);
 void initSpritesGround(int i, int j, Unit* u);
 void cameraMove(char direction);
+void updateFunds();
 
 
 /* Classes */
@@ -708,6 +709,9 @@ void Mover::propagate() {
 
 void Unit::renderRange() {
 
+	if (isMoved)
+		return;
+
 	movTemp[x][y] = new Mover(x, y, mov, minRange, maxRange, movType, team);
 
 	for (int d = mov+1; d > 0; --d) {
@@ -718,12 +722,13 @@ void Unit::renderRange() {
 			}
 	}
 	
-	for (int i = 0; i < MAP_TILE_W; ++i)
+	for (int i = 0; i < MAP_TILE_W; ++i) {
 		for (int j = 0; j < MAP_TILE_H; ++j)
 			if (map[i][j]->getIsReachable()) {
 				int temp[] = { i,j,-1,-1 };
-					reLayer(temp, 'b', NULL);
+				reLayer(temp, 'r', NULL);
 			}
+	}
 	int temp[] = { x, y, -1, -1 };
 	reLayer(temp, 'r', 's');
 	map[x][y]->setIsReachable(true);
@@ -744,6 +749,8 @@ int coords[4]; //temp coords array
 int targetsIndex;
 
 bool Unit::renderAttack() {
+
+	//map[x][y]->setIsReachable(true);
 
 	int numTargets = 0;
 
@@ -790,6 +797,7 @@ bool Unit::renderAttack() {
 	}
 
 	targetsSize = numTargets;
+
 	return true;
 
 }
@@ -805,6 +813,10 @@ bool ctrl;
 bool space;
 bool enter = false;
 bool isRunning = true;
+bool catalogIsOpen = false;
+std::vector<UNIT_TYPE> catalog(11);
+int catalogIndex = 0;
+char catalogMode = 'l';
 int blueFunds = 0;
 int redFunds = 0;
 SDL_Window* window;
@@ -878,6 +890,8 @@ int main(int argc, char* argv[])
 
 		std::cout << "Map Created!";
 
+		updateFunds();
+
 		while (isRunning) {
 			SDL_Event scanner;
 			while (SDL_PollEvent(&scanner)) {
@@ -915,7 +929,16 @@ int main(int argc, char* argv[])
 				if (w == true) {
 					if (coords[1] == 0)
 						break;
-					if ((moveMode == 's' && map[coords[0]][coords[1] - 1]->getIsReachable()) || moveMode == 'c') {
+					if ((moveMode == 's' /*&& map[coords[0]][coords[1] - 1]->getIsReachable())*/) || moveMode == 'c') {
+						if (catalogIsOpen) {
+							delete spritesGround[coords[0]][coords[1]];
+							spritesGround[coords[0]][coords[1]] = NULL;
+							int temp[] = { coords[0], coords[1], -1, -1 };
+							reLayer(temp, NULL, NULL);
+							catalogIsOpen = false;
+							catalogIndex = 0;
+							catalog.clear();
+						}
 						setCoord(coords[0], coords[1], 'w');
 						reLayer(coords, NULL, moveMode);
 						SDL_RenderPresent(renderer);
@@ -928,7 +951,16 @@ int main(int argc, char* argv[])
 				if (a == true) {
 					if (coords[0] == 0)
 						break;
-					if ((moveMode == 's' && map[coords[0] - 1][coords[1]]->getIsReachable()) || moveMode == 'c') {
+					if ((moveMode == 's' /*&& map[coords[0] - 1][coords[1]]->getIsReachable())*/) || moveMode == 'c') {
+						if (catalogIsOpen) {
+							delete spritesGround[coords[0]][coords[1]];
+							spritesGround[coords[0]][coords[1]] = NULL;
+							int temp[] = { coords[0], coords[1], -1, -1 };
+							reLayer(temp, NULL, NULL);
+							catalogIsOpen = false;
+							catalogIndex = 0;
+							catalog.clear();
+						}
 						setCoord(coords[0], coords[1], 'a');
 						reLayer(coords, NULL, moveMode);
 						SDL_RenderPresent(renderer);
@@ -950,7 +982,16 @@ int main(int argc, char* argv[])
 				if (s == true) {
 					if (coords[1] == MAP_TILE_H-1)
 						break;
-					if ((moveMode == 's' && map[coords[0]][coords[1] + 1]->getIsReachable()) || moveMode == 'c') {
+					if ((moveMode == 's' /*&&*/ /*map[coords[0]][coords[1] + 1]->getIsReachable())*/) || moveMode == 'c') {
+						if (catalogIsOpen) {
+							delete spritesGround[coords[0]][coords[1]];
+							spritesGround[coords[0]][coords[1]] = NULL;
+							int temp[] = { coords[0], coords[1], -1, -1 };
+							reLayer(temp, NULL, NULL);
+							catalogIsOpen = false;
+							catalogIndex = 0;
+							catalog.clear();
+						}
 						setCoord(coords[0], coords[1], 's');
 						reLayer(coords, NULL, moveMode);
 						SDL_RenderPresent(renderer);
@@ -963,7 +1004,16 @@ int main(int argc, char* argv[])
 				if (d == true) {
 					if (coords[0] == MAP_TILE_W-1)
 						break;
-					if ((moveMode == 's' && map[coords[0] + 1][coords[1]]->getIsReachable()) || moveMode == 'c') {
+					if ((moveMode == 's' /*&&*/ /*map[coords[0] + 1][coords[1]]->getIsReachable())*/) || moveMode == 'c') {
+						if (catalogIsOpen) {
+							delete spritesGround[coords[0]][coords[1]];
+							spritesGround[coords[0]][coords[1]] = NULL;
+							int temp[] = { coords[0], coords[1], -1, -1 };
+							reLayer(temp, NULL, NULL);
+							catalogIsOpen = false;
+							catalogIndex = 0;
+							catalog.clear();
+						}
 						setCoord(coords[0], coords[1], 'd');
 						reLayer(coords, NULL, moveMode);
 						SDL_RenderPresent(renderer);
@@ -985,7 +1035,7 @@ int main(int argc, char* argv[])
 				}
 				if (space == true) {
 					// coords[0],coords[1] == coordinates of cursor currently
-					if (spritesGround[coords[0]][coords[1]] != NULL && spritesGround[coords[0]][coords[1]]->getTeam() == turn % 2 && moveMode == 'c')
+					if (spritesGround[coords[0]][coords[1]] != NULL && spritesGround[coords[0]][coords[1]]->getTeam() == turn % 2 && moveMode == 'c' && !catalogIsOpen)
 					{
 						if (!spritesGround[coords[0]][coords[1]]->getIsMoved()) {
 							moveMode = 's';
@@ -1008,12 +1058,15 @@ int main(int argc, char* argv[])
 					}
 					else if (moveMode == 's') {
 						moveMode = 'c';
-						if (coords[0] != selUnit->getX() || coords[1] != selUnit->getY()) {
-							initSpritesGround(coords[0], coords[1], selUnit);
-							spritesGround[selUnit->getX()][selUnit->getY()] = NULL;
-							int temp[] = { selUnit->getX(), selUnit->getY(), -1, -1 };
-							reLayer(temp, NULL, NULL);
-							delete selUnit;
+						if (map[coords[0]][coords[1]]->getIsReachable()) {
+							if (coords[0] != selUnit->getX() || coords[1] != selUnit->getY()) {
+								initSpritesGround(coords[0], coords[1], selUnit);
+								spritesGround[selUnit->getX()][selUnit->getY()] = NULL;
+								int temp[] = { selUnit->getX(), selUnit->getY(), -1, -1 };
+								reLayer(temp, NULL, NULL);
+								delete selUnit;
+							}
+							spritesGround[coords[0]][coords[1]]->setIsMoved(true);
 						}
 						for (int i = 0; i < MAP_TILE_W; ++i)
 							for (int j = 0; j < MAP_TILE_H; ++j) {
@@ -1025,7 +1078,6 @@ int main(int argc, char* argv[])
 							}
 						reLayer(coords, NULL, moveMode);
 						SDL_RenderPresent(renderer);
-						spritesGround[coords[0]][coords[1]]->setIsMoved(true);
 					}
 					else if (moveMode == 't') {
 						moveMode = 'c';
@@ -1053,8 +1105,85 @@ int main(int argc, char* argv[])
 						delete[] targets;
 						targets = NULL;
 					}
+					else if ((map[coords[0]][coords[1]]->getType() == ((turn % 2) ? T_AIRPORT_RED : T_AIRPORT_BLUE) || map[coords[0]][coords[1]]->getType() == ((turn % 2) ? T_PORT_RED : T_PORT_BLUE) || map[coords[0]][coords[1]]->getType() == ((turn % 2) ? T_BASE_RED : T_BASE_BLUE)) && moveMode == 'c' && spritesGround[coords[0]][coords[1]] == NULL && !catalogIsOpen) {
+						
+						catalog.clear();
+						catalogIndex = 0;
+
+						if (map[coords[0]][coords[1]]->getType() == ((turn % 2) ? T_AIRPORT_RED : T_AIRPORT_BLUE)) {
+							for (int i = 11; i < 15; ++i) { // range of air units on list
+								if (unitsheet[i]->getCost() <= ((turn % 2) ? redFunds : blueFunds))
+									catalog.push_back((UNIT_TYPE)i);
+							}
+							catalogMode = 'a';
+						}
+						else if (map[coords[0]][coords[1]]->getType() == ((turn % 2) ? T_PORT_RED : T_PORT_BLUE)) {
+							for (int i = 15; i < 20; ++i) { // range of sea units
+								if (unitsheet[i]->getCost() <= ((turn % 2) ? redFunds : blueFunds))
+									catalog.push_back((UNIT_TYPE)i);
+							}
+							catalogMode = 's';
+						}
+						else if (map[coords[0]][coords[1]]->getType() == ((turn % 2) ? T_BASE_RED : T_BASE_BLUE)) {
+							for (int i = 0; i < 11; ++i) { // range of ground units
+								if (unitsheet[i]->getCost() <= ((turn % 2) ? redFunds : blueFunds))
+									catalog.push_back((UNIT_TYPE)i);
+							}
+							catalogMode = 'l';
+						}
+
+						if (catalog.size() == 0)
+							break;
+
+						catalogIsOpen = true;
+
+						initSpritesGround(coords[0], coords[1], unitsheet[catalog[0]]);
+						spritesGround[coords[0]][coords[1]]->setTeam(turn % 2);
+						int temp[] = { coords[0], coords[1], -1, -1 };
+						reLayer(temp, 'r', 'c');
+
+					}
+					else if ((map[coords[0]][coords[1]]->getType() == ((turn % 2) ? T_AIRPORT_RED : T_AIRPORT_BLUE) || map[coords[0]][coords[1]]->getType() == ((turn % 2) ? T_PORT_RED : T_PORT_BLUE) || map[coords[0]][coords[1]]->getType() == ((turn % 2) ? T_BASE_RED : T_BASE_BLUE)) && moveMode == 'c' && catalogIsOpen) {
+						
+						catalogIsOpen = false;
+						spritesGround[coords[0]][coords[1]]->setIsMoved(true);
+						spritesGround[coords[0]][coords[1]]->setHasAttacked(true);
+						catalog.clear();
+						catalogIndex = 0;
+
+						if (turn % 2)
+							redFunds -= spritesGround[coords[0]][coords[1]]->getCost();
+						else
+							blueFunds -= spritesGround[coords[0]][coords[1]]->getCost();
+
+						int temp[] = { coords[0], coords[1], -1, -1 };
+						reLayer(temp, NULL, 'c');
+
+					}
 					SDL_RenderPresent(renderer);
 					space = !space;
+				}
+				if (shift == true) {
+
+					if (catalogIsOpen) {
+
+						if (catalogIndex == catalog.size() - 1)
+							catalogIndex = 0;
+						else
+							catalogIndex++;
+
+						delete spritesGround[coords[0]][coords[1]];
+						spritesGround[coords[0]][coords[1]] = NULL;
+						initSpritesGround(coords[0], coords[1], unitsheet[catalog[catalogIndex]]);
+						spritesGround[coords[0]][coords[1]]->setTeam(turn % 2);
+
+						int temp[] = { coords[0], coords[1], -1, -1 };
+						reLayer(temp, 'r', 'c');
+
+					}
+
+					SDL_RenderPresent(renderer);
+
 				}
 				if (enter == true) {
 					if (moveMode != 'c') {
@@ -1070,6 +1199,7 @@ int main(int argc, char* argv[])
 						}
 					}
 					turn++;
+					updateFunds();
 					enter = !enter;
 					int temp[] = { coords[0], coords[1], -1, -1 };
 					reLayer(temp, NULL, 'c');
@@ -1482,10 +1612,10 @@ void keyStatesUp(SDL_Keycode input) {
 		//std::cout << "A!";
 		a = false;
 		break;
-	//case SDLK_SPACE:
-	//	//std::cout << "SPACE!";
-	//	space = false;
-	//	break;
+	case SDLK_SPACE:
+		//std::cout << "SPACE!";
+		space = false;
+		break;
 	case SDLK_LSHIFT:
 		//std::cout << "LEFT SHIFT!";
 		shift = false;
@@ -1530,13 +1660,14 @@ void reLayer(int input[], char effect, char cursorType) {
 		case NULL:
 			metaOne->setLayer(2, spritesheet[T_NULL]);
 			break;
-		case 'b':
+		case 'r':
 			metaOne->setLayer(2, spritesheet[T_BLUE]);
 			break;
-		case 'r':
+		case 'b':
 			metaOne->setLayer(2, spritesheet[T_RED]);
 			break;
 	}
+	
 
 	//sprites layer 3 (cursor)
 	switch (cursorType) {
@@ -1630,6 +1761,10 @@ void reLayer(int input[], char effect, char cursorType) {
 			metaTwo->setLayer(1, spritesheet[T_NULL]);
 		
 		//effect layer 2 (shading)
+		if (map[xOld][yOld]->getIsReachable())
+			effect = 'r';
+		else
+			effect = NULL;
 		switch (effect) {
 		case NULL:
 			metaTwo->setLayer(2, spritesheet[T_NULL]);
@@ -2021,4 +2156,25 @@ void cameraMove(char direction) {
 		}
 		break;
 	}
+}
+
+void updateFunds() {
+
+	int numCities = 0;
+
+	for (int i = 0; i < MAP_TILE_W; ++i) {
+		for (int j = 0; j < MAP_TILE_H; ++j) {
+			if (map[i][j]->getType() == ((turn % 2) ? T_CITY_RED : T_CITY_BLUE))
+				++numCities;
+		}
+	}
+
+	for (int i = 0; i < numCities; ++i)
+		if (turn % 2)
+			redFunds += 1000;
+		else
+			blueFunds += 1000;
+
+	std::cout << redFunds << blueFunds;
+
 }
