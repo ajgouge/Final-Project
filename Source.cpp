@@ -434,11 +434,13 @@ private:
 	Tile* display;
 	bool isReachable = false;
 	bool isAttackable = false;
+	double hp = 20;
+	int team;
 	TEXTURE type;
 
 public:
-	Terrain() : def(0), canCapture(false), display(NULL), isReachable(false), type(T_ERROR) { mov = new int[NUM_TYPES]; }
-	Terrain(int d, int* m, bool c, Tile* di, TEXTURE t) : def(d), canCapture(c), display(di), isReachable(false), type(t) {
+	Terrain() : def(0), canCapture(false), display(NULL), isReachable(false), type(T_ERROR), team(2) { mov = new int[NUM_TYPES]; }
+	Terrain(int d, int* m, bool c, Tile* di, TEXTURE t, int te = -1) : def(d), canCapture(c), display(di), isReachable(false), type(t), team(te) {
 		mov = new int[NUM_TYPES];
 		setMov(m);
 	}
@@ -454,11 +456,17 @@ public:
 	void setIsReachable(bool r);
 	void setIsAttackable(bool t);
 	int getDef();
+	double getHP();
+	void setHP(double i);
+	void heal(double h);
+	void hit(double h);
 	int* getMov();
 	bool getCanCapture();
 	bool getIsReachable();
 	bool getIsAttackable();
 	TEXTURE getType();
+	int getTeam();
+	void setTeam(int t);
 
 };
 
@@ -477,6 +485,12 @@ void Terrain::setIsReachable(bool r) { isReachable = r; }
 TEXTURE Terrain::getType() { return type; }
 void Terrain::setIsAttackable(bool t) { isAttackable = t; }
 bool Terrain::getIsAttackable() { return isAttackable; }
+double Terrain::getHP() { return hp; }
+void Terrain::setHP(double i) { hp = i; }
+void Terrain::heal(double h) { hp += h; if (hp > 20) hp = 20; }
+void Terrain::hit(double h) { hp -= h; }
+int Terrain::getTeam() { return team; }
+void Terrain::setTeam(int t) { team = t; }
 
 void Terrain::setMov(int* m) {
 	for (int i = 0; i < NUM_TYPES; ++i)
@@ -499,8 +513,11 @@ private:
 	int team;
 	bool isMoved = false;
 	bool hasAttacked = false;
+	bool isLoadable = false;
 	double hp = 20;
 	UNIT_TYPE name;
+	Unit* cargo1 = NULL;
+	Unit* cargo0 = NULL;
 
 public:
 	Unit() : x(0), y(0), type(T_ERROR), mov(0), minRange(0), maxRange(0), movType(ERROR), cost(0), display(NULL), team(0), name(UNIT_ERROR) { attack = new double[NUM_UNITS]; }
@@ -541,6 +558,10 @@ public:
 	void hit(double h);
 	void setHasAttacked(bool t);
 	bool getHasAttacked();
+	void setCargo(int i, Unit* c);
+	Unit* getCargo(int i);
+	bool getIsLoadable();
+	void setIsLoadable(bool l);
 
 };
 
@@ -591,6 +612,15 @@ void Unit::hit(double h) { hp -= h; }
 UNIT_TYPE Unit::getName() { return name; }
 void Unit::setHasAttacked(bool t) { hasAttacked = t; }
 bool Unit::getHasAttacked() { return hasAttacked; }
+void Unit::setCargo(int i, Unit* c) {
+	if (i)
+		cargo1 = c;
+	else
+		cargo0 = c;
+}
+Unit* Unit::getCargo(int i) { return (i) ? cargo1 : cargo0; }
+void Unit::setIsLoadable(bool l) { isLoadable = l; }
+bool Unit::getIsLoadable() { return isLoadable; }
 
 void Unit::setAttack(double* a) {
 	for (int i = 0; i < NUM_UNITS; ++i)
@@ -652,9 +682,10 @@ public:
 	bool hasMoved;
 	TYPE movType;
 	int team;
+	UNIT_TYPE name;
 
-	Mover() : x(-1), y(-1), mov(-1), minRange(-1), maxRange(-1), movType(ERROR), hasMoved(false), team(-1) {}
-	Mover(int ix, int iy, int m, int r1, int r2, TYPE t, int te) : x(ix), y(iy), mov(m), minRange(r1), maxRange(r2), movType(t), hasMoved(false), team(te) {}
+	Mover() : x(-1), y(-1), mov(-1), minRange(-1), maxRange(-1), movType(ERROR), hasMoved(false), team(-1), name(UNIT_ERROR) {}
+	Mover(int ix, int iy, int m, int r1, int r2, TYPE t, int te, UNIT_TYPE n) : x(ix), y(iy), mov(m), minRange(r1), maxRange(r2), movType(t), hasMoved(false), team(te), name(n) {}
 	~Mover();
 	void propagate();
 };
@@ -699,11 +730,17 @@ void Mover::propagate() {
 				}
 				else
 					continue;
-		movTemp[newX][newY] = new Mover(newX, newY, movDiff, minRange, maxRange, movType, team);
+		movTemp[newX][newY] = new Mover(newX, newY, movDiff, minRange, maxRange, movType, team, name);
 	}
 
-	if (spritesGround[x][y] == NULL)
-		map[x][y]->setIsReachable(true);
+	if (spritesGround[x][y] == NULL || ((name == INFANTRY || name == MECH) && (spritesGround[x][y]->getName() == T_COPTER || spritesGround[x][y]->getName() == APC)) || (name <= H_TANK && spritesGround[x][y]->getName() == LANDER) || (name > B_COPTER && name <= BOMBER && spritesGround[x][y]->getName() == CARRIER)) {
+		if (spritesGround[x][y] != NULL && ((spritesGround[x][y]->getName() == T_COPTER || spritesGround[x][y]->getName() == APC) ? spritesGround[x][y]->getCargo(0) == NULL : spritesGround[x][y]->getCargo(1) == NULL)) {
+			spritesGround[x][y]->setIsLoadable(true);
+			map[x][y]->setIsReachable(true);
+		}
+		else if (spritesGround[x][y] == NULL)
+			map[x][y]->setIsReachable(true);
+	}
 	hasMoved = true;
 }
 
@@ -712,7 +749,7 @@ void Unit::renderRange() {
 	if (isMoved)
 		return;
 
-	movTemp[x][y] = new Mover(x, y, mov, minRange, maxRange, movType, team);
+	movTemp[x][y] = new Mover(x, y, mov, minRange, maxRange, movType, team, name);
 
 	for (int d = mov+1; d > 0; --d) {
 		for (int i = 0; i < MAP_TILE_W; ++i)
@@ -732,6 +769,7 @@ void Unit::renderRange() {
 	int temp[] = { x, y, -1, -1 };
 	reLayer(temp, 'r', 's');
 	map[x][y]->setIsReachable(true);
+	isLoadable = false;
 
 	for (int i = 0; i < MAP_TILE_W; ++i)
 		for (int j = 0; j < MAP_TILE_H; ++j)
@@ -819,6 +857,8 @@ int catalogIndex = 0;
 char catalogMode = 'l';
 int blueFunds = 0;
 int redFunds = 0;
+std::vector<Unit*> cargoBay(2);
+bool unloading = false;
 SDL_Window* window;
 // Tracks whether a unit is selected or not (c for not, s for selecting)
 char moveMode = 'c';
@@ -1059,7 +1099,19 @@ int main(int argc, char* argv[])
 					else if (moveMode == 's') {
 						moveMode = 'c';
 						if (map[coords[0]][coords[1]]->getIsReachable()) {
-							if (coords[0] != selUnit->getX() || coords[1] != selUnit->getY()) {
+							if (spritesGround[coords[0]][coords[1]] != NULL && spritesGround[coords[0]][coords[1]]->getIsLoadable()) {
+								spritesGround[selUnit->getX()][selUnit->getY()] = NULL;
+								int temp[] = { selUnit->getX(), selUnit->getY(), -1, -1 };
+								reLayer(temp, NULL, NULL);
+								spritesGround[coords[0]][coords[1]]->setIsLoadable(false);
+								if ((spritesGround[coords[0]][coords[1]]->getName() == LANDER || spritesGround[coords[0]][coords[1]]->getName() == CARRIER) && spritesGround[coords[0]][coords[1]]->getCargo(0) != NULL) {
+									spritesGround[coords[0]][coords[1]]->setCargo(1, selUnit);
+								}
+								else
+									spritesGround[coords[0]][coords[1]]->setCargo(0, selUnit);
+								selUnit = NULL;
+							}
+							else if (coords[0] != selUnit->getX() || coords[1] != selUnit->getY()) {
 								initSpritesGround(coords[0], coords[1], selUnit);
 								spritesGround[selUnit->getX()][selUnit->getY()] = NULL;
 								int temp[] = { selUnit->getX(), selUnit->getY(), -1, -1 };
@@ -1179,6 +1231,18 @@ int main(int argc, char* argv[])
 
 						int temp[] = { coords[0], coords[1], -1, -1 };
 						reLayer(temp, 'r', 'c');
+
+					}
+					else if (unloading) {
+
+						// browse unloading
+
+					}
+					else if (spritesGround[coords[0]][coords[1]] != NULL && spritesGround[coords[0]][coords[1]]->getCargo(0) != NULL) {
+
+						unloading = true;
+
+						// init unloading
 
 					}
 
@@ -1932,15 +1996,15 @@ void initTerrain() {
 	int tempMov5[] = { 1, 1, 1, 1, 1, 10 };
 	terrainsheet[ROAD] = new Terrain(0, tempMov5, false, spritesheet[T_ROAD], T_ROAD);
 	int tempMov6[] = { 1, 1, 1, 1, 1, 1 };
-	terrainsheet[PORT] = new Terrain(3, tempMov6, true, spritesheet[T_PORT], T_PORT);
+	terrainsheet[PORT] = new Terrain(3, tempMov6, true, spritesheet[T_PORT], T_PORT, 2);
 	int tempMov7[] = { 1, 1, 1, 1, 1, 10 };
-	terrainsheet[HQ] = new Terrain(4, tempMov7, true, spritesheet[T_HQ], T_HQ);
+	terrainsheet[HQ] = new Terrain(4, tempMov7, true, spritesheet[T_HQ], T_HQ, 2);
 	int tempMov8[] = { 1, 1, 1, 1, 1, 10 };
-	terrainsheet[AIRPORT] = new Terrain(3, tempMov8, true, spritesheet[T_AIRPORT], T_AIRPORT);
+	terrainsheet[AIRPORT] = new Terrain(3, tempMov8, true, spritesheet[T_AIRPORT], T_AIRPORT, 2);
 	int tempMov9[] = { 1, 1, 1, 1, 1, 10 };
-	terrainsheet[BASE] = new Terrain(3, tempMov9, true, spritesheet[T_BASE], T_BASE);
+	terrainsheet[BASE] = new Terrain(3, tempMov9, true, spritesheet[T_BASE], T_BASE, 2);
 	int tempMov10[] = { 1, 1, 1, 1, 1, 10 };
-	terrainsheet[CITY] = new Terrain(3, tempMov10, true, spritesheet[T_CITY], T_CITY);
+	terrainsheet[CITY] = new Terrain(3, tempMov10, true, spritesheet[T_CITY], T_CITY, 2);
 	int tempMov11[] = { 10, 10, 10, 10, 1, 2 };
 	terrainsheet[REEF] = new Terrain(1, tempMov11, false, spritesheet[T_REEF], T_REEF);
 	int tempMov12[] = { 1, 1, 2, 3, 1, 10 };
@@ -1949,16 +2013,16 @@ void initTerrain() {
 	terrainsheet[SHORE] = new Terrain(0, tempMov13, false, spritesheet[T_SHORE], T_SHORE);
 	int tempMov14[] = { 2, 1, 10, 10, 1, 10 };
 	terrainsheet[RIVER] = new Terrain(0, tempMov14, false, spritesheet[T_RIVER], T_RIVER);
-	terrainsheet[PORT_RED] = new Terrain(3, tempMov6, true, spritesheet[T_PORT_RED], T_PORT_RED); // 
-	terrainsheet[HQ_RED] = new Terrain(4, tempMov7, true, spritesheet[T_HQ_RED], T_HQ_RED);
-	terrainsheet[AIRPORT_RED] = new Terrain(3, tempMov8, true, spritesheet[T_AIRPORT_RED], T_AIRPORT_RED);
-	terrainsheet[BASE_RED] = new Terrain(3, tempMov9, true, spritesheet[T_BASE_RED], T_BASE_RED);
-	terrainsheet[CITY_RED] = new Terrain(3, tempMov10, true, spritesheet[T_CITY_RED], T_CITY_RED);
-	terrainsheet[PORT_BLUE] = new Terrain(3, tempMov6, true, spritesheet[T_PORT_BLUE], T_PORT_BLUE);
-	terrainsheet[HQ_BLUE] = new Terrain(4, tempMov7, true, spritesheet[T_HQ_BLUE], T_HQ_BLUE);
-	terrainsheet[AIRPORT_BLUE] = new Terrain(3, tempMov8, true, spritesheet[T_AIRPORT_BLUE], T_AIRPORT_BLUE);
-	terrainsheet[BASE_BLUE] = new Terrain(3, tempMov9, true, spritesheet[T_BASE_BLUE], T_BASE_BLUE);
-	terrainsheet[CITY_BLUE] = new Terrain(3, tempMov10, true, spritesheet[T_CITY_BLUE], T_CITY_BLUE);
+	terrainsheet[PORT_RED] = new Terrain(3, tempMov6, true, spritesheet[T_PORT_RED], T_PORT_RED, 1); // 
+	terrainsheet[HQ_RED] = new Terrain(4, tempMov7, true, spritesheet[T_HQ_RED], T_HQ_RED, 1);
+	terrainsheet[AIRPORT_RED] = new Terrain(3, tempMov8, true, spritesheet[T_AIRPORT_RED], T_AIRPORT_RED, 1);
+	terrainsheet[BASE_RED] = new Terrain(3, tempMov9, true, spritesheet[T_BASE_RED], T_BASE_RED, 1);
+	terrainsheet[CITY_RED] = new Terrain(3, tempMov10, true, spritesheet[T_CITY_RED], T_CITY_RED, 1);
+	terrainsheet[PORT_BLUE] = new Terrain(3, tempMov6, true, spritesheet[T_PORT_BLUE], T_PORT_BLUE, 0);
+	terrainsheet[HQ_BLUE] = new Terrain(4, tempMov7, true, spritesheet[T_HQ_BLUE], T_HQ_BLUE, 0);
+	terrainsheet[AIRPORT_BLUE] = new Terrain(3, tempMov8, true, spritesheet[T_AIRPORT_BLUE], T_AIRPORT_BLUE, 0);
+	terrainsheet[BASE_BLUE] = new Terrain(3, tempMov9, true, spritesheet[T_BASE_BLUE], T_BASE_BLUE, 0);
+	terrainsheet[CITY_BLUE] = new Terrain(3, tempMov10, true, spritesheet[T_CITY_BLUE], T_CITY_BLUE, 0);
 	/*
 	int temp1[] = { 1, 1, 1, 1, 1, 1 };
 	terrainsheet[GRASS] = new Terrain(0, temp1, false, spritesheet[T_GRASS], T_GRASS);
