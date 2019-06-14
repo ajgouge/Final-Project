@@ -7,6 +7,7 @@
 #include <chrono>
 #include <cassert>
 #include <cmath>
+#include <SDL_ttf.h>
 
 //camera Offest by y value
 int cameraY = 0;
@@ -364,6 +365,7 @@ void initMap(int i, int j, Terrain* t);
 void initSpritesGround(int i, int j, Unit* u);
 void cameraMove(char direction);
 void updateFunds();
+void updateText();
 
 
 /* Classes */
@@ -889,6 +891,11 @@ metaTile*** demTiles;
 //Null Tile and MetaTile for passthrough
 Tile nullTile;
 metaTile nullMetaTile;
+//SDL Text Font
+TTF_Font* Sans;
+SDL_Color Blue = {51, 204, 255};
+SDL_Rect Blue_message; //create a rect
+SDL_Rect Red_message; //create a rect
 
 int main(int argc, char* argv[])
 {
@@ -931,6 +938,10 @@ int main(int argc, char* argv[])
 		std::cout << "Map Created!";
 
 		updateFunds();
+
+		//Text debug
+		updateText();
+		SDL_RenderPresent(renderer);
 
 		while (isRunning) {
 			SDL_Event scanner;
@@ -1269,6 +1280,10 @@ int main(int argc, char* argv[])
 					reLayer(temp, NULL, 'c');
 					SDL_RenderPresent(renderer);
 				}
+				if (ctrl == true) {
+					//unloads unit from vehicle, probably APC?
+
+				}
 			}
 
 
@@ -1345,6 +1360,10 @@ SDL_Window* init(SDL_Window* window) {
 	}
 	SDL_SetRenderDrawColor(renderer, 0x0, 0x0, 0x0, 0xFF);
 	printf("Renderer initialized\n");
+
+	//Init ttf
+	TTF_Init();
+	Sans = TTF_OpenFont("sans.ttf", 12);
 
 	/*enum TEXTURE {
 	T_ROAD = 4,
@@ -1605,7 +1624,9 @@ void close(SDL_Window* window) {
 	SDL_FreeSurface(screenSurface);
 	SDL_DestroyWindow(window);
 
+	TTF_CloseFont(Sans);
 
+	TTF_Quit();
 	IMG_Quit();
 	SDL_Quit();
 }
@@ -2241,4 +2262,19 @@ void updateFunds() {
 
 	std::cout << redFunds << blueFunds;
 
+}
+
+void updateText() {
+	//Blue team
+	Blue_message.x = 1253;  //controls the rect's x coordinate 
+	Blue_message.y = 869; // controls the rect's y coordinte
+	Blue_message.w = 100; // controls the width of the rect
+	Blue_message.h = 20;
+
+	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, "Get Shreked!", Blue); 
+	SDL_Texture* Message_blue = SDL_CreateTextureFromSurface(renderer, surfaceMessage); 
+
+	SDL_RenderCopy(renderer, Message_blue, NULL, &Blue_message);
+
+	std::cout << "Text set!?\n";
 }
