@@ -1363,7 +1363,7 @@ SDL_Window* init(SDL_Window* window) {
 
 	//Init ttf
 	TTF_Init();
-	Sans = TTF_OpenFont("sans.ttf", 12);
+	Sans = TTF_OpenFont("sanss___.ttf", 12);
 
 	/*enum TEXTURE {
 	T_ROAD = 4,

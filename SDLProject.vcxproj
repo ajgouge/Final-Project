@@ -218,6 +218,34 @@
     <ClInclude Include="SDL\SDL2-2.0.9\include\SDL_vulkan.h" />
     <ClInclude Include="SDL\SDL2_image-2.0.4\include\SDL_image.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="SDL\SDL2-2.0.9\lib\x64\SDL2.dll" />
+    <None Include="SDL\SDL2_image-2.0.4\lib\x64\libjpeg-9.dll" />
+    <None Include="SDL\SDL2_image-2.0.4\lib\x64\libpng16-16.dll" />
+    <None Include="SDL\SDL2_image-2.0.4\lib\x64\libtiff-5.dll" />
+    <None Include="SDL\SDL2_image-2.0.4\lib\x64\libwebp-7.dll" />
+    <None Include="SDL\SDL2_image-2.0.4\lib\x64\SDL2_image.dll" />
+    <None Include="SDL\SDL2_image-2.0.4\lib\x64\zlib1.dll" />
+    <None Include="SDL\SDL2_ttf-2.0.15\lib\x64\libfreetype-6.dll" />
+    <None Include="SDL\SDL2_ttf-2.0.15\lib\x64\SDL2_ttf.dll" />
+    <None Include="SDL\SDL2_ttf-2.0.15\lib\x64\zlib1.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="SDL\SDL2_image-2.0.4\lib\x64\LICENSE.jpeg.txt" />
+    <Text Include="SDL\SDL2_image-2.0.4\lib\x64\LICENSE.png.txt" />
+    <Text Include="SDL\SDL2_image-2.0.4\lib\x64\LICENSE.tiff.txt" />
+    <Text Include="SDL\SDL2_image-2.0.4\lib\x64\LICENSE.webp.txt" />
+    <Text Include="SDL\SDL2_image-2.0.4\lib\x64\LICENSE.zlib.txt" />
+    <Text Include="SDL\SDL2_ttf-2.0.15\lib\x64\LICENSE.freetype.txt" />
+    <Text Include="SDL\SDL2_ttf-2.0.15\lib\x64\LICENSE.zlib.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="SDL\SDL2-2.0.9\lib\x64\SDL2.lib" />
+    <Library Include="SDL\SDL2-2.0.9\lib\x64\SDL2main.lib" />
+    <Library Include="SDL\SDL2-2.0.9\lib\x64\SDL2test.lib" />
+    <Library Include="SDL\SDL2_image-2.0.4\lib\x64\SDL2_image.lib" />
+    <Library Include="SDL\SDL2_ttf-2.0.15\lib\x64\SDL2_ttf.lib" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
