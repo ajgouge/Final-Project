@@ -166,13 +166,13 @@ enum TEXTURE {
 
 
 /* Constants */
-const int SCREEN_WIDTH = 1920;
-const int SCREEN_HEIGHT = 1080;
+const int SCREEN_WIDTH = 960*1.5;
+const int SCREEN_HEIGHT = 540*1.5;
 const int MAP_X = 0;
 const int MAP_Y = SCREEN_HEIGHT / 10;
 const int MAP_W = SCREEN_WIDTH;
 const int MAP_H = SCREEN_HEIGHT * 7 / 10;
-const int TILE_SIDE = 64;
+const int TILE_SIDE = 32*1.5;
 const int MAP_TILE_W = 30;
 const int MAP_TILE_H = 20;
 // Map initializer arrays
@@ -243,8 +243,8 @@ TERRAIN_TYPE testMap2[30][20] = {
 };
 
 TERRAIN_TYPE testMap3[30][20] = {
-{BASE_RED,CITY_RED,WATER,WATER,REEF,WATER,REEF,WATER,REEF,WATER,REEF,REEF,REEF,WATER,WATER,WATER,WATER,PORT_BLUE,ROAD,HQ_BLUE},
-{CITY_RED,PORT_RED,WATER,REEF,WATER,REEF,WATER,REEF,WATER,REEF,REEF,WATER,WATER,WATER,WATER,WATER,WATER,BASE_BLUE,ROAD,BASE_BLUE},
+{BASE_BLUE,CITY_BLUE,WATER,WATER,REEF,WATER,REEF,WATER,REEF,WATER,REEF,REEF,REEF,WATER,WATER,WATER,WATER,PORT_BLUE,ROAD,HQ_BLUE},
+{CITY_BLUE,PORT_BLUE,WATER,REEF,WATER,REEF,WATER,REEF,WATER,REEF,REEF,WATER,WATER,WATER,WATER,WATER,WATER,BASE_BLUE,ROAD,BASE_BLUE},
 {WATER,WATER,WATER,WATER,REEF,WATER,REEF,REEF,REEF,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,GRASS,ROAD,GRASS},
 {REEF,REEF,WATER,REEF,WATER,REEF,REEF,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,GRASS,ROAD,GRASS},
 {REEF,WATER,REEF,REEF,REEF,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,GRASS,ROAD,GRASS},
@@ -271,8 +271,8 @@ TERRAIN_TYPE testMap3[30][20] = {
 {REEF,WATER,REEF,REEF,REEF,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,GRASS,ROAD,GRASS},
 {REEF,REEF,WATER,REEF,WATER,REEF,REEF,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,GRASS,ROAD,GRASS},
 {WATER,WATER,WATER,WATER,REEF,WATER,REEF,REEF,REEF,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,GRASS,ROAD,GRASS},
-{CITY_RED,PORT_RED,WATER,REEF,WATER,REEF,WATER,REEF,WATER,REEF,REEF,WATER,WATER,WATER,WATER,WATER,WATER,BASE_BLUE,ROAD,BASE_BLUE},
-{BASE_RED,CITY_RED,WATER,WATER,REEF,WATER,REEF,WATER,REEF,WATER,REEF,REEF,REEF,WATER,WATER,WATER,WATER,PORT_BLUE,ROAD,HQ_BLUE},
+{CITY_RED,PORT_RED,WATER,REEF,WATER,REEF,WATER,REEF,WATER,REEF,REEF,WATER,WATER,WATER,WATER,WATER,WATER,BASE_RED,ROAD,BASE_RED},
+{BASE_RED,CITY_RED,WATER,WATER,REEF,WATER,REEF,WATER,REEF,WATER,REEF,REEF,REEF,WATER,WATER,WATER,WATER,PORT_RED,ROAD,HQ_RED},
 };
 
 TERRAIN_TYPE testMap4[30][20] = {
@@ -283,9 +283,9 @@ TERRAIN_TYPE testMap4[30][20] = {
 {MOUNTAIN,MOUNTAIN,ROAD,MOUNTAIN,RIVER,MOUNTAIN,ROAD,GRASS,SHORE,WATER,WATER,WATER,WATER,ROAD,ROAD,TREE,RIVER,TREE,TREE,TREE},
 {WATER,WATER,BRIDGE,WATER,WATER,WATER,BRIDGE,WATER,WATER,WATER,SHORE,WATER,WATER,HQ_RED,ROAD,TREE,RIVER,RIVER,RIVER,RIVER},
 {WATER,WATER,BRIDGE,WATER,WATER,WATER,BRIDGE,SHORE,WATER,WATER,PORT,WATER,WATER,BASE_RED,ROAD,TREE,TREE,TREE,TREE,TREE},
-{WATER,GRASS,ROAD,GRASS,GRASS,GRASS,ROAD,PORT,SHORE,WATER,SHORE,WATER,WATER,CITY,ROAD,GRASS,GRASS,TREE,TREE,TREE},
-{WATER,GRASS,ROAD,ROAD,ROAD,ROAD,ROAD,GRASS,SHORE,WATER,WATER,WATER,WATER,BASE,ROAD,GRASS,CITY,GRASS,TREE,TREE},
-{WATER,GRASS,GRASS,CITY,ROAD,CITY,GRASS,GRASS,SHORE,WATER,REEF,WATER,WATER,CITY,ROAD, ROAD,ROAD,ROAD,ROAD,TREE},
+{WATER,GRASS,ROAD,GRASS,GRASS,GRASS,ROAD,PORT,SHORE,WATER,SHORE,WATER,WATER,CITY_RED,ROAD,GRASS,GRASS,TREE,TREE,TREE},
+{WATER,GRASS,ROAD,ROAD,ROAD,ROAD,ROAD,GRASS,SHORE,WATER,WATER,WATER,WATER,BASE_RED,ROAD,GRASS,CITY,GRASS,TREE,TREE},
+{WATER,GRASS,GRASS,CITY,ROAD,CITY,GRASS,GRASS,SHORE,WATER,REEF,WATER,WATER,CITY_RED,ROAD, ROAD,ROAD,ROAD,ROAD,TREE},
 {WATER,WATER,WATER,WATER,BRIDGE,SHORE,SHORE,SHORE,WATER,WATER,WATER,WATER,WATER,BASE_RED,GRASS,GRASS,GRASS,GRASS,ROAD,GRASS},
 {WATER,WATER,WATER,WATER,BRIDGE,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,SHORE,SHORE,SHORE,SHORE,SHORE,BRIDGE,WATER},
 {WATER,WATER,WATER,WATER,BRIDGE,SHORE,SHORE,WATER,WATER,SHORE,SHORE,WATER,WATER,WATER,WATER,WATER,WATER,WATER,BRIDGE,WATER},
@@ -305,7 +305,7 @@ TERRAIN_TYPE testMap4[30][20] = {
 {GRASS,GRASS,ROAD,MOUNTAIN,GRASS,WATER, WATER, GRASS,GRASS,GRASS,ROAD,GRASS,GRASS,GRASS,ROAD,TREE,RIVER,TREE,ROAD,CITY},
 {MOUNTAIN,MOUNTAIN,ROAD,ROAD,ROAD,BRIDGE,BRIDGE,ROAD,ROAD,ROAD,ROAD,ROAD,ROAD,ROAD,ROAD,TREE,RIVER,TREE,ROAD,CITY},
 {CITY,CITY,ROAD,GRASS,MOUNTAIN,WATER,WATER,BASE,GRASS,GRASS,ROAD,GRASS,GRASS,AIRPORT_BLUE,GRASS,TREE,RIVER,TREE,BASE,CITY},
-{CITY,CITY,ROAD,MOUNTAIN,GRASS,WATER,WATER,GRASS,BASE_BLUE,CITY,HQ_BLUE,CITY,BASE_BLUE,GRASS,GRASS,TREE,RIVER,TREE,GRASS,CITY},
+{CITY,CITY,ROAD,MOUNTAIN,GRASS,WATER,WATER,GRASS,BASE_BLUE,CITY_BLUE,HQ_BLUE,CITY_BLUE,BASE_BLUE,GRASS,GRASS,TREE,RIVER,TREE,GRASS,CITY},
 };
 
 TERRAIN_TYPE testMap5[30][20] = {
@@ -315,14 +315,14 @@ TERRAIN_TYPE testMap5[30][20] = {
 {GRASS,GRASS,TREE,CITY,GRASS,GRASS,CITY,TREE,GRASS,GRASS,CITY,TREE,GRASS,CITY,GRASS,TREE,CITY,GRASS,CITY,CITY},
 {GRASS,CITY,TREE,TREE,GRASS,MOUNTAIN,MOUNTAIN,MOUNTAIN,GRASS,TREE,GRASS,TREE,GRASS,TREE,GRASS,CITY,TREE,TREE,GRASS,GRASS},
 {GRASS,GRASS,GRASS,GRASS,MOUNTAIN,MOUNTAIN,MOUNTAIN,MOUNTAIN,MOUNTAIN,GRASS,GRASS,CITY,CITY,GRASS,CITY,GRASS,GRASS,GRASS,TREE,GRASS,},
-{TREE,GRASS,CITY,TREE,BASE_RED,BASE_RED,MOUNTAIN,MOUNTAIN,MOUNTAIN,GRASS,TREE,GRASS,GRASS,WATER,WATER,WATER,WATER,WATER,GRASS,CITY},
+{TREE,GRASS,CITY_RED,TREE,BASE_RED,BASE_RED,MOUNTAIN,MOUNTAIN,MOUNTAIN,GRASS,TREE,GRASS,GRASS,WATER,WATER,WATER,WATER,WATER,GRASS,CITY},
 {GRASS,GRASS,TREE,GRASS,MOUNTAIN,MOUNTAIN,MOUNTAIN,HQ_RED,MOUNTAIN,GRASS,GRASS,CITY,TREE,GRASS,WATER,WATER,WATER,GRASS,TREE,GRASS},
-{CITY,GRASS,CITY,GRASS,MOUNTAIN,MOUNTAIN,MOUNTAIN,PORT_RED,SHORE,SHORE,SHORE,GRASS,GRASS,CITY,TREE,WATER,GRASS,TREE,GRASS,GRASS},
+{CITY,GRASS,CITY_RED,GRASS,MOUNTAIN,MOUNTAIN,MOUNTAIN,PORT_RED,SHORE,SHORE,SHORE,GRASS,GRASS,CITY,TREE,WATER,GRASS,TREE,GRASS,GRASS},
 {SHORE,TREE,GRASS,GRASS,MOUNTAIN,MOUNTAIN,MOUNTAIN,WATER,WATER,WATER,WATER,SHORE,GRASS,TREE,GRASS,WATER,GRASS,GRASS,CITY,WATER},
 {WATER,SHORE,SHORE,SHORE,MOUNTAIN,MOUNTAIN,WATER,WATER,WATER,WATER,WATER,WATER,SHORE,ROAD,ROAD,ROAD,ROAD,TREE,CITY,GRASS},
 {WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,SHORE,ROAD,ROAD,ROAD,ROAD,ROAD,TREE,GRASS,TREE,},
-{WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,SHORE,ROAD,ROAD,ROAD,ROAD,ROAD,GRASS,CITY,TREE},
-{WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,SHORE,ROAD,ROAD,ROAD,ROAD,TREE,CITY,GRASS,WATER},
+{WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,SHORE,ROAD,ROAD,ROAD,ROAD,ROAD,GRASS,CITY_BLUE,TREE},
+{WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,SHORE,ROAD,ROAD,ROAD,ROAD,TREE,CITY_BLUE,GRASS,WATER},
 {WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,SHORE,ROAD,ROAD,ROAD,ROAD,MOUNTAIN,MOUNTAIN,MOUNTAIN,WATER},
 {WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,SHORE,ROAD,ROAD,ROAD,MOUNTAIN,MOUNTAIN,MOUNTAIN,MOUNTAIN,MOUNTAIN},
 {WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,SHORE,ROAD,ROAD,MOUNTAIN,MOUNTAIN,MOUNTAIN,MOUNTAIN,MOUNTAIN,MOUNTAIN},
@@ -366,6 +366,8 @@ void initSpritesGround(int i, int j, Unit* u);
 void cameraMove(char direction);
 void updateFunds();
 void updateText();
+TERRAIN_TYPE getNewCapture(TEXTURE t, int team);
+int getNumUnits(int team);
 
 
 /* Classes */
@@ -860,7 +862,14 @@ char catalogMode = 'l';
 int blueFunds = 0;
 int redFunds = 0;
 std::vector<Unit*> cargoBay(2);
+int cargoIndex = 0;
 bool unloading = false;
+std::vector<int> dropX(4);
+std::vector<int> dropY(4);
+int dropIndex = 0;
+int winningTeam = -1;
+bool gameOver = false;
+int mapNo = 0;
 SDL_Window* window;
 // Tracks whether a unit is selected or not (c for not, s for selecting)
 char moveMode = 'c';
@@ -895,7 +904,9 @@ metaTile nullMetaTile;
 TTF_Font* Sans;
 SDL_Color Blue = {51, 204, 255};
 SDL_Rect Blue_message; //create a rect
+SDL_Color Red = { 230, 40, 40 };
 SDL_Rect Red_message; //create a rect
+SDL_Rect End_message;
 
 int main(int argc, char* argv[])
 {
@@ -1130,6 +1141,12 @@ int main(int argc, char* argv[])
 								delete selUnit;
 							}
 							spritesGround[coords[0]][coords[1]]->setIsMoved(true);
+
+							if (map[coords[0]][coords[1]]->getCanCapture() && spritesGround[coords[0]][coords[1]]->getTeam() != map[coords[0]][coords[1]]->getTeam() && (spritesGround[coords[0]][coords[1]]->getName() == INFANTRY || spritesGround[coords[0]][coords[1]]->getName() == MECH)) {
+								TERRAIN_TYPE newT = getNewCapture(map[coords[0]][coords[1]]->getType(), turn % 2);
+								delete map[coords[0]][coords[1]];
+								initMap(coords[0], coords[1], terrainsheet[newT]);
+							}
 						}
 						for (int i = 0; i < MAP_TILE_W; ++i)
 							for (int j = 0; j < MAP_TILE_H; ++j) {
@@ -1146,7 +1163,7 @@ int main(int argc, char* argv[])
 						moveMode = 'c';
 						int tX = targets[targetsIndex]->getX();
 						int tY = targets[targetsIndex]->getY();
-						spritesGround[tX][tY]->hit(selUnit->getAttack()[targets[targetsIndex]->getName()] * 10.0);
+						spritesGround[tX][tY]->hit(selUnit->getAttack()[targets[targetsIndex]->getName()] * 10.0 * (selUnit->getHP() / 20.0));
 						int temp2[] = { selUnit->getX(), selUnit->getY(), -1, -1 };
 						selUnit->setHasAttacked(true);
 						reLayer(temp2, NULL, NULL);
@@ -1219,6 +1236,8 @@ int main(int argc, char* argv[])
 						else
 							blueFunds -= spritesGround[coords[0]][coords[1]]->getCost();
 
+						updateText();
+
 						int temp[] = { coords[0], coords[1], -1, -1 };
 						reLayer(temp, NULL, 'c');
 
@@ -1246,14 +1265,62 @@ int main(int argc, char* argv[])
 					}
 					else if (unloading) {
 
-						// browse unloading
+						// browse unloading WIP
 
 					}
 					else if (spritesGround[coords[0]][coords[1]] != NULL && spritesGround[coords[0]][coords[1]]->getCargo(0) != NULL) {
-
+						// WIP
 						unloading = true;
+						for (int i = 0; i < cargoBay.size(); ++i)
+							cargoBay.at(i) = NULL;
+						cargoBay.clear();
+						dropX.clear();
+						dropY.clear();
+						cargoIndex = 0;
+						dropIndex = 0;
 
-						// init unloading
+						cargoBay.push_back(spritesGround[coords[0]][coords[1]]->getCargo(0));
+						if (spritesGround[coords[0]][coords[1]]->getCargo(1) != NULL)
+							cargoBay.push_back(spritesGround[coords[0]][coords[1]]->getCargo(1));
+
+						for (int i = 0; i < 4; ++i) {
+							int x = coords[0], y = coords[1];
+							if (i == 0) x--;
+							if (i == 1) y--;
+							if (i == 2) x++;
+							if (i == 3) y++;
+							if (map[x][y]->getMov()[cargoBay.at(cargoIndex)->getMovType()] == 10)
+								continue;
+							if (spritesGround[x][y] != NULL)
+								continue;
+							dropX.push_back(x);
+							dropY.push_back(y);
+						}
+
+						if (dropX.size() == 0) {
+							for (int i = 0; i < cargoBay.size(); ++i)
+								cargoBay.at(i) = NULL;
+							cargoBay.clear();
+							dropX.clear();
+							dropY.clear();
+							cargoIndex = 0;
+							dropIndex = 0;
+							unloading = false;
+							break;
+						}
+
+						initSpritesGround(dropX.at(0), dropY.at(0), cargoBay.at(0));
+						//int temp[] = { dropX.at(0), dropY.at(0), -1, -1 };
+						coords[2] = coords[0];
+						coords[3] = coords[1];
+						coords[0] = dropX.at(0);
+						coords[1] = dropY.at(0);
+						reLayer(coords, 'r', 'c');
+
+						for (int i = 1; i < dropX.size(); ++i) {
+							int temp1[] = { dropX.at(i), dropY.at(i), -1, -1 };
+							reLayer(temp1, 'r', NULL);
+						}
 
 					}
 
@@ -1261,6 +1328,10 @@ int main(int argc, char* argv[])
 
 				}
 				if (enter == true) {
+					if (gameOver) {
+						isRunning = false;
+						break;
+					}
 					if (moveMode != 'c') {
 						enter = !enter;
 						break;
@@ -1278,10 +1349,47 @@ int main(int argc, char* argv[])
 					enter = !enter;
 					int temp[] = { coords[0], coords[1], -1, -1 };
 					reLayer(temp, NULL, 'c');
+					if (turn > 5) {
+						int numRed = getNumUnits(1);
+						int numBlue = getNumUnits(0);
+
+						if (numRed == 0)
+							winningTeam = 0;
+						else if (numBlue == 0)
+							winningTeam = 1;
+
+
+					}
+
+					int numRedHQ = 0;
+					for (int i = 0; i < MAP_TILE_W; ++i) {
+						for (int j = 0; j < MAP_TILE_H; ++j) {
+							if (map[i][j]->getType() == T_HQ_RED)
+								numRedHQ++;
+						}
+					}
+					if (numRedHQ == 0)
+						winningTeam = 0;
+					else if (numRedHQ == 2)
+						winningTeam = 1;
+
+					updateText();
 					SDL_RenderPresent(renderer);
 				}
 				if (ctrl == true) {
-					//unloads unit from vehicle, probably APC?
+					close(window);
+					ctrl = false;
+					mapNo++;
+					if (mapNo == 5)
+						mapNo = 0;
+
+					blueFunds = 0;
+					redFunds = 0;
+					winningTeam = -1;
+					gameOver = false;
+					turn = 0;
+
+					return main(0, NULL);
 
 				}
 			}
@@ -1363,7 +1471,7 @@ SDL_Window* init(SDL_Window* window) {
 
 	//Init ttf
 	TTF_Init();
-	Sans = TTF_OpenFont("sans.ttf", 12);
+	Sans = TTF_OpenFont("segoeui.ttf", 30);
 
 	/*enum TEXTURE {
 	T_ROAD = 4,
@@ -2177,6 +2285,8 @@ void initMap(int i, int j, Terrain* t) {
 
 void initSpritesGround(int i, int j, Unit* u) {
 	spritesGround[i][j] = new Unit(i, j, u->getType(), u->getMov(), u->getMinRange(), u->getMaxRange(), u->getMovType(), u->getCost(), u->getAttack(), u->getDisplay(), u->getTeam(), u->getName());
+	spritesGround[i][j]->setCargo(0, u->getCargo(0));
+	spritesGround[i][j]->setCargo(1, u->getCargo(1));
 }
 
 //temp debug -- initializes the map[] and spritesGround[] and movTemp[] arrays
@@ -2184,7 +2294,16 @@ void createMap() {
 
 	for (int i = 0; i < MAP_TILE_W; i++) {
 		for (int j = 0; j < MAP_TILE_H; j++) {
-			initMap(i, j, terrainsheet[testMap1[i][j]]);
+			if (mapNo == 0)
+				initMap(i, j, terrainsheet[testMap1[i][j]]);
+			else if (mapNo == 1)
+				initMap(i, j, terrainsheet[testMap2[i][j]]);
+			else if (mapNo == 2)
+				initMap(i, j, terrainsheet[testMap3[i][j]]);
+			else if (mapNo == 3)
+				initMap(i, j, terrainsheet[testMap4[i][j]]);
+			else if (mapNo == 4)
+				initMap(i, j, terrainsheet[testMap5[i][j]]);
 		}
 	}
 	
@@ -2266,15 +2385,108 @@ void updateFunds() {
 
 void updateText() {
 	//Blue team
-	Blue_message.x = 1253;  //controls the rect's x coordinate 
-	Blue_message.y = 869; // controls the rect's y coordinte
-	Blue_message.w = 100; // controls the width of the rect
-	Blue_message.h = 20;
+	Blue_message.x = SCREEN_WIDTH / 10 * 7;  //controls the rect's x coordinate 
+	Blue_message.y = SCREEN_HEIGHT * 7 / 10 + 50; // controls the rect's y coordinte
+	Blue_message.w = 160; // controls the width of the rect
+	Blue_message.h = 30;
 
-	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, "Get Shreked!", Blue); 
+	//Red team
+	Red_message.x = SCREEN_WIDTH / 10 * 1;  //controls the rect's x coordinate 
+	Red_message.y = SCREEN_HEIGHT * 7 / 10 + 50; // controls the rect's y coordinte
+	Red_message.w = 160; // controls the width of the rect
+	Red_message.h = 30;
+
+	//End Message
+	End_message.x = SCREEN_WIDTH / 2 - 100;
+	End_message.y = SCREEN_HEIGHT / 2 - 50;
+	End_message.w = 200;
+	End_message.h = 100;
+
+	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, ("Blue Funds: " + std::to_string(blueFunds)).c_str(), Blue); 
 	SDL_Texture* Message_blue = SDL_CreateTextureFromSurface(renderer, surfaceMessage); 
 
-	SDL_RenderCopy(renderer, Message_blue, NULL, &Blue_message);
+	SDL_Surface* surfaceMessageR = TTF_RenderText_Solid(Sans, ("Red Funds: " + std::to_string(redFunds)).c_str(), Red);
+	SDL_Texture* Message_red = SDL_CreateTextureFromSurface(renderer, surfaceMessageR);
 
-	std::cout << "Text set!?\n";
+	SDL_Surface* surfaceMessageE = TTF_RenderText_Solid(Sans, "END", ((winningTeam) ? Red : Blue));
+	SDL_Texture* Message_end = SDL_CreateTextureFromSurface(renderer, surfaceMessageE);
+	
+	SDL_FreeSurface(surfaceMessage);
+	SDL_FreeSurface(surfaceMessageR);
+	SDL_FreeSurface(surfaceMessageE);
+
+	SDL_RenderClear(renderer);
+	for (int i = 0; i < MAP_TILE_W; ++i)
+		for (int j = 0; j < MAP_TILE_H; ++j)
+			reRender(demTiles[i][j], NULL, true);
+	SDL_RenderCopy(renderer, Message_blue, NULL, &Blue_message);
+	SDL_RenderCopy(renderer, Message_red, NULL, &Red_message);
+	if (winningTeam != -1) {
+		SDL_RenderCopy(renderer, Message_end, NULL, &End_message);
+		gameOver = true;
+	}
+
+	SDL_DestroyTexture(Message_blue);
+	SDL_DestroyTexture(Message_red);
+	SDL_DestroyTexture(Message_end);
+
+	//std::cout << "Text set!?\n";
+}
+
+TERRAIN_TYPE getNewCapture(TEXTURE t, int team) {
+
+	if (team == 0) {
+		switch (t) {
+		case T_AIRPORT:
+		case T_AIRPORT_RED:
+			return AIRPORT_BLUE;
+		case T_BASE:
+		case T_BASE_RED:
+			return BASE_BLUE;
+		case T_PORT:
+		case T_PORT_RED:
+			return PORT_BLUE;
+		case T_HQ:
+		case T_HQ_RED:
+			return HQ_BLUE;
+		case T_CITY:
+		case T_CITY_RED:
+			return CITY_BLUE;
+		}
+	}
+	else {
+		switch (t) {
+		case T_AIRPORT:
+		case T_AIRPORT_BLUE:
+			return AIRPORT_RED;
+		case T_BASE:
+		case T_BASE_BLUE:
+			return BASE_RED;
+		case T_PORT:
+		case T_PORT_BLUE:
+			return PORT_RED;
+		case T_HQ:
+		case T_HQ_BLUE:
+			return HQ_RED;
+		case T_CITY:
+		case T_CITY_BLUE:
+			return CITY_RED;
+		}
+	}
+
+}
+
+int getNumUnits(int team) {
+
+	int ret = 0;
+
+	for (int i = 0; i < MAP_TILE_W; ++i) {
+		for (int j = 0; j < MAP_TILE_H; ++j) {
+			if (spritesGround[i][j] != NULL && spritesGround[i][j]->getTeam() == team)
+				ret++;
+		}
+	}
+	
+	return ret;
+
 }
