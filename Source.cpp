@@ -9,6 +9,8 @@
 #include <cmath>
 #include <SDL_ttf.h>
 
+// Zangolf Edits
+
 /*
 	
 	To-do:
