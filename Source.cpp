@@ -9,6 +9,71 @@
 #include <cmath>
 #include <SDL_ttf.h>
 
+/*
+	
+	To-do:
+	# -> finished
+	- -> backlog
+	> -> current projects
+
+	Important things to do first:
+	#Fix unloading/loading (units can't be unloaded after being loaded)
+	-Pressing tab takes you to a unit that hasn't moved yet that turn
+	-Holding a button shows a unit's danger zone; another button toggles full danger zones on all enemy units
+	-Fog of War
+	>Add animation
+	-Way to change the level that doesn't break the game (level map? level select?)
+	-Change capture mechanics to be more tactical (buildings have health, can be captured when they have none)
+	-Weird bug where some red units capture red buildings and make them blue / turn them into other buildings
+	-Potential bug with movement (teleportation?)
+	>GUI overhaul (add menus to replace pressing lshift all the time, info around the map you can see, more fluid moving animations, etc)
+	-Add extra commands to other units
+	-Add extra layers (sky, underground) to make the game stand out
+	-New mechanics / ideas to keep this from being an advance wars clone
+	-Upgrade assets (Xander?)
+	-Bridges, rivers, coasts, roads, etc change direction as they should rather than be a single tile with no direction
+	-Level editor that makes a level file and can read other level files
+	-AI
+	-Multiple different resolutions
+	-Minimap
+	-Zoom feature
+	>Other bugs as they pop up
+	-Codex of units, their attacks, and their features that can be brought up mid-game
+	-Window confirming you want to end your turn
+	-Title sceen
+	-Options menu
+	-Thorough playtesting and balancing
+	-Camera can scroll left/right as well, to make maps bigger or longer
+
+	Possible new ideas:
+	-Multiple map layers
+	-Unit upgrades? (Need resources to be captured to upgrade? Extra cost? Unit EXP?)
+		-Perhaps the upgraded version is purchased for extra at barracks/port/etc and takes longer to come out, AND the port/etc can't make anything else while it works on the upgraded unit
+	-Different armies have different signature units
+	-Builders construct terrain for your advantage -- each army has its own unique terrain it can build
+	-Natural disasters (Telegraphed well in advance so it doesn't feel like a screwjob)
+	-Tie the number of terrains you can build and the number of cities you have to each other (cities own terrain you make, not you)
+	-Workers are spawned from the city the terrain they make will be owned by
+	-Losing a city with terrain also loses you the terrain
+	-
+
+	New unit ideas:
+	-Units that can also spawn other units (At a cost? For free, but there are only so many? HP cost?)
+	-Builder units
+	-Invisible unit that is given objectives and then sent off (uncontrollable until it attacks / is attacked)
+	-Mech that is manned, has abilities/stats that are affected by the unit manning it (think Robobot Suit from Kirby)
+	-
+
+	New terrain ideas:
+	-Mine that can be triggered to explode (Maybe not a good idea -- it offers no risk and the opponent can't combat it)
+	-Mine that automatically explodes (Better idea -- Opponent can sweep for it with weak units, player could get backed into it)
+	-Barricade that is impassible (Effective water tile)
+	-Gunner that can be manned, does heavy damage at a range, has a recharge, can be destroyed
+	-Turret that attacks enemies that enter its range, low damage, can be destroyed
+	-
+
+ */
+
 //camera Offest by y value
 int cameraY = 0;
 
@@ -166,13 +231,13 @@ enum TEXTURE {
 
 
 /* Constants */
-const int SCREEN_WIDTH = 960*1.5;
-const int SCREEN_HEIGHT = 540*1.5;
+const int SCREEN_WIDTH = (int)(960*1.5);
+const int SCREEN_HEIGHT = (int)(540*1.5);
 const int MAP_X = 0;
 const int MAP_Y = SCREEN_HEIGHT / 10;
 const int MAP_W = SCREEN_WIDTH;
 const int MAP_H = SCREEN_HEIGHT * 7 / 10;
-const int TILE_SIDE = 32*1.5;
+const int TILE_SIDE = (int)(32*1.5);
 const int MAP_TILE_W = 30;
 const int MAP_TILE_H = 20;
 // Map initializer arrays
@@ -991,6 +1056,34 @@ int main(int argc, char* argv[])
 				if (w == true) {
 					if (coords[1] == 0)
 						break;
+					if (unloading) {
+						int dx = dropX.at(dropIndex), dy = dropY.at(dropIndex);
+
+						unloading = false;
+						selUnit->setCargo(0, cargoBay.at(0));
+						if (cargoBay.size() > 1)
+							selUnit->setCargo(1, cargoBay.at(1));
+						else
+							selUnit->setCargo(1, NULL);
+
+						selUnit = NULL;
+
+						delete spritesGround[dx][dy];
+						spritesGround[dx][dy] = NULL;
+
+						for (int i = 0; i < dropX.size(); ++i) {
+							int temp[] = { dropX.at(i), dropY.at(i), -1, -1 };
+							reLayer(temp, NULL, NULL);
+						}
+
+						for (int i = 0; i < cargoBay.size(); ++i)
+							cargoBay.at(i) = NULL;
+						cargoBay.clear();
+						dropX.clear();
+						dropY.clear();
+						cargoIndex = 0;
+						dropIndex = 0;
+					}
 					if ((moveMode == 's' /*&& map[coords[0]][coords[1] - 1]->getIsReachable())*/) || moveMode == 'c') {
 						if (catalogIsOpen) {
 							delete spritesGround[coords[0]][coords[1]];
@@ -1013,7 +1106,22 @@ int main(int argc, char* argv[])
 				if (a == true) {
 					if (coords[0] == 0)
 						break;
-					if ((moveMode == 's' /*&& map[coords[0] - 1][coords[1]]->getIsReachable())*/) || moveMode == 'c') {
+					if (unloading) {
+						if (--dropIndex < 0) dropIndex = dropX.size() - 1;
+						coords[2] = coords[0];
+						coords[3] = coords[1];
+						coords[0] = dropX.at(dropIndex);
+						coords[1] = dropY.at(dropIndex);
+						delete spritesGround[coords[2]][coords[3]];
+						spritesGround[coords[2]][coords[3]] = NULL;
+						initSpritesGround(coords[0], coords[1], cargoBay.at(cargoIndex));
+						int temp[] = { coords[0], coords[1], -1, -1 };
+						reLayer(temp, 'r', 'c');
+						int temp2[] = { coords[2], coords[3], -1, -1 };
+						reLayer(temp2, 'r', NULL);
+						SDL_RenderPresent(renderer);
+					}
+					else if ((moveMode == 's' /*&& map[coords[0] - 1][coords[1]]->getIsReachable())*/) || moveMode == 'c') {
 						if (catalogIsOpen) {
 							delete spritesGround[coords[0]][coords[1]];
 							spritesGround[coords[0]][coords[1]] = NULL;
@@ -1044,6 +1152,34 @@ int main(int argc, char* argv[])
 				if (s == true) {
 					if (coords[1] == MAP_TILE_H-1)
 						break;
+					if (unloading) {
+						int dx = dropX.at(dropIndex), dy = dropY.at(dropIndex);
+
+						unloading = false;
+						selUnit->setCargo(0, cargoBay.at(0));
+						if (cargoBay.size() > 1)
+							selUnit->setCargo(1, cargoBay.at(1));
+						else
+							selUnit->setCargo(1, NULL);
+
+						selUnit = NULL;
+
+						delete spritesGround[dx][dy];
+						spritesGround[dx][dy] = NULL;
+
+						for (int i = 0; i < dropX.size(); ++i) {
+							int temp[] = { dropX.at(i), dropY.at(i), -1, -1 };
+							reLayer(temp, NULL, NULL);
+						}
+
+						for (int i = 0; i < cargoBay.size(); ++i)
+							cargoBay.at(i) = NULL;
+						cargoBay.clear();
+						dropX.clear();
+						dropY.clear();
+						cargoIndex = 0;
+						dropIndex = 0;
+					}
 					if ((moveMode == 's' /*&&*/ /*map[coords[0]][coords[1] + 1]->getIsReachable())*/) || moveMode == 'c') {
 						if (catalogIsOpen) {
 							delete spritesGround[coords[0]][coords[1]];
@@ -1066,7 +1202,22 @@ int main(int argc, char* argv[])
 				if (d == true) {
 					if (coords[0] == MAP_TILE_W-1)
 						break;
-					if ((moveMode == 's' /*&&*/ /*map[coords[0] + 1][coords[1]]->getIsReachable())*/) || moveMode == 'c') {
+					if (unloading) {
+						if (++dropIndex == dropX.size()) dropIndex = 0;
+						coords[2] = coords[0];
+						coords[3] = coords[1];
+						coords[0] = dropX.at(dropIndex);
+						coords[1] = dropY.at(dropIndex);
+						delete spritesGround[coords[2]][coords[3]];
+						spritesGround[coords[2]][coords[3]] = NULL;
+						initSpritesGround(coords[0], coords[1], cargoBay.at(cargoIndex));
+						int temp[] = { coords[0], coords[1], -1, -1 };
+						reLayer(temp, 'r', 'c');
+						int temp2[] = { coords[2], coords[3], -1, -1 };
+						reLayer(temp2, 'r', NULL);
+						SDL_RenderPresent(renderer);
+					}
+					else if ((moveMode == 's' /*&&*/ /*map[coords[0] + 1][coords[1]]->getIsReachable())*/) || moveMode == 'c') {
 						if (catalogIsOpen) {
 							delete spritesGround[coords[0]][coords[1]];
 							spritesGround[coords[0]][coords[1]] = NULL;
@@ -1097,7 +1248,47 @@ int main(int argc, char* argv[])
 				}
 				if (space == true) {
 					// coords[0],coords[1] == coordinates of cursor currently
-					if (spritesGround[coords[0]][coords[1]] != NULL && spritesGround[coords[0]][coords[1]]->getTeam() == turn % 2 && moveMode == 'c' && !catalogIsOpen)
+					if (unloading) {
+						// WIP
+						int dx = dropX.at(dropIndex), dy = dropY.at(dropIndex);
+
+						unloading = false;
+						if (cargoBay.size() != 1) {
+							Unit* repop = cargoBay.at((cargoIndex == 0) ? 1 : 0);
+							selUnit->setCargo(0, repop);
+							selUnit->setCargo(1, NULL);
+							std::cout << "lol";
+							repop = NULL;
+						}
+						else {
+							selUnit->setCargo(0, NULL);
+							selUnit->setCargo(1, NULL);
+						}
+
+						selUnit = NULL;
+
+						for (int i = 0; i < dropX.size(); ++i) {
+
+							int temp[] = { dropX.at(i), dropY.at(i), -1, -1 };
+							if (dropX.at(i) == dx && dropY.at(i) == dy)
+								reLayer(temp, NULL, 'c');
+							else
+								reLayer(temp, NULL, NULL);
+						}
+
+						spritesGround[dx][dy]->setIsMoved(true);
+						spritesGround[dx][dy]->setHasAttacked(true);
+
+						for (int i = 0; i < cargoBay.size(); ++i)
+							cargoBay.at(i) = NULL;
+						cargoBay.clear();
+						dropX.clear();
+						dropY.clear();
+						cargoIndex = 0;
+						dropIndex = 0;
+
+					}
+					else if (spritesGround[coords[0]][coords[1]] != NULL && spritesGround[coords[0]][coords[1]]->getTeam() == turn % 2 && moveMode == 'c' && !catalogIsOpen)
 					{
 						if (!spritesGround[coords[0]][coords[1]]->getIsMoved()) {
 							moveMode = 's';
@@ -1131,6 +1322,9 @@ int main(int argc, char* argv[])
 								}
 								else
 									spritesGround[coords[0]][coords[1]]->setCargo(0, selUnit);
+								//
+								std::cout << "Loaded unit type " << selUnit->getName() << " into unit type " << spritesGround[coords[0]][coords[1]]->getName() << ".\n";
+								//
 								selUnit = NULL;
 							}
 							else if (coords[0] != selUnit->getX() || coords[1] != selUnit->getY()) {
@@ -1266,10 +1460,19 @@ int main(int argc, char* argv[])
 					else if (unloading) {
 
 						// browse unloading WIP
+						if (cargoBay.size() > 1) {
+							delete spritesGround[dropX.at(dropIndex)][dropY.at(dropIndex)];
+							if (++cargoIndex == cargoBay.size()) cargoIndex = 0;
+							initSpritesGround(dropX.at(dropIndex), dropY.at(dropIndex), cargoBay.at(cargoIndex));
+							int temp[] = {dropX.at(dropIndex), dropY.at(dropIndex), -1, -1};
+							reLayer(temp, 'r', 'c');
+						}
 
 					}
 					else if (spritesGround[coords[0]][coords[1]] != NULL && spritesGround[coords[0]][coords[1]]->getCargo(0) != NULL) {
 						// WIP
+						selUnit = spritesGround[coords[0]][coords[1]];
+						std::cout << "Unloading a unit!\n";
 						unloading = true;
 						for (int i = 0; i < cargoBay.size(); ++i)
 							cargoBay.at(i) = NULL;
@@ -1311,6 +1514,9 @@ int main(int argc, char* argv[])
 
 						initSpritesGround(dropX.at(0), dropY.at(0), cargoBay.at(0));
 						//int temp[] = { dropX.at(0), dropY.at(0), -1, -1 };
+						// Clear the unit's cargo to be repopulated from the remnants of cargoBay after unloading
+						spritesGround[coords[0]][coords[1]]->setCargo(0, NULL);
+						spritesGround[coords[0]][coords[1]]->setCargo(1, NULL);
 						coords[2] = coords[0];
 						coords[3] = coords[1];
 						coords[0] = dropX.at(0);
@@ -1647,9 +1853,9 @@ SDL_Window* init(SDL_Window* window) {
 		std::cout << "Texture \"red port\" failed to load!\n";
 	if (!loadTexture(renderer, &textures[T_HQ_RED], "assets/Red HQ.png"))
 		std::cout << "Texture \"red HQ\" failed to load!\n";
-	if (!loadTexture(renderer, &textures[T_AIRPORT_RED], "assets/Red airport.png")) // The filename is misspelled for some reason
+	if (!loadTexture(renderer, &textures[T_AIRPORT_RED], "assets/Red airport.png")) 
 		std::cout << "Texture \"red airport\" failed to load!\n";
-	if (!loadTexture(renderer, &textures[T_BASE_RED], "assets/Red base.png")) // Again
+	if (!loadTexture(renderer, &textures[T_BASE_RED], "assets/Red base.png")) 
 		std::cout << "Texture \"red base\" failed to load!\n";
 	if (!loadTexture(renderer, &textures[T_CITY_RED], "assets/Red city.png"))
 		std::cout << "Texture \"red city\" failed to load!\n";
@@ -2308,10 +2514,10 @@ void createMap() {
 	}
 	
 	// DEBUG
-	for (int i = 0; i < NUM_UNITS/2; ++i)
+	/*for (int i = 0; i < NUM_UNITS/2; ++i)
 		initSpritesGround(6+i, 5, unitsheet[i]);
 	for (int i = NUM_UNITS/2; i < NUM_UNITS; ++i) 
-		initSpritesGround(6+i-NUM_UNITS/2, 6, unitsheet[i]);
+		initSpritesGround(6+i-NUM_UNITS/2, 6, unitsheet[i]);*/
 	//initSpritesGround(12, 3, unitsheet[APC]);
 	//initSpritesGround(11, 2, unitsheet[APC]);
 
@@ -2473,6 +2679,8 @@ TERRAIN_TYPE getNewCapture(TEXTURE t, int team) {
 			return CITY_RED;
 		}
 	}
+
+	return TERRAIN_ERROR;
 
 }
 
