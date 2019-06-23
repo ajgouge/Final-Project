@@ -32,7 +32,7 @@
 	-Add extra commands to other units
 	-Add extra layers (sky, underground) to make the game stand out
 	-New mechanics / ideas to keep this from being an advance wars clone
-	-Upgrade assets (Xander?)
+	-Upgrade assets
 	-Bridges, rivers, coasts, roads, etc change direction as they should rather than be a single tile with no direction
 	-Level editor that makes a level file and can read other level files
 	-AI
