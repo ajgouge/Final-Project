@@ -134,8 +134,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="gui.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="gui.h" />
     <ClInclude Include="SDL\SDL2-2.0.9\include\begin_code.h" />
     <ClInclude Include="SDL\SDL2-2.0.9\include\close_code.h" />
     <ClInclude Include="SDL\SDL2-2.0.9\include\SDL.h" />

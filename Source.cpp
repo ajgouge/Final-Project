@@ -8,6 +8,7 @@
 #include <cassert>
 #include <cmath>
 #include <SDL_ttf.h>
+#include "gui.h"
 
 // Zangolf Edits
 
@@ -233,15 +234,17 @@ enum TEXTURE {
 
 
 /* Constants */
-const int SCREEN_WIDTH = (int)(960*1.5);
-const int SCREEN_HEIGHT = (int)(540*1.5);
-const int MAP_X = 0;
-const int MAP_Y = SCREEN_HEIGHT / 10;
-const int MAP_W = SCREEN_WIDTH;
-const int MAP_H = SCREEN_HEIGHT * 7 / 10;
-const int TILE_SIDE = (int)(32*1.5);
-const int MAP_TILE_W = 30;
-const int MAP_TILE_H = 20;
+double SCALE = 0.7;
+
+int SCREEN_WIDTH = (int)(960*1.5*SCALE);
+int SCREEN_HEIGHT = (int)(540*1.5 * SCALE);
+int MAP_X = 0;
+int MAP_Y = SCREEN_HEIGHT / 10;
+int MAP_W = SCREEN_WIDTH;
+int MAP_H = SCREEN_HEIGHT * 7 / 10;
+int TILE_SIDE = (int)(32*1.5 * SCALE);
+int MAP_TILE_W = 30;
+int MAP_TILE_H = 20;
 // Map initializer arrays
 const TERRAIN_TYPE testMap1[30][20] = {
 {WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,WATER,GRASS,CITY,GRASS,GRASS,GRASS,GRASS,GRASS},
@@ -430,6 +433,7 @@ void initTerrain();
 void initUnit();
 void initMap(int i, int j, Terrain* t);
 void initSpritesGround(int i, int j, Unit* u);
+//void initSpritesGround(int i, int j, Unit* u, bool teamOverride = false);
 void cameraMove(char direction);
 void updateFunds();
 void updateText();
@@ -1337,10 +1341,12 @@ int main(int argc, char* argv[])
 								delete selUnit;
 							}
 							spritesGround[coords[0]][coords[1]]->setIsMoved(true);
+							
 
 							if (map[coords[0]][coords[1]]->getCanCapture() && spritesGround[coords[0]][coords[1]]->getTeam() != map[coords[0]][coords[1]]->getTeam() && (spritesGround[coords[0]][coords[1]]->getName() == INFANTRY || spritesGround[coords[0]][coords[1]]->getName() == MECH)) {
 								TERRAIN_TYPE newT = getNewCapture(map[coords[0]][coords[1]]->getType(), turn % 2);
 								delete map[coords[0]][coords[1]];
+								// Bugfix note: Capturable terrain wasn't spawned with the correct team at first (Fixed?)
 								initMap(coords[0], coords[1], terrainsheet[newT]);
 							}
 						}
@@ -2488,8 +2494,15 @@ void initUnit() {
 }
 
 void initMap(int i, int j, Terrain* t) {
-	map[i][j] = new Terrain(t->getDef(), t->getMov(), t->getCanCapture(), t->getDisplay(), t->getType());
+	map[i][j] = new Terrain(t->getDef(), t->getMov(), t->getCanCapture(), t->getDisplay(), t->getType(), t->getTeam());
 }
+
+//void initSpritesGround(int i, int j, Unit* u, bool teamOverride = false) {
+//	spritesGround[i][j] = new Unit(i, j, u->getType(), u->getMov(), u->getMinRange(), u->getMaxRange(), u->getMovType(), u->getCost(), u->getAttack(), u->getDisplay(), turn % 2, u->getName());
+//	spritesGround[i][j]->setCargo(0, u->getCargo(0));
+//	spritesGround[i][j]->setCargo(1, u->getCargo(1));
+//	if (teamOverride) spritesGround[i][j]->setTeam(u->getTeam());
+//}
 
 void initSpritesGround(int i, int j, Unit* u) {
 	spritesGround[i][j] = new Unit(i, j, u->getType(), u->getMov(), u->getMinRange(), u->getMaxRange(), u->getMovType(), u->getCost(), u->getAttack(), u->getDisplay(), u->getTeam(), u->getName());
@@ -2594,21 +2607,21 @@ void updateFunds() {
 void updateText() {
 	//Blue team
 	Blue_message.x = SCREEN_WIDTH / 10 * 7;  //controls the rect's x coordinate 
-	Blue_message.y = SCREEN_HEIGHT * 7 / 10 + 50; // controls the rect's y coordinte
-	Blue_message.w = 160; // controls the width of the rect
-	Blue_message.h = 30;
+	Blue_message.y = SCREEN_HEIGHT * 7 / 10 + (int)(50*SCALE); // controls the rect's y coordinte
+	Blue_message.w = (int)(160*SCALE); // controls the width of the rect
+	Blue_message.h = (int)(30*SCALE);
 
 	//Red team
 	Red_message.x = SCREEN_WIDTH / 10 * 1;  //controls the rect's x coordinate 
-	Red_message.y = SCREEN_HEIGHT * 7 / 10 + 50; // controls the rect's y coordinte
-	Red_message.w = 160; // controls the width of the rect
-	Red_message.h = 30;
+	Red_message.y = SCREEN_HEIGHT * 7 / 10 + (int)(50 * SCALE); // controls the rect's y coordinte
+	Red_message.w = (int)(160*SCALE); // controls the width of the rect
+	Red_message.h = (int)(30 * SCALE);
 
 	//End Message
-	End_message.x = SCREEN_WIDTH / 2 - 100;
-	End_message.y = SCREEN_HEIGHT / 2 - 50;
-	End_message.w = 200;
-	End_message.h = 100;
+	End_message.x = SCREEN_WIDTH / 2 - (int)(100 * SCALE);
+	End_message.y = SCREEN_HEIGHT / 2 - (int)(50 * SCALE);
+	End_message.w = (int)(200*SCALE);
+	End_message.h = (int)(100*SCALE);
 
 	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, ("Blue Funds: " + std::to_string(blueFunds)).c_str(), Blue); 
 	SDL_Texture* Message_blue = SDL_CreateTextureFromSurface(renderer, surfaceMessage); 
