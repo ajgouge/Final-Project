@@ -40,6 +40,9 @@ NOTE: This is slightly outdated; the idea is mostly the same but the names are d
 // Function pointer typedef to make life easier
 typedef bool (*GUI_Handler)();
 
+// Helper function to make a custom color
+void GUI_SetColor(SDL_Color* c, int r, int g, int b, int a);
+
 class GUI_Pane {
 private:
 	// SDL_Surface * screen -- This surface is a malleable form of the final GUI texture, and is the dst of blits from child @GUI_Display s
@@ -58,6 +61,55 @@ private:
 	std::vector<GUI_Display*> fields;
 	// int b -- integer pixel width of the border around the @GUI_Pane. Primarily used in calculating @canvas 's position.
 	int b;
+	// Self explanatory
+	SDL_Color bkColor;
+	// Self explanatory
+	SDL_Color brColor;
+	// See the same construct of GUI_Display
+	SDL_Color h_bkColor;
+	// See the same construct of GUI_Display
+	SDL_Color h_brColor;
+
+
+public:
+	GUI_Pane();
+	GUI_Pane(SDL_Rect pos, int b, SDL_Color backgroundColor, SDL_Color borderColor, SDL_Color h_backgroundColor, SDL_Color h_borderColor);
+	~GUI_Pane();
+	// This is the function that blits all GUI_Displays' &display fields onto this &screen field, renders this to this &display field, and 
+	// render copies it.
+	void reRenderGUI();
+	// This function should be called every "tick" to make sure tracked fields by GUI_Displays are updated. Returns false if the GUI did not
+	// rerender, and true if it did.
+	bool updateGUI();
+	// This function accepts a pointer to heap memory to a GUI_Display and adds it to the fields vector. The user has to allocate the memory 
+	// initially, but the Pane will deallocate the memory by itself.
+	// Note: DO NOT deallocate the pointer you pass, as it will cause memory leaks. 
+	void addDisplay(GUI_Display* disp);
+	// Drops the GUI_Display at the given index of the fields vector. It is deleted, and the memory is cleaned up.
+	void dropDisplay(int index);
+	// Pops the GUI_Display at the given index of the fields vector. This GUI_Display is returned to the user.
+	GUI_Display* popDisplay(int index);
+	// Returns the pointer of the Display at the given index of the fields vector. The Display is not deleted.
+	GUI_Display* getDisplay(int index);
+
+	// Accessors:
+
+	int getBorderWidth();
+	SDL_Color getBackgroundColor();
+	SDL_Color getBorderColor();
+	SDL_Color getHBackgroundColor();
+	SDL_Color getHBorderColor();
+	SDL_Rect getPos();
+
+	// Mutators:
+
+	void setBorderWidth(int ib);
+	void setBackgroundColor(SDL_Color c);
+	void setBorderColor(SDL_Color c);
+	void setHBackgroundColor(SDL_Color c);
+	void setHBorderColor(SDL_Color c);
+	void setPos(SDL_Rect p);
+	
 
 };
 
@@ -130,8 +182,6 @@ protected:
 	void loadVar();
 	// Calculates the dimensions and position of canvas (call after an update to the border)
 	void calculateCanvas();
-	// Helper function to make a custom color
-	static void GUI_SetColor(SDL_Color* c, int r, int g, int b, int a);
 	// Helper function to initialize certain fields
 	void defaultFields();
 
@@ -289,7 +339,7 @@ void GUI_Display::calculateCanvas() {
 	canvas.h = pos.h - 2 * b;
 }
 
-void GUI_Display::GUI_SetColor(SDL_Color* c, int r, int g, int b, int a) {
+void GUI_SetColor(SDL_Color* c, int r, int g, int b, int a) {
 	c->r = r; c->g = g; c->b = b; c->a = a;
 }
 
